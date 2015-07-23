@@ -14,4 +14,4 @@ This option will restore the size of the scrollbars.  Excel can get out of shape
 ###Output sheet names
 This option is used to output a list of all the sheet names. It outputs to a new Worksheet and includes a hyperlink to each sheet.
 
-![sheet listing](.\images\sheet-mgmt\output sheet names.png)
+![sheet listing](./images/sheet-mgmt/output sheet names.png)
