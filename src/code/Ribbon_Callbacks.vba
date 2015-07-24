@@ -25,14 +25,6 @@ Sub btn_chartApplyColors_onAction(control As IRibbonControl)
 Chart_ApplyTrendColors
 End Sub
 '
-Sub btn_piBuildSampData_onAction(control As IRibbonControl)
-Pi_CreateSampleData
-End Sub
-'
-Sub btn_piChartTimeSeries_onAction(control As IRibbonControl)
-Chart_TimeSeries_FastCreation
-End Sub
-'
 Sub btn_chartSplitSeries_onAction(control As IRibbonControl)
 ChartSplitSeries
 End Sub
@@ -103,10 +95,6 @@ End Sub
 
 Public Sub btn_chtGrid_onAction(control As IRibbonControl)
     frm_chartGrid.Show
-End Sub
-
-Public Sub btn_piDataPull_onAction(control As IRibbonControl)
-    MsgBox "Feature coming soon..."
 End Sub
 
 Public Sub btn_protect_onAction(control As IRibbonControl)
@@ -191,10 +179,6 @@ End Sub
 
 Public Sub btn_chartXYMatrix_onAction(control As IRibbonControl)
     ChartCreateXYGrid
-End Sub
-
-Public Sub btn_PiCreateHelper_onAction(control As IRibbonControl)
-    PiDataPull
 End Sub
 
 Public Sub btn_aboutForm_onAction(control As IRibbonControl)
