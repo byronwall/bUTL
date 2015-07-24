@@ -16,6 +16,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
 
+
 Dim ser_coll As New Dictionary
 Dim dirty As Boolean
 
