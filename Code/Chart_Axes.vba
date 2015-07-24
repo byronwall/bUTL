@@ -1,26 +1,5 @@
 Attribute VB_Name = "Chart_Axes"
 'this contains code that related to charting axes
-
-Sub Chart_Axis_AutoY()
-   
-    Dim cht_obj As ChartObject
-    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
-        Dim cht As Chart
-        
-        Dim ax As Axis
-        
-        Set cht = cht_obj.Chart
-        
-        Set ax = cht.Axes(xlValue)
-        ax.MaximumScaleIsAuto = True
-        ax.MinimumScaleIsAuto = True
-        ax.MajorUnitIsAuto = True
-        ax.MinorUnitIsAuto = True
-    
-    Next cht_obj
-
-End Sub
-
 Sub Chart_Axis_AutoX()
    
     Dim cht_obj As ChartObject
@@ -40,30 +19,23 @@ Sub Chart_Axis_AutoX()
     Next cht_obj
 
 End Sub
-
-Sub Chart_YAxisRangeWithAvgAndStdev()
-    'this sub will set the y-axis to a number of stdevs past the average of the first series
-    Dim dbl_std As Double
-    
-    dbl_std = CDbl(InputBox("How many standard deviations to include?"))
-    
+Sub Chart_Axis_AutoY()
+   
     Dim cht_obj As ChartObject
-    
     For Each cht_obj In Chart_GetObjectsFromObject(Selection)
+        Dim cht As Chart
         
-        Dim ser As series
-        Set ser = cht_obj.Chart.SeriesCollection(1)
-            
-        Dim avg_val As Double
-        Dim std_val As Double
+        Dim ax As Axis
         
-        avg_val = WorksheetFunction.Average(ser.Values)
-        std_val = WorksheetFunction.StDev(ser.Values)
-                
-        cht_obj.Chart.Axes(xlValue).MinimumScale = avg_val - std_val * dbl_std
-        cht_obj.Chart.Axes(xlValue).MaximumScale = avg_val + std_val * dbl_std
+        Set cht = cht_obj.Chart
+        
+        Set ax = cht.Axes(xlValue)
+        ax.MaximumScaleIsAuto = True
+        ax.MinimumScaleIsAuto = True
+        ax.MajorUnitIsAuto = True
+        ax.MinorUnitIsAuto = True
     
-    Next
+    Next cht_obj
 
 End Sub
 
@@ -116,3 +88,32 @@ Sub Chart_FitAxisToMaxAndMin(xlCat As XlAxisType)
     Next cht_obj
 
 End Sub
+
+
+Sub Chart_YAxisRangeWithAvgAndStdev()
+    'this sub will set the y-axis to a number of stdevs past the average of the first series
+    Dim dbl_std As Double
+    
+    dbl_std = CDbl(InputBox("How many standard deviations to include?"))
+    
+    Dim cht_obj As ChartObject
+    
+    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
+        
+        Dim ser As series
+        Set ser = cht_obj.Chart.SeriesCollection(1)
+            
+        Dim avg_val As Double
+        Dim std_val As Double
+        
+        avg_val = WorksheetFunction.Average(ser.Values)
+        std_val = WorksheetFunction.StDev(ser.Values)
+                
+        cht_obj.Chart.Axes(xlValue).MinimumScale = avg_val - std_val * dbl_std
+        cht_obj.Chart.Axes(xlValue).MaximumScale = avg_val + std_val * dbl_std
+    
+    Next
+
+End Sub
+
+

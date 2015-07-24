@@ -83,7 +83,7 @@ Public Sub Colorize()
     On Error GoTo errHandler
     Set rngToColor = Application.InputBox("Select range to color", Type:=8)
     Dim lastrow As Integer
-    lastrow = rngToColor.Cells(rows.count, "A").End(xlUp).Row
+    lastrow = rngToColor.rows.count
     
     likevalues = MsgBox("Do you want to keep duplicate values the same color?", vbYesNo)
     
@@ -91,8 +91,8 @@ Public Sub Colorize()
     
         For i = 1 To lastrow
             If i Mod 2 = 0 Then
-                rows(i).EntireRow.Interior.Color = RGB(200, 200, 200)
-            Else: rows(i).EntireRow.Interior.ColorIndex = xlNone
+                rngToColor.rows(i).Interior.Color = RGB(200, 200, 200)
+            Else: rngToColor.rows(i).Interior.ColorIndex = xlNone
             End If
         Next
     End If
@@ -106,8 +106,8 @@ Public Sub Colorize()
         End If
         
         If flip Then
-            rows(i).EntireRow.Interior.Color = RGB(200, 200, 200)
-        Else: rows(i).EntireRow.Interior.ColorIndex = xlNone
+            rngToColor.rows(i).Interior.Color = RGB(200, 200, 200)
+        Else: rngToColor.rows(i).Interior.ColorIndex = xlNone
         End If
     Next
     End If
@@ -160,7 +160,34 @@ Sub ConvertToNumber()
     Application.Calculation = xlCalculationAutomatic
 
 End Sub
+Sub CopyTranspose()
+'Get range to transpose
+Dim rngSrc As Range
+Set rngSrc = Application.InputBox("What range do you want to transpose?", Type:=8)
+'Obtain size of range
+Dim rRow As Integer
+rRow = rngSrc.rows.count
 
+Dim rCol As Integer
+rCol = rngSrc.Columns.count
+
+'Create array and resize to the size of the range
+Dim arrTranspose() As Variant
+ReDim arrTranspose(1 To rCol, 1 To rRow)
+For i = 1 To rRow
+    For j = 1 To rCol
+        arrTranspose(j, i) = rngSrc.Cells(i, j)
+    Next j
+Next i
+
+'Where will we put it
+Dim rngDest As Range
+Set rngDest = Application.InputBox("Where would you like this to output?", Type:=8)
+
+'Transpose it
+rngDest.Resize(UBound(arrTranspose, 1), UBound(arrTranspose, 2)).Value = arrTranspose
+
+End Sub
 '''this code is used to apply pretty looking number formats
 Sub CreateConditionalsForFormatting()
     On Error GoTo errHandler

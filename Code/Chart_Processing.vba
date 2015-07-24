@@ -2,88 +2,6 @@ Attribute VB_Name = "Chart_Processing"
 Option Explicit
 
 'this module contains the code to do the major "processing" elements of the charting stuff
-
-'''added 2015 05 27 to remove 0 value labels from a chart
-Sub RemoveZeroValueDataLabel()
-    
-    'uses the ActiveChart, be sure a chart is selected
-    Dim cht As Chart
-    Set cht = ActiveChart
-    
-    Dim ser As series
-    For Each ser In cht.SeriesCollection
-        
-        Dim vals As Variant
-        vals = ser.Values
-        
-        'include this line if you want to reestablish labels before deleting
-        ser.ApplyDataLabels xlDataLabelsShowLabel, , , , True, False, False, False, False
-        
-        'loop through values and delete 0-value labels
-        Dim i As Integer
-        For i = LBound(vals) To UBound(vals)
-            If vals(i) = 0 Then
-                With ser.Points(i)
-                    If .HasDataLabel Then
-                        .DataLabel.Delete
-                    End If
-                End With
-            End If
-        Next i
-    Next ser
-End Sub
-
-
-
-'this method is the one that the UI selects
-Sub CreateMultipleTimeSeries()
-
-    Dim rng_dates As Range
-    Dim rng_data As Range
-    Dim rng_titles As Range
-    
-    'delete all charts?
-    If MsgBox("Delete all charts?", vbYesNo) = vbYes Then
-        Application.ScreenUpdating = False
-        Dim cht_obj_del As ChartObject
-        For Each cht_obj_del In ActiveSheet.ChartObjects
-            cht_obj_del.Delete
-        Next cht_obj_del
-        
-        Application.ScreenUpdating = True
-        
-    End If
-    
-    Set rng_dates = Application.InputBox("Select date range", Type:=8)
-    Set rng_data = Application.InputBox("Select data", Type:=8)
-    Set rng_titles = Application.InputBox("Select titles", Type:=8)
-    
-    Chart_TimeSeries rng_dates, rng_data, rng_titles
-    
-End Sub
-
-Sub Chart_TimeSeries_FastCreation()
-
-    ''this will create a fast set of charts from a block of data
-    Dim rng_dates As Range
-    Dim rng_data As Range
-    Dim rng_titles As Range
-    
-    'dates are in B4 and down
-    Set rng_dates = RangeEnd_Boundary(Range("B4"), xlDown)
-        
-    'data starts in C4, down and over
-    Set rng_data = RangeEnd_Boundary(Range("C4"), xlDown, xlToRight)
-    
-    'titels are C2 and over
-    Set rng_titles = RangeEnd_Boundary(Range("C2"), xlToRight)
-    
-    Chart_TimeSeries rng_dates, rng_data, rng_titles
-    ChartDefaultFormat
-    Chart_GridOfCharts
-
-End Sub
-
 Sub Chart_TimeSeries(rng_dates As Range, rng_data As Range, rng_titles As Range)
     
     Dim int_counter As Integer
@@ -123,3 +41,90 @@ Sub Chart_TimeSeries(rng_dates As Range, rng_data As Range, rng_titles As Range)
         
     Next rng_title
 End Sub
+
+Sub Chart_TimeSeries_FastCreation()
+
+    ''this will create a fast set of charts from a block of data
+    Dim rng_dates As Range
+    Dim rng_data As Range
+    Dim rng_titles As Range
+    
+    'dates are in B4 and down
+    Set rng_dates = RangeEnd_Boundary(Range("B4"), xlDown)
+        
+    'data starts in C4, down and over
+    Set rng_data = RangeEnd_Boundary(Range("C4"), xlDown, xlToRight)
+    
+    'titels are C2 and over
+    Set rng_titles = RangeEnd_Boundary(Range("C2"), xlToRight)
+    
+    Chart_TimeSeries rng_dates, rng_data, rng_titles
+    ChartDefaultFormat
+    Chart_GridOfCharts
+
+End Sub
+
+'this method is the one that the UI selects
+Sub CreateMultipleTimeSeries()
+
+    Dim rng_dates As Range
+    Dim rng_data As Range
+    Dim rng_titles As Range
+    
+    'delete all charts?
+    If MsgBox("Delete all charts?", vbYesNo) = vbYes Then
+        Application.ScreenUpdating = False
+        Dim cht_obj_del As ChartObject
+        For Each cht_obj_del In ActiveSheet.ChartObjects
+            cht_obj_del.Delete
+        Next cht_obj_del
+        
+        Application.ScreenUpdating = True
+        
+    End If
+    
+    Set rng_dates = Application.InputBox("Select date range", Type:=8)
+    Set rng_data = Application.InputBox("Select data", Type:=8)
+    Set rng_titles = Application.InputBox("Select titles", Type:=8)
+    
+    Chart_TimeSeries rng_dates, rng_data, rng_titles
+    
+End Sub
+
+Sub RemoveZeroValueDataLabel()
+    
+    'uses the ActiveChart, be sure a chart is selected
+    Dim cht As Chart
+    Set cht = ActiveChart
+    
+    Dim ser As series
+    For Each ser In cht.SeriesCollection
+        
+        Dim vals As Variant
+        vals = ser.Values
+        
+        'include this line if you want to reestablish labels before deleting
+        ser.ApplyDataLabels xlDataLabelsShowLabel, , , , True, False, False, False, False
+        
+        'loop through values and delete 0-value labels
+        Dim i As Integer
+        For i = LBound(vals) To UBound(vals)
+            If vals(i) = 0 Then
+                With ser.Points(i)
+                    If .HasDataLabel Then
+                        .DataLabel.Delete
+                    End If
+                End With
+            End If
+        Next i
+    Next ser
+End Sub
+
+
+
+
+
+
+
+
+

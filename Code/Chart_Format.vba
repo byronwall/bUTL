@@ -1,83 +1,41 @@
 Attribute VB_Name = "Chart_Format"
-Sub ChartDefaultFormat()
-
+Sub Chart_AddTitles()
     Dim cht_obj As ChartObject
     
-    For Each cht_obj In ActiveSheet.ChartObjects
-        Dim cht As Chart
+    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
         
-        Set cht = cht_obj.Chart
-        
-        Dim ser As series
-        For Each ser In cht.SeriesCollection
-        
-            ser.MarkerSize = 3
-            ser.MarkerStyle = xlMarkerStyleCircle
-            
-            If ser.ChartType = xlXYScatterLines Then
-                ser.Format.Line.Weight = 1.5
-
-            End If
-            
-            ser.MarkerForegroundColorIndex = xlColorIndexNone
-            ser.MarkerBackgroundColorIndex = xlColorIndexAutomatic
-            
-        Next ser
-        
-
-        cht.HasLegend = True
-        cht.Legend.Position = xlLegendPositionBottom
-        
-        Dim ax As Axis
-        Set ax = cht.Axes(xlValue)
-        
-        ax.MajorGridlines.Border.Color = RGB(200, 200, 200)
-        ax.MinorGridlines.Border.Color = RGB(230, 230, 230)
-        ax.Crosses = xlAxisCrossesMinimum
-        
-        If cht.HasTitle Then
-            cht.ChartTitle.Characters.Font.Size = 12
-            cht.ChartTitle.Characters.Font.Bold = True
+        If Not cht_obj.Chart.Axes(xlCategory).HasTitle Then
+            cht_obj.Chart.Axes(xlCategory).HasTitle = True
+            cht_obj.Chart.Axes(xlCategory).AxisTitle.Text = "x axis"
         End If
         
-        Set ax = cht.Axes(xlCategory)
-               
-    Next cht_obj
-
-End Sub
-
-
-Sub ChartTitleEqualsSeriesSelection()
-
-    Dim cht_obj As ChartObject
-    
-
-        For Each cht_obj In Selection
-            cht_obj.Chart.ChartTitle.Text = cht_obj.Chart.SeriesCollection(1).name
-        Next cht_obj
-
-
-End Sub
-
-Sub Chart_AxisTitleIsSeriesTitle()
-    'this will make the axis titles equal to the names of the series on them (last one wins)
-    Dim cht_obj As ChartObject
-    Dim cht As Chart
-    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
-        Set cht = cht_obj.Chart
+        If Not cht_obj.Chart.Axes(xlValue).HasTitle Then
+            cht_obj.Chart.Axes(xlValue).HasTitle = True
+            cht_obj.Chart.Axes(xlValue).AxisTitle.Text = "y axis"
+        End If
         
-        Dim b_ser As bUTLChartSeries
+        If Not cht_obj.Chart.HasTitle Then
+            cht_obj.Chart.HasTitle = True
+            cht_obj.Chart.ChartTitle.Text = "chart"
+        End If
+                
+    Next
+
+End Sub
+
+Sub Chart_ApplyFormattingToSelected()
+
+    Dim obj As ChartObject
+
+    For Each obj In Chart_GetObjectsFromObject(Selection)
+        
         Dim ser As series
         
-        For Each ser In cht.SeriesCollection
-            Set b_ser = New bUTLChartSeries
-            b_ser.UpdateFromChartSeries ser
-
-            cht.Axes(xlValue, ser.AxisGroup).HasTitle = True
-            cht.Axes(xlValue, ser.AxisGroup).AxisTitle.Text = b_ser.name
-            
+        For Each ser In obj.Chart.SeriesCollection
+            ser.MarkerSize = 5
         Next ser
-    Next cht_obj
+    Next obj
+    
 End Sub
 
 Sub Chart_ApplyTrendColors()
@@ -104,33 +62,26 @@ Sub Chart_ApplyTrendColors()
 
 End Sub
 
-'''bUTL add 2/24/2014
-Sub Chart_AddTitles()
+Sub Chart_AxisTitleIsSeriesTitle()
+    'this will make the axis titles equal to the names of the series on them (last one wins)
     Dim cht_obj As ChartObject
-    
+    Dim cht As Chart
     For Each cht_obj In Chart_GetObjectsFromObject(Selection)
+        Set cht = cht_obj.Chart
         
-        If Not cht_obj.Chart.Axes(xlCategory).HasTitle Then
-            cht_obj.Chart.Axes(xlCategory).HasTitle = True
-            cht_obj.Chart.Axes(xlCategory).AxisTitle.Text = "x axis"
-        End If
+        Dim b_ser As bUTLChartSeries
+        Dim ser As series
         
-        If Not cht_obj.Chart.Axes(xlValue).HasTitle Then
-            cht_obj.Chart.Axes(xlValue).HasTitle = True
-            cht_obj.Chart.Axes(xlValue).AxisTitle.Text = "y axis"
-        End If
-        
-        If Not cht_obj.Chart.HasTitle Then
-            cht_obj.Chart.HasTitle = True
-            cht_obj.Chart.ChartTitle.Text = "chart"
-        End If
-                
-    Next
+        For Each ser In cht.SeriesCollection
+            Set b_ser = New bUTLChartSeries
+            b_ser.UpdateFromChartSeries ser
 
+            cht.Axes(xlValue, ser.AxisGroup).HasTitle = True
+            cht.Axes(xlValue, ser.AxisGroup).AxisTitle.Text = b_ser.name
+            
+        Next ser
+    Next cht_obj
 End Sub
-
-
-'''bUTL additions 2013 12 16
 
 Sub Chart_CreateDataLabels()
 
@@ -153,6 +104,72 @@ Sub Chart_CreateDataLabels()
         p.DataLabel.ShowLegendKey = True
             
     Next ser
+
+End Sub
+
+''this is the business end of creating a grid of charts
+Sub Chart_GridOfCharts( _
+    Optional int_cols As Integer = 3, _
+    Optional cht_wid As Double = 400, _
+    Optional cht_height As Double = 300, _
+    Optional v_off As Double = 80, _
+    Optional h_off As Double = 40, _
+    Optional chk_down As Boolean = False, _
+    Optional bool_zoom As Boolean = False)
+
+    Dim cht_obj As ChartObject
+    
+    Dim sht As Worksheet
+    Set sht = ActiveSheet
+    
+    Application.ScreenUpdating = False
+    
+    Dim count As Integer
+    count = 0
+        
+    For Each cht_obj In sht.ChartObjects
+        Dim left As Double, top As Double
+        
+        If chk_down Then
+            left = (count \ int_cols) * cht_wid + h_off
+            top = (count Mod int_cols) * cht_height + v_off
+        Else
+            left = (count Mod int_cols) * cht_wid + h_off
+            top = (count \ int_cols) * cht_height + v_off
+        End If
+        
+        cht_obj.top = top
+        cht_obj.left = left
+        cht_obj.Width = cht_wid
+        cht_obj.height = cht_height
+        
+        count = count + 1
+        
+    Next cht_obj
+    
+    'loop through columsn to find how far to zoom
+    If bool_zoom Then
+        Dim col_zoom As Integer
+        col_zoom = 1
+        Do While sht.Cells(1, col_zoom).left < int_cols * cht_wid
+            col_zoom = col_zoom + 1
+        Loop
+        
+        sht.Range("A:A", sht.Cells(1, col_zoom - 1).EntireColumn).Select
+        ActiveWindow.Zoom = True
+        sht.Range("A1").Select
+    End If
+    
+    Application.ScreenUpdating = True
+
+End Sub
+
+Sub ChartApplyToAll()
+
+    Dim cht_obj As ChartObject
+    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
+        cht_obj.Chart.SeriesCollection(1).ChartType = xlXYScatter
+    Next cht_obj
 
 End Sub
 
@@ -251,78 +268,63 @@ Sub ChartCreateXYGrid()
 
 End Sub
 
-
-
-''this is the business end of creating a grid of charts
-Sub Chart_GridOfCharts( _
-    Optional int_cols As Integer = 3, _
-    Optional cht_wid As Double = 400, _
-    Optional cht_height As Double = 300, _
-    Optional v_off As Double = 80, _
-    Optional h_off As Double = 40, _
-    Optional chk_down As Boolean = False, _
-    Optional bool_zoom As Boolean = False)
+Sub ChartDefaultFormat()
 
     Dim cht_obj As ChartObject
     
-    Dim sht As Worksheet
-    Set sht = ActiveSheet
-    
-    Application.ScreenUpdating = False
-    
-    Dim count As Integer
-    count = 0
+    For Each cht_obj In ActiveSheet.ChartObjects
+        Dim cht As Chart
         
-    For Each cht_obj In sht.ChartObjects
-        Dim left As Double, top As Double
+        Set cht = cht_obj.Chart
         
-        If chk_down Then
-            left = (count \ int_cols) * cht_wid + h_off
-            top = (count Mod int_cols) * cht_height + v_off
-        Else
-            left = (count Mod int_cols) * cht_wid + h_off
-            top = (count \ int_cols) * cht_height + v_off
+        Dim ser As series
+        For Each ser In cht.SeriesCollection
+        
+            ser.MarkerSize = 3
+            ser.MarkerStyle = xlMarkerStyleCircle
+            
+            If ser.ChartType = xlXYScatterLines Then
+                ser.Format.Line.Weight = 1.5
+
+            End If
+            
+            ser.MarkerForegroundColorIndex = xlColorIndexNone
+            ser.MarkerBackgroundColorIndex = xlColorIndexAutomatic
+            
+        Next ser
+        
+
+        cht.HasLegend = True
+        cht.Legend.Position = xlLegendPositionBottom
+        
+        Dim ax As Axis
+        Set ax = cht.Axes(xlValue)
+        
+        ax.MajorGridlines.Border.Color = RGB(200, 200, 200)
+        ax.MinorGridlines.Border.Color = RGB(230, 230, 230)
+        ax.Crosses = xlAxisCrossesMinimum
+        
+        If cht.HasTitle Then
+            cht.ChartTitle.Characters.Font.Size = 12
+            cht.ChartTitle.Characters.Font.Bold = True
         End If
         
-        cht_obj.top = top
-        cht_obj.left = left
-        cht_obj.Width = cht_wid
-        cht_obj.height = cht_height
-        
-        count = count + 1
-        
+        Set ax = cht.Axes(xlCategory)
+               
     Next cht_obj
-    
-    'loop through columsn to find how far to zoom
-    If bool_zoom Then
-        Dim col_zoom As Integer
-        col_zoom = 1
-        Do While sht.Cells(1, col_zoom).left < int_cols * cht_wid
-            col_zoom = col_zoom + 1
-        Loop
-        
-        sht.Range("A:A", sht.Cells(1, col_zoom - 1).EntireColumn).Select
-        ActiveWindow.Zoom = True
-        sht.Range("A1").Select
-    End If
-    
-    Application.ScreenUpdating = True
 
 End Sub
 
-Sub Chart_ApplyFormattingToSelected()
+Sub ChartTitleEqualsSeriesSelection()
 
-    Dim obj As ChartObject
-
-    For Each obj In Chart_GetObjectsFromObject(Selection)
-        
-        Dim ser As series
-        
-        For Each ser In obj.Chart.SeriesCollection
-            ser.MarkerSize = 5
-        Next ser
-    Next obj
+    Dim cht_obj As ChartObject
     
+
+        For Each cht_obj In Selection
+            cht_obj.Chart.ChartTitle.Text = cht_obj.Chart.SeriesCollection(1).name
+        Next cht_obj
+
+
 End Sub
 
 Sub ChartPropMove()
@@ -335,11 +337,6 @@ Sub ChartPropMove()
     
 End Sub
 
-Sub ChartApplyToAll()
 
-    Dim cht_obj As ChartObject
-    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
-        cht_obj.Chart.SeriesCollection(1).ChartType = xlXYScatter
-    Next cht_obj
 
-End Sub
+

@@ -33,79 +33,12 @@ GetRow = True
 
 End Function
 
-Sub EvaluateArrayFormulaOnNewSheet()
 
-    'cut cell with formula
-    Dim StrAddress As String
-    Dim rngStart As Range
-    Set rngStart = Sheet1.Range("J2")
-    StrAddress = rngStart.Address
-    
-    rngStart.Cut
-    
-    'create new sheet
-    Dim sht As Worksheet
-    Set sht = Worksheets.Add
-    
-    'paste cell onto sheet
-    Dim rngArr As Range
-    Set rngArr = sht.Range("A1")
-    sht.Paste rngArr
-    
-    'expand array formula size.. resize to whatever size is needed
-    rngArr.Resize(3).FormulaArray = rngArr.FormulaArray
-    
-    'get your result
-    Dim VarArr As Variant
-    VarArr = Application.Evaluate(rngArr.CurrentArray.Address)
-    
-    ''''do something with your result here... it is an array
-    
-    
-    'shrink the formula back to one cell
-    Dim strFormula As String
-    strFormula = rngArr.FormulaArray
-    
-    rngArr.CurrentArray.ClearContents
-    rngArr.FormulaArray = strFormula
-    
-    'cut and paste back to original spot
-    rngArr.Cut
-    
-    Sheet1.Paste Sheet1.Range(StrAddress)
-    
-    Application.DisplayAlerts = False
-    sht.Delete
-    Application.DisplayAlerts = True
 
-End Sub
 
-Sub GenerateRandomData()
+Sub ForceRecalc()
 
-    '''code will create 1 column of Dates followed by three columns of integers
-    'Dates will be sequential, Headers in Row 2 beginning in Column B with 10 data points below
-    
-    Dim c As Range
-    Set c = Range("B2")
-    
-    Dim i As Integer
-    
-    For i = 0 To 3
-        c.Offset(, i) = Chr(65 + i)
-        
-        With c.Offset(1, i).Resize(10)
-            Select Case i
-                Case 0
-                    .Formula = "=TODAY()+ROW()"
-                Case Else
-                    .Formula = "=RANDBETWEEN(1,100)"
-            End Select
-            
-            .Value = .Value
-        End With
-    Next i
-    
-    ActiveSheet.UsedRange.Columns.ColumnWidth = 15
+    Application.CalculateFullRebuild
 
 End Sub
 
@@ -196,6 +129,176 @@ Sub CombineAllSheetsData()
     Next wsData
 End Sub
 
+Sub ConvertSelectionToCsv()
+
+    'this will go through a block of data and return a single CSV string
+    
+    Dim csvRow As Range
+    
+    Dim rngCSV As Range
+    
+    Set rngCSV = Selection
+    
+    Dim csvOut As String
+    csvOut = ""
+    
+    
+    For Each csvRow In rngCSV.rows
+        Dim arr() As Variant
+        GetRow csvRow.rows.Value, arr, 1
+        
+        csvOut = csvOut & Join(arr, ",") & vbCrLf
+        
+    Next csvRow
+    
+    Dim clipboard As MSForms.DataObject
+    Set clipboard = New MSForms.DataObject
+    
+    clipboard.SetText csvOut
+    clipboard.PutInClipboard
+
+End Sub
+
+Sub CopyClear()
+
+    'Save the selection
+    Dim rngSource As Range
+    Set rngSource = Selection
+    
+    'Determine the destination
+    Dim rngDestination As Range
+    Set rngDestination = Application.InputBox("Select the destination", Type:=8)
+    
+    'Freeze screen
+    Application.ScreenUpdating = False
+    
+    'Copy the source
+    rngSource.Copy
+    
+    'Determine the offset of change
+    Dim rngOff As Range
+    Set rngOff = rngSource.Offset(rngDestination.Row - rngSource.Row, rngDestination.Column - rngSource.Column)
+    
+    'Paste to the destination
+    rngDestination.PasteSpecial xlPasteAll
+    
+    'Clear any cells that were in the source and not in the destination
+    Dim rngClear As Range
+    For Each rngClear In rngSource
+        If Intersect(rngClear, rngOff) Is Nothing Then
+            rngClear.Clear
+        End If
+    Next rngClear
+ End Sub
+Sub ColorInputs()
+
+    Dim c As Range
+    
+    For Each c In Selection
+        If c.Value <> "" Then
+            If c.HasFormula Then
+                c.Interior.ThemeColor = msoThemeColorAccent1
+            Else
+                c.Interior.ThemeColor = msoThemeColorAccent2
+            End If
+        End If
+    Next c
+
+End Sub
+
+
+Sub CutPasteTranspose()
+
+
+    Dim rngSelect As Range
+    Set rngSelect = rngSelectection
+    
+    Dim rngOut As Range
+    Set rngOut = Application.InputBox("Select output corner", Type:=8)
+
+    Application.ScreenUpdating = False
+    Application.EnableEvents = False
+    Application.Calculation = xlCalculationManual
+
+
+    
+    Dim rCorner As Range
+    Set rCorner = rngSelect.Cells(1, 1)
+    
+    Dim iCRow As Integer
+    iCRow = rCorner.Row
+    Dim iCCol As Integer
+    iCCol = rCorner.Column
+    
+    Dim iORow As Integer
+    Dim iOCol As Integer
+    iORow = rngOut.Row
+    iOCol = rngOut.Column
+    
+    rngOut.Activate
+    
+    Dim c As Range
+    For Each c In rngSelect
+        c.Cut
+        ActiveSheet.Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow).Activate
+        ActiveSheet.Paste
+    Next c
+    
+    Application.CutCopyMode = False
+    
+    Application.ScreenUpdating = True
+    Application.EnableEvents = True
+    Application.Calculation = xlCalculationAutomatic
+    Application.Calculate
+End Sub
+
+Sub EvaluateArrayFormulaOnNewSheet()
+
+    'cut cell with formula
+    Dim StrAddress As String
+    Dim rngStart As Range
+    Set rngStart = Sheet1.Range("J2")
+    StrAddress = rngStart.Address
+    
+    rngStart.Cut
+    
+    'create new sheet
+    Dim sht As Worksheet
+    Set sht = Worksheets.Add
+    
+    'paste cell onto sheet
+    Dim rngArr As Range
+    Set rngArr = sht.Range("A1")
+    sht.Paste rngArr
+    
+    'expand array formula size.. resize to whatever size is needed
+    rngArr.Resize(3).FormulaArray = rngArr.FormulaArray
+    
+    'get your result
+    Dim VarArr As Variant
+    VarArr = Application.Evaluate(rngArr.CurrentArray.Address)
+    
+    ''''do something with your result here... it is an array
+    
+    
+    'shrink the formula back to one cell
+    Dim strFormula As String
+    strFormula = rngArr.FormulaArray
+    
+    rngArr.CurrentArray.ClearContents
+    rngArr.FormulaArray = strFormula
+    
+    'cut and paste back to original spot
+    rngArr.Cut
+    
+    Sheet1.Paste Sheet1.Range(StrAddress)
+    
+    Application.DisplayAlerts = False
+    sht.Delete
+    Application.DisplayAlerts = True
+
+End Sub
+
 '''"TEST
 Sub ExportFilesFromFolder()
 
@@ -237,81 +340,60 @@ Sub ExportFilesFromFolder()
 
 End Sub
 
+'Sub will take a selection of values and fill blanks with the value from above
+'#BUTTON
+Sub FillValueDown()
 
-Sub UnhideAllRowsAndColumns()
-
-    'need to unhide rows and then columns
+    Dim rngInput As Range
+    Set rngInput = Selection
     
-    ActiveSheet.Cells.EntireRow.Hidden = False
-    ActiveSheet.Cells.EntireColumn.Hidden = False
-
-End Sub
-
-Sub ColorInputs()
-
     Dim c As Range
     
-    For Each c In Selection
-        If c.Value <> "" Then
-            If c.HasFormula Then
-                c.Interior.ThemeColor = msoThemeColorAccent1
-            Else
-                c.Interior.ThemeColor = msoThemeColorAccent2
-            End If
-        End If
+    For Each c In Intersect(rngInput.SpecialCells(xlCellTypeBlanks), Selection.Parent.UsedRange)
+        c = c.End(xlUp)
     Next c
 
 End Sub
 
+Sub GenerateRandomData()
 
-Sub ConvertSelectionToCsv()
-
-    'this will go through a block of data and return a single CSV string
+    '''code will create 1 column of Dates followed by three columns of integers
+    'Dates will be sequential, Headers in Row 2 beginning in Column B with 10 data points below
     
-    Dim csvRow As Range
+    Dim c As Range
+    Set c = Range("B2")
     
-    Dim rngCSV As Range
+    Dim i As Integer
     
-    Set rngCSV = Selection
-    
-    Dim csvOut As String
-    csvOut = ""
-    
-    
-    For Each csvRow In rngCSV.rows
-        Dim arr() As Variant
-        GetRow csvRow.rows.Value, arr, 1
+    For i = 0 To 3
+        c.Offset(, i) = Chr(65 + i)
         
-        csvOut = csvOut & Join(arr, ",") & vbCrLf
-        
-    Next csvRow
+        With c.Offset(1, i).Resize(10)
+            Select Case i
+                Case 0
+                    .Formula = "=TODAY()+ROW()"
+                Case Else
+                    .Formula = "=RANDBETWEEN(1,100)"
+            End Select
+            
+            .Value = .Value
+        End With
+    Next i
     
-    Dim clipboard As MSForms.DataObject
-    Set clipboard = New MSForms.DataObject
-    
-    clipboard.SetText csvOut
-    clipboard.PutInClipboard
+    ActiveSheet.UsedRange.Columns.ColumnWidth = 15
 
 End Sub
 
-Sub Sheet_DeleteHiddenRows()
+Sub OpenContainingFolder()
 
-    'this sub will delete all the hidden rows
-    'this would be used with a filter to pare down the list
+    Dim wb As Workbook
+    Set wb = ActiveWorkbook
     
-    Application.ScreenUpdating = False
-    Dim Row As Range
-    For i = ActiveSheet.UsedRange.rows.count To 1 Step -1
-        
-        
-        Set Row = ActiveSheet.rows(i)
-        
-        If Row.Hidden Then
-            Row.Delete
-        End If
-    Next i
-
-    Application.ScreenUpdating = True
+    If wb.path <> "" Then
+        wb.FollowHyperlink wb.path
+    Else
+        MsgBox "Open file is not in a folder yet."
+    End If
 
 End Sub
 
@@ -386,46 +468,35 @@ Sub SeriesSplit()
     Set rngFormula = rngValues.Offset(1, 1).Resize(rngValues.rows.count - 1, dictCategories.count)
     rngFormula.FormulaR1C1 = strFormula
     rngFormula.EntireColumn.AutoFit
-
 End Sub
 
-Sub ForceRecalc()
+Sub Sheet_DeleteHiddenRows()
 
-    Application.CalculateFullRebuild
-
-End Sub
-
-Sub CopyClear()
-
-    'Save the selection
-    Dim rngSource As Range
-    Set rngSource = Selection
+    'this sub will delete all the hidden rows
+    'this would be used with a filter to pare down the list
     
-    'Determine the destination
-    Dim rngDestination As Range
-    Set rngDestination = Application.InputBox("Select the destination", Type:=8)
-    
-    'Freeze screen
     Application.ScreenUpdating = False
-    
-    'Copy the source
-    rngSource.Copy
-    
-    'Determine the offset of change
-    Dim rngOff As Range
-    Set rngOff = rngSource.Offset(rngDestination.Row - rngSource.Row, rngDestination.Column - rngSource.Column)
-    
-    'Paste to the destination
-    rngDestination.PasteSpecial xlPasteAll
-    
-    'Clear any cells that were in the source and not in the destination
-    Dim rngClear As Range
-    For Each rngClear In rngSource
-        If Intersect(rngClear, rngOff) Is Nothing Then
-            rngClear.Clear
+    Dim Row As Range
+    For i = ActiveSheet.UsedRange.rows.count To 1 Step -1
+        
+        
+        Set Row = ActiveSheet.rows(i)
+        
+        If Row.Hidden Then
+            Row.Delete
         End If
-    Next rngClear
+    Next i
+
+    Application.ScreenUpdating = True
+
+End Sub
+
+Sub UnhideAllRowsAndColumns()
+
+    'need to unhide rows and then columns
     
+    ActiveSheet.Cells.EntireRow.Hidden = False
+    ActiveSheet.Cells.EntireColumn.Hidden = False
 
 End Sub
 
@@ -436,80 +507,14 @@ Sub UpdateScrollbars()
 
 End Sub
 
-Sub OpenContainingFolder()
-
-    Dim wb As Workbook
-    Set wb = ActiveWorkbook
-    
-    If wb.path <> "" Then
-        wb.FollowHyperlink wb.path
-    Else
-        MsgBox "Open file is not in a folder yet."
-    End If
-
-End Sub
-
-Sub CutPasteTranspose()
-
-
-    Dim rngSelect As Range
-    Set rngSelect = rngSelectection
-    
-    Dim rngOut As Range
-    Set rngOut = Application.InputBox("Select output corner", Type:=8)
-
-    Application.ScreenUpdating = False
-    Application.EnableEvents = False
-    Application.Calculation = xlCalculationManual
-
-
-    
-    Dim rCorner As Range
-    Set rCorner = rngSelect.Cells(1, 1)
-    
-    Dim iCRow As Integer
-    iCRow = rCorner.Row
-    Dim iCCol As Integer
-    iCCol = rCorner.Column
-    
-    Dim iORow As Integer
-    Dim iOCol As Integer
-    iORow = rngOut.Row
-    iOCol = rngOut.Column
-    
-    rngOut.Activate
-    
-    Dim c As Range
-    For Each c In rngSelect
-        c.Cut
-        ActiveSheet.Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow).Activate
-        ActiveSheet.Paste
-    Next c
-    
-    Application.CutCopyMode = False
-    
-    Application.ScreenUpdating = True
-    Application.EnableEvents = True
-    Application.Calculation = xlCalculationAutomatic
-    Application.Calculate
-
-End Sub
 
 
 
-'Sub will take a selection of values and fill blanks with the value from above
-'#BUTTON
-Sub FillValueDown()
 
-    Dim rngInput As Range
-    Set rngInput = Selection
-    
-    Dim c As Range
-    
-    For Each c In Intersect(rngInput.SpecialCells(xlCellTypeBlanks), Selection.Parent.UsedRange)
-        c = c.End(xlUp)
-    Next c
 
-End Sub
+
+
+
+
 
 
