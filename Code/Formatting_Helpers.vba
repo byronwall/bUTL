@@ -83,7 +83,7 @@ Public Sub Colorize()
     On Error GoTo errHandler
     Set rngToColor = Application.InputBox("Select range to color", Type:=8)
     Dim lastrow As Integer
-    lastrow = rngToColor.Cells(rows.count, "A").End(xlUp).row
+    lastrow = rngToColor.Cells(rows.count, "A").End(xlUp).Row
     
     likevalues = MsgBox("Do you want to keep duplicate values the same color?", vbYesNo)
     

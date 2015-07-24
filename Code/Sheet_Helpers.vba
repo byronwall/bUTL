@@ -40,7 +40,7 @@ Sub UnlockAllSheets()
         Application.ScreenUpdating = False
         
         Dim sht As Worksheet
-        For Each sht In Sheets
+        For Each sht In ThisWorkbook.Sheets
             On Error Resume Next
             sht.Unprotect pass
 
@@ -63,7 +63,7 @@ Sub LockAllSheets()
         Application.ScreenUpdating = False
         
         Dim sht As Worksheet
-        For Each sht In Sheets
+        For Each sht In ThisWorkbook.Sheets
             On Error Resume Next
             sht.Protect pass
         Next sht

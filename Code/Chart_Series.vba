@@ -1,7 +1,8 @@
 Attribute VB_Name = "Chart_Series"
+
+Sub ChartSplitSeries()
 'split into separate charts
 ''opposite of the merge series option
-Sub ChartSplitSeries()
 
     Dim cht_obj As ChartObject
     Dim cht As Chart
@@ -103,7 +104,7 @@ Sub ChartFlipXYValues()
             'code blocked for now
             If False And Not b_ser.name Is Nothing Then
                 Dim int_offset_rows As Integer, int_offset_cols As Integer
-                int_offset_rows = b_ser.name.row - b_ser.XValues.Cells(1, 1).row
+                int_offset_rows = b_ser.name.Row - b_ser.XValues.Cells(1, 1).Row
                 int_offset_cols = b_ser.name.Column - b_ser.XValues.Cells(1, 1).Column
                 
                 Set b_ser.name = b_ser.Values.Cells(1, 1).Offset(int_offset_rows, int_offset_cols)

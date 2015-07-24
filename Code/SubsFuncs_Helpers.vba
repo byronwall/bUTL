@@ -3,6 +3,7 @@ Attribute VB_Name = "SubsFuncs_Helpers"
 
 'Helper function which is used to select a range of cells
 'This reduces redundant typing redundant typing redundant typing when defining ranges
+'+Where is this called? I can't get it to work properly as a UDF on sheet
 Function RangeEnd(start As Range, direction As XlDirection, Optional direction2 As XlDirection = -1) As Range
     'check that a second direction was supplied
     If direction2 = -1 Then
@@ -13,6 +14,7 @@ Function RangeEnd(start As Range, direction As XlDirection, Optional direction2 
 End Function
 
 Function RangeEnd_Boundary(start As Range, direction As XlDirection, Optional direction2 As XlDirection = -1) As Range
+    '+Where is this called? I can't get it to work properly as a UDF on sheet
     'check that a second direction was supplied
     If direction2 = -1 Then
         Set RangeEnd_Boundary = Intersect(Range(start, start.End(direction)), start.CurrentRegion)
@@ -22,7 +24,7 @@ Function RangeEnd_Boundary(start As Range, direction As XlDirection, Optional di
 End Function
 
 
-'from http://stackoverflow.com/a/152325/4288101
+'from http://stackoverflow.com/a/152325/4288101 & http://en.allexperts.com/q/Visual-Basic-1048/string-manipulation.htm
 'modified to be case-insensitive and Optional params
 Public Sub QuickSort(vArray As Variant, Optional inLow As Variant, Optional inHi As Variant)
 
