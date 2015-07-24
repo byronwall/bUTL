@@ -1,6 +1,26 @@
 Attribute VB_Name = "Sheet_Helpers"
 '''this module contains code related to sheets and sheet processing
 
+Sub LockAllSheets()
+
+    Dim pass As Variant
+    pass = Application.InputBox("Password to lock")
+    
+    If pass = False Then
+        MsgBox "Cancelled."
+    Else
+        Application.ScreenUpdating = False
+        
+        Dim sht As Worksheet
+        For Each sht In ThisWorkbook.Sheets
+            On Error Resume Next
+            sht.Protect pass
+        Next sht
+        
+        Application.ScreenUpdating = True
+    End If
+
+End Sub
 Sub OutputSheets()
 
     Dim sht_out As Worksheet
@@ -40,7 +60,7 @@ Sub UnlockAllSheets()
         Application.ScreenUpdating = False
         
         Dim sht As Worksheet
-        For Each sht In Sheets
+        For Each sht In ThisWorkbook.Sheets
             On Error Resume Next
             sht.Unprotect pass
 
@@ -52,23 +72,4 @@ Sub UnlockAllSheets()
 End Sub
 
 
-Sub LockAllSheets()
 
-    Dim pass As Variant
-    pass = Application.InputBox("Password to lock")
-    
-    If pass = False Then
-        MsgBox "Cancelled."
-    Else
-        Application.ScreenUpdating = False
-        
-        Dim sht As Worksheet
-        For Each sht In Sheets
-            On Error Resume Next
-            sht.Protect pass
-        Next sht
-        
-        Application.ScreenUpdating = True
-    End If
-
-End Sub

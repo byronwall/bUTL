@@ -49,7 +49,7 @@ Sub Rand_OpenFilesAndCopy()
     Dim folder As Variant
     
     Application.ScreenUpdating = False
-    
+    ' Another static folder
     folder = "O:\HCCShare\Operations\PE\Plant 8\Production Engineer\BWall\2013 11 Rheo troubleshooting\Recipes\PE7\2\"
     
     path = Dir(folder)
@@ -80,7 +80,7 @@ Sub Rand_PrintMultiple()
     'print out a PDF to a file
     
     Application.ScreenUpdating = False
-    
+    'Another static folder
     Dim rng_tag As Range
     Dim str_path As String
     str_path = "C:\Documents and Settings\wallbd\Application Data\PDF OUTPUT\"
@@ -115,7 +115,7 @@ Sub Rand_PrintMultiplePvVsOp()
     'print out a PDF to a file
     
     Application.ScreenUpdating = False
-    
+    'Another static folder
     Dim rng_tag As Range
     Dim str_path As String
     str_path = "C:\Documents and Settings\wallbd\Application Data\PDF OUTPUT\"
@@ -163,7 +163,7 @@ Sub Rand_DownloadFromSheet()
     Dim rng_addr As Range
     
     Dim str_folder As Variant
-    
+    'Another static folder
     str_folder = "C:\Documents and Settings\wallbd\Application Data\DSP Guide\"
     
     For Each rng_addr In Range("B2:B35")
@@ -256,12 +256,12 @@ Sub Rand_DumpTextFromAllSheets()
     Set w = Application.Workbooks.Add
     Set sw = w.Sheets.Add
     
-    Dim row As Integer
-    row = 0
+    Dim Row As Integer
+    Row = 0
     For Each s In main.Sheets
         For Each c In s.UsedRange.SpecialCells(xlCellTypeConstants)
-            sw.Range("A1").Offset(row) = c
-            row = row + 1
+            sw.Range("A1").Offset(Row) = c
+            Row = Row + 1
         Next c
     Next s
 
@@ -298,8 +298,8 @@ Sub Rand_Matrix()
     
     Dim int_left As Integer, int_top As Integer
     
-    Set rng_body = Range(Cells(rng_left.row, rng_top.Column), _
-                            Cells(rng_left.rows(rng_left.rows.count).row, rng_top.Columns(rng_top.Columns.count).Column))
+    Set rng_body = Range(Cells(rng_left.Row, rng_top.Column), _
+                            Cells(rng_left.rows(rng_left.rows.count).Row, rng_top.Columns(rng_top.Columns.count).Column))
                             
     Dim sht_out As Worksheet
     Set sht_out = Application.Worksheets.Add()
@@ -310,7 +310,7 @@ Sub Rand_Matrix()
     int_row = 1
     
     For Each rng_cell In rng_body.SpecialCells(xlCellTypeConstants)
-        sht_out.Range("A1").Offset(int_row) = rng_left.Cells(rng_cell.row - rng_left.row + 1, 1)
+        sht_out.Range("A1").Offset(int_row) = rng_left.Cells(rng_cell.Row - rng_left.Row + 1, 1)
         sht_out.Range("B1").Offset(int_row) = rng_top.Cells(1, rng_cell.Column - rng_top.Column + 1)
         sht_out.Range("C1").Offset(int_row) = rng_cell
         
