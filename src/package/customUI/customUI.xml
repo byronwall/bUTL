@@ -1,7 +1,6 @@
 <!--RibbonX Visual Designer 1.93 for Microsoft Excel 14.0. XML Code produced on 2014/06/26-->
 <customUI
-	xmlns="http://schemas.microsoft.com/office/2006/01/customui"
-	onLoad="rib_onLoad">
+	xmlns="http://schemas.microsoft.com/office/2006/01/customui">
 	<ribbon >
 		<tabs >
 			<tab

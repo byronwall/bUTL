@@ -1,6 +1,12 @@
 Attribute VB_Name = "RandomCode"
-'this includes some random helper code
-'most of this stuff was purpose built and saved for later
+'---------------------------------------------------------------------------------------
+' Module    : RandomCode
+' Author    : @byronwall
+' Date      : 2015 07 24
+' Purpose   : Contains a lot of junk code that was stored.  Most is too specific to be useful.
+'---------------------------------------------------------------------------------------
+
+
 
 
 '''this one goes through a data source and alphabetizes it.

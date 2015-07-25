@@ -14,8 +14,12 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
-
-
+'---------------------------------------------------------------------------------------
+' Module    : form_newCommands
+' Author    : @byronwall
+' Date      : 2015 07 24
+' Purpose   : This form is just buttons to easier get to new code
+'---------------------------------------------------------------------------------------
 Option Explicit
 
 Private Sub CommandButton1_Click()
@@ -30,7 +34,7 @@ End Sub
 
 Private Sub CommandButton15_Click()
     Hide
-    
+
     Dim frm As New form_chtSeries
     frm.Show
 End Sub
@@ -39,21 +43,20 @@ Private Sub CommandButton16_Click()
     Selection_ColorWithHex
 End Sub
 
-
 Private Sub CommandButton17_Click()
     Chart_TrendlinesToAverage
 End Sub
 
 Private Sub CommandButton18_Click()
-ChartPropMove
+    ChartPropMove
 End Sub
 
 Private Sub CommandButton19_Click()
-Chart_RemoveTrendlines
+    Chart_RemoveTrendlines
 End Sub
 
 Private Sub CommandButton20_Click()
-PivotSetAllFields
+    PivotSetAllFields
 End Sub
 
 Private Sub CommandButton21_Click()
@@ -68,10 +71,6 @@ Private Sub CommandButton23_Click()
     UnhideAllRowsAndColumns
 End Sub
 
-Private Sub CommandButton24_Click()
-    Macro1
-End Sub
-
 Private Sub CommandButton25_Click()
     ExportFilesFromFolder
 End Sub
@@ -83,3 +82,4 @@ End Sub
 Private Sub CommandButton5_Click()
     DownloadFromSheet
 End Sub
+

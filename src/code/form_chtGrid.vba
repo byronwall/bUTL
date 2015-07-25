@@ -14,21 +14,27 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 
-
+'---------------------------------------------------------------------------------------
+' Module    : form_chtGrid
+' Author    : @byronwall
+' Date      : 2015 07 24
+' Purpose   : Simple interface to create a grid of charts
+'---------------------------------------------------------------------------------------
 
 Option Explicit
 
 Private Sub btn_grid_Click()
-    
+
     Chart_GridOfCharts _
-        txt_cols, _
-        CDbl(txt_width), _
-        CDbl(txt_height), _
-        CDbl(txt_vOff), _
-        CDbl(txt_hOff), _
-        chk_down, _
-        chk_zoom
-    
+            txt_cols, _
+            CDbl(txt_width), _
+            CDbl(txt_height), _
+            CDbl(txt_vOff), _
+            CDbl(txt_hOff), _
+            chk_down, _
+            chk_zoom
+
     Hide
-    
+
 End Sub
+
