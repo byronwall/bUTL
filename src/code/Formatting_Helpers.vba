@@ -304,16 +304,31 @@ errHandler:
     MsgBox ("No selection made!")
 End Sub
 
-Sub SplitAndKeep(delim As Variant, keep As Variant)
-    Dim parts As Variant
+'---------------------------------------------------------------------------------------
+' Procedure : SplitAndKeep
+' Author    : @byronwall
+' Date      : 2015 07 24
+' Purpose   : Reduces a cell's value to one item returned from Split
+'---------------------------------------------------------------------------------------
+'
+Sub SplitAndKeep(delim As Variant, vItemToKeep As Variant)
+    Dim vParts As Variant
+    Dim rngCell As Range
     
-    For Each c In Intersect(Selection, ActiveSheet.UsedRange)
-        parts = Split(c, delim)
-        If UBound(parts) >= keep Then
-            c = parts(keep)
-        End If
-    Next cell
+   On Error GoTo SplitAndKeep_Error
 
+    For Each rngCell In Intersect(Selection, ActiveSheet.UsedRange)
+        vParts = Split(rngCell, delim)
+        If UBound(vParts) >= vItemToKeep Then
+            rngCell.Value = vParts(vItemToKeep)
+        End If
+    Next rngCell
+
+   On Error GoTo 0
+   Exit Sub
+
+SplitAndKeep_Error:
+    MsgBox "Check that a valid Range is selected"
 End Sub
 
 Sub SplitIntoColumns()
