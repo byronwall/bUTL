@@ -182,12 +182,14 @@ Public Sub btn_chartXYMatrix_onAction(control As IRibbonControl)
 End Sub
 
 Public Sub btn_aboutForm_onAction(control As IRibbonControl)
-    Dim frm_about As New form_bUTLabout
-    frm_about.Show
-End Sub
-
-Public Sub btn_help_onAction(control As IRibbonControl)
-    MsgBox "not available now"
+    
+    'catch the rare case where the add-in is opened directly
+    If ActiveWorkbook Is Nothing Then
+        Application.Workbooks.Add
+    End If
+    
+    ActiveWorkbook.FollowHyperlink "https://github.com/byronwall/bUTL"
+    
 End Sub
 
 Public Sub btn_chartFlipXY_onAction(control As IRibbonControl)

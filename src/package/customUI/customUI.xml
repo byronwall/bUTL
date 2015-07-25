@@ -386,14 +386,8 @@
 						id="btn_aboutForm"
 						imageMso="WorkflowPending"
 						label="about"
-						supertip="This will open a form containing information about this add-in."
+						supertip="This will open the GitHub page for bUTL."
 						onAction="btn_aboutForm_onAction"/>
-					<button
-						id="btn_help"
-						image="question_png"
-						label="help"
-						supertip="This will open the documentation (PDF) for the add-in."
-						onAction="btn_help_onAction"/>
 				</group >
 			</tab >
 		</tabs >
