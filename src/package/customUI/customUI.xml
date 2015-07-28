@@ -1,0 +1,394 @@
+<!--RibbonX Visual Designer 1.93 for Microsoft Excel 14.0. XML Code produced on 2014/06/26-->
+<customUI
+	xmlns="http://schemas.microsoft.com/office/2006/01/customui">
+	<ribbon >
+		<tabs >
+			<tab
+				id="tabByron"
+				label="bUTL"
+				visible="true">
+				<group
+					id="grp_format"
+					label="formatting">
+					<button
+						id="btn_fmtDateTime"
+						label="mm/dd/yyyy HH:mm"
+						supertip="This will apply the formatting that it indicates.  This seems to be the most useful/generic date format to use."
+						onAction="btn_fmtDateTime_onAction"/>
+					<menu
+						id="menu_bulkFormatting"
+						label="bulk formatting"
+						supertip="Contains options for doing bulk formatting to a selection.">
+						<button
+							id="btn_toNumeric"
+							label="to numeric"
+							supertip="Converts string to a numeric value.  This is destructive."
+							onAction="btn_toNumeric_onAction"/>
+						<button
+							id="btn_convertValue"
+							label="to value"
+							supertip="Converts numbers and formulas to values for the entire sheet.  This is destructive."
+							onAction="btn_convertValue_onAction"/>
+						<button
+							id="btn_trimSelection"
+							label="trim"
+							supertip="Performs a trim operation on all cells that are selected.  This is destructive."
+							onAction="btn_trimSelection_onAction"/>
+						<button
+							description="Make hyperlink from each cell in selection."
+							id="btn_hyperlink"
+							label="to hyperlink"
+							supertip="This will create a hyperlink out of the given text in the cell."
+							onAction="btn_hyperlink_onAction"/>
+					</menu >
+					<menu
+						id="menu_colorizing"
+						label="colorize"
+						supertip="This contains functions which are used to apply coloring to cells based on conditions.  These are mainly like manual conditional formatting for advanced needs.">
+						<button
+							id="btn_colorCategory"
+							label="category"
+							supertip="This will allow you to color cells based on the color of cells that contain the same values."
+							onAction="btn_colorCategory_onAction"/>
+						<button
+							id="btn_colorize"
+							label="alt"
+							supertip="This will run through the selection and alternate coloring."
+							onAction="btn_colorize_onAction"/>
+					</menu >
+				</group >
+				<group
+					id="grp_selection"
+					label="text selection">
+					<editBox
+						id="txt_sepDelim"
+						label="delim"
+						sizeString="www"
+						onChange="txt_onChange"/>
+					<editBox
+						id="txt_sepKeep"
+						label="keep"
+						sizeString="www"
+						onChange="txt_onChange"/>
+					<button
+						id="btn_split"
+						label="split/keep"
+						supertip="This will do a &quot;split/keep&quot; in place on the current selection.  It will split by the delimeter and keep the values from the given index.  Note that this is 0-based indexing.  This ignores cells that cannot be split."
+						onAction="btn_split_onAction"/>
+					<separator  id="Separator1" />
+					<editBox
+						id="txt_offRows"
+						label="rows"
+						sizeString="ww"
+						onChange="txt_onChange"/>
+					<editBox
+						id="txt_offCols"
+						label="cols"
+						sizeString="ww"
+						onChange="txt_onChange"/>
+					<button
+						id="btn_offset"
+						label="offset"
+						supertip="This uses the text boxes above it.  It will offset the current range by the given amounts (postive or negative)."
+						onAction="btn_offset_onAction"/>
+					<separator  id="Separator3" />
+					<button
+						id="btn_cutTranspose"
+						label="cut transpose"
+						supertip="This will execute a &quot;cut transpose&quot; operation.  This allows for tranposing while moving formulas and references."
+						onAction="btn_cutTranspose_onAction"/>
+					<button
+						description="Copies the range and then clears any leftovers."
+						id="btn_copyClear"
+						label="copy clear"
+						supertip="Copies the range and then clears any leftovers."
+						onAction="btn_copyClear_onAction"/>
+					<menu
+						id="menu_splitsJoins"
+						label="splits / joins">
+						<button
+							id="btn_splitRows"
+							label="split into rows"
+							supertip="This will split out the given text into rows based on the delimeter given.  This makes most sesne when splitting text that is in lines into actual rows."
+							onAction="btn_splitRows_onAction"/>
+						<button
+							id="btn_joinCells"
+							label="join"
+							supertip="This will join together all of the selected cells."
+							onAction="btn_joinCells_onAction"/>
+						<button
+							id="btn_splitCol"
+							label="split cols"
+							supertip="This will split the selected text into columns based on a given delimeter.  It will extend out to an arbitrary number of splits without prompting about erasing other data.  Beware."
+							onAction="btn_splitCol_onAction"/>
+					</menu >
+				</group >
+				<group
+					id="tab_shtMgmt"
+					label="sheet mgmt">
+					<button
+						id="btn_sht_unhide"
+						imageMso="WindowSwitchWindowsMenuExcel"
+						label="unhide all"
+						showImage="true"
+						showLabel="true"
+						size="normal"
+						supertip="This will unhide all sheets in the workbook."
+						onAction="btn_sht_unhide_onAction"/>
+					<menu
+						id="menu_lockUnlock"
+						label="sheet protect">
+						<button
+							description="Protect sheets"
+							id="btn_protect"
+							imageMso="SheetProtect"
+							label="lock all"
+							showImage="true"
+							showLabel="true"
+							supertip="This will lock all sheets with a prompted password."
+							onAction="btn_protect_onAction"/>
+						<button
+							id="btn_unprotectAll"
+							imageMso="ReviewProtectWorkbook"
+							label="unlock"
+							showImage="true"
+							showLabel="true"
+							supertip="This will attempt to unlock all sheets with a prompted password.  It will fail silently for those that it cannot open."
+							onAction="btn_unprotectAll_onAction"/>
+					</menu >
+					<menu
+						id="Menu13"
+						label="others">
+						<button
+							description="Updates the scrollbars without saving."
+							id="btn_updateScrollbars"
+							label="fix scroll bars"
+							supertip="This will fix the scroll bars if the sheet is not showing them correctly.  This can also be done  by saving, but if you do not want to save then this is easier."
+							onAction="btn_updateScrollbars_onAction"/>
+						<button
+							id="btn_sheetNamesOutput"
+							label="output sheet names"
+							supertip="This will output the list of all sheet names in the current workbook."
+							onAction="btn_sheetNamesOutput_onAction"/>
+					</menu >
+				</group >
+				<group
+					id="grp_processors"
+					label="adv processing">
+					<button
+						id="btn_fillDown"
+						label="waterfall fill"
+						supertip="This will execute a waterfall fill.  See the documentation for what this means and how it can be used."
+						onAction="btn_fillDown_onAction"/>
+					<button
+						id="btn_seriesSplit"
+						label="series split"
+						supertip="This will split out a column of data based on its categorical relationship to another column.  See documentation for full details."
+						onAction="btn_seriesSplit_onAction"/>
+					<button
+						id="btn_extendArray"
+						label="extend array"
+						supertip="This will extend an array formula down to the end of the formula that is next to it."
+						onAction="btn_extendArray_onAction"/>
+					<button
+						id="btn_sheetDeleteHiddenRows"
+						label="delete hidden rows"
+						supertip="This will delete all hidden rows on the current sheet.  Good for inverting a filter for good."
+						onAction="btn_sheetDeleteHiddenRows_onAction"/>
+					<button
+						description="Force recalc for PI formulas."
+						id="btn_piRecalc"
+						label="recalc"
+						supertip="This will force the &quot;hardest&quot; of recalculations.  This is useful for PI to reset all of the formulas and recalc."
+						onAction="btn_piRecalc_onAction"/>
+				</group >
+				<group
+					id="grp_chart"
+					label="charting">
+					<button
+						id="btn_chtGrid"
+						imageMso="ControlLayoutStacked"
+						label="create grid"
+						onAction="btn_chtGrid_onAction"/>
+					<button
+						description="Creates a fake PivotChart"
+						id="btn_chartFormat"
+						label="format all"
+						supertip="This will apply a default formatting to all charts on the sheet."
+						onAction="btn_chartFormat_onAction"/>
+					<button
+						id="btn_chartTimeSeries"
+						label="time series"
+						onAction="btn_chartTimeSeries_onAction"/>
+					<button
+						id="btn_chartXYMatrix"
+						label="XY matrix"
+						supertip="This will create a scatter matrix of XY plots for all columns selected.  Note that it prompts for the selection (with headers) after pressing the button."
+						onAction="btn_chartXYMatrix_onAction"/>
+					<button
+						id="btn_chartFlipXY"
+						imageMso="PivotSwitchRowColumn"
+						label="flip XY"
+						supertip="This flips the XY data for the selected charts.  This uses ranges and is non-destructive."
+						onAction="btn_chartFlipXY_onAction"/>
+					<menu
+						id="Menu12"
+						label="series">
+						<button
+							id="btn_chartMergeSeries"
+							image="arrow-merge_png"
+							label="merge"
+							showImage="true"
+							supertip="This takes all of the eries from the selected charts and merges them into the first chart.  This uses ranges and is non-destructive."
+							onAction="btn_chartMergeSeries_onAction"/>
+						<button
+							id="btn_chartSplitSeries"
+							image="arrow-split_png"
+							label="split"
+							showImage="true"
+							supertip="This will take the selected charts and put each series in its own chart."
+							onAction="btn_chartSplitSeries_onAction"/>
+					</menu >
+					<separator  id="Separator6" />
+					<menu
+						id="Menu10"
+						label="find data"
+						supertip="This includes the commands to locate the series data in the chart.">
+						<button
+							description="Find the data used in the chart."
+							id="btn_chartFindX"
+							label="find X"
+							supertip="This will select the range that is the x-axis values."
+							onAction="btn_chartFindX_onAction"/>
+						<button
+							description="Find the data used in the chart."
+							id="btn_chartFindY"
+							label="find Y"
+							supertip="This will select the range that is the y-axis values."
+							onAction="btn_chartFindY_onAction"/>
+					</menu >
+					<splitButton  id="Splitbutton1" >
+						<button
+							id="btn_chartBothAxis"
+							imageMso="ChartAxes"
+							label="fit x/y to data"
+							showImage="true"
+							showLabel="true"
+							supertip="This will force the chart to set the range on the x/y-axis to the max and min from the data set."
+							onAction="btn_chartBothAxis_onAction"/>
+						<menu
+							id="menu_fixAxes"
+							label="fit axes"
+							showImage="false">
+							<button
+								id="btn_chartFitX"
+								imageMso="ChartSecondaryHorizontalAxis"
+								label="fit x"
+								showImage="true"
+								showLabel="true"
+								supertip="This will force the chart to set the range on the x-axis to the max and min from the data set."
+								onAction="btn_chartFitX_onAction"/>
+							<button
+								id="btn_chartYAxis"
+								imageMso="ChartSecondaryVerticalAxis"
+								label="fit y"
+								showImage="true"
+								showLabel="true"
+								supertip="This will force the chart to set the range on the y-axis to the max and min from the data set."
+								onAction="btn_chartYAxis_onAction"/>
+							<button
+								id="btn_chartFitAutoX"
+								imageMso="ChartSecondaryHorizontalAxis"
+								label="auto x"
+								showImage="true"
+								showLabel="true"
+								supertip="This will revert to the default settings for the x axis range."
+								onAction="btn_chartFitAutoX_onAction"/>
+							<button
+								id="btn_chartFitAutoY"
+								imageMso="ChartSecondaryVerticalAxis"
+								label="auto y"
+								showImage="true"
+								showLabel="true"
+								supertip="This will revert to the default settings for the y axis range."
+								onAction="btn_chartFitAutoY_onAction"/>
+						</menu >
+					</splitButton >
+					<button
+						id="btn_chartExtendSeries"
+						label="extend series"
+						showImage="false"
+						showLabel="true"
+						supertip="This will extend the series of the selected charts to include all data in the block of data going down the sheet."
+						onAction="btn_chartExtendSeries_onAction"/>
+					<button
+						id="btn_chartTrendLines"
+						imageMso="ChartTrendline"
+						label="add trendlines"
+						showImage="true"
+						showLabel="true"
+						supertip="This will add trendlines for all selected charts (each series).  It will also force a color onto the series in order to get around an odd Excel bug."
+						onAction="btn_chartTrendLines_onAction"/>
+					<button
+						id="btn_chartApplyColors"
+						imageMso="AppointmentColorDialog"
+						label="apply colors"
+						showImage="true"
+						showLabel="true"
+						supertip="This will color the series using the bUTL colors."
+						onAction="btn_chartApplyColors_onAction"/>
+					<splitButton  id="Splitbutton3" >
+						<button
+							id="btn_chartAddTitles"
+							label="add titles"
+							showImage="false"
+							showLabel="true"
+							supertip="This will add titles to each y axis and x axis in use."
+							onAction="btn_chartAddTitles_onAction"/>
+						<menu
+							id="Menu8"
+							label="Menu8">
+							<button
+								id="btn_chartAxisTitleBySeries"
+								label="add title by series"
+								showImage="false"
+								showLabel="true"
+								supertip="This will set the y axis title equal to the series name."
+								onAction="btn_chartAxisTitleBySeries_onAction"/>
+						</menu >
+					</splitButton >
+				</group >
+				<group
+					id="grp_others"
+					label="others">
+					<button
+						id="btn_addIns"
+						label="add-ins"
+						supertip="This will open the Excel dialog to see which add-ins are installed."
+						onAction="btn_addIns_onAction"/>
+					<button
+						id="btn_folder"
+						imageMso="FileOpen"
+						label="open folder"
+						supertip="This will open the current folder that the file is saved within.  If it has not been saved, it will tell you."
+						onAction="btn_folder_onAction"/>
+					<button
+						id="btn_openNewFeatures"
+						label="new features"
+						supertip="This will open up a form that allows access to features that have not been given buttons in the Ribbon yet."
+						onAction="btn_openNewFeatures_onAction"/>
+				</group >
+				<group
+					id="grp_help"
+					label="help / about">
+					<button
+						id="btn_aboutForm"
+						imageMso="WorkflowPending"
+						label="about"
+						supertip="This will open the GitHub page for bUTL."
+						onAction="btn_aboutForm_onAction"/>
+				</group >
+			</tab >
+		</tabs >
+	</ribbon >
+</customUI >

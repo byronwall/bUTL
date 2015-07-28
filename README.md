@@ -1,6 +1,22 @@
 #bUTL (Excel add-in)
-bUTL is an add-in for Excel that is an accumulation of all the utility and helper code that I have written over the years.  It is heavily geared toward speeding up common utility tasks and is also heavily featured when it comes to working with `Charts`.
+bUTL is an add-in for Excel that started as an accumulation of utility and helper code collected by @byronwall over the years.  It is intended to continue in that vein, growing to include general utilities from others.
 
-I will be adding descriptions of the code and documentation shortly.
+##Installation
+To use this add-in, simply grab the current [bUTL.xlam](/bUTL.xlam) file from the repo.  This will eventually move over to releases.
 
-For now, the repo contains the compiled file and the VBA source files.  There is some additional configuration for the Ribbon which needs to be added as text.
+##Help
+Documentation for the features of bUTL are located in the [/docs/ folder](/docs/README.md).  This contains a run down of all the features included in the Ribbon interface.  There are a number of `Subs` which are included in the add-in not placed on the Ribbon.  This is being resolved.
+
+##Contributing
+For purposes of development, it is assumed that the **current** source code for the add-in is contained in the [/src/](/src/) folder.  The compiled (really zipped) `bUTL.xlam` is provided for convenience now.  At some point it will be removed (and moved over to releases), requiring the build step to be run in order to get an `.xlam` file for development.
+
+If you want to contribute a feature to the add-in or improve the code in some other way (e.g. fix a bug), please use the following workflow:
+
+ - clone the repo
+ - rebuild the xlam file from src, see `scripts/create xlam from src`
+ - make changes using the VBA editor and possibly the Ribbon editor, saving the file like normal
+ - export your new add-in back to src, see `scripts/create src from xlam`
+ - verify that the diffs on the files inside src seem reasonable
+ - commit and submit a pull request
+
+Why? This workflow has been adopted because Excel/VBA files have severe limitations for version control.  An `xlam` file is a zipped folder with a number of binary files inside the zip.  There are a couple of useful add-ins which help manage this, but I would prefer to not dictate what add-ins are installed.  Given that, this workflow and build scripts allow for changes to the underlying VBA code and Ribbon interface to be properly tracked.

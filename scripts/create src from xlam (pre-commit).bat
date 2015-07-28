@@ -1,0 +1,1 @@
+powershell -ExecutionPolicy Bypass -File "%CD%\build-manager.ps1" "CreatePackageAndCodeFromFile"
