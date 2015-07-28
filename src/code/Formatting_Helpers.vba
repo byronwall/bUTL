@@ -59,26 +59,68 @@ End Sub
 Sub ColorForUnique()
 
     Dim dict As New Scripting.Dictionary
+    Set dict = CreateObject("Scripting.Dictionary")
 
-    'build range from block of data
-    'only check columns F:K for matches
-    Dim rng_match As Range
-    Set rng_match = Intersect( _
-                    Range("B2:M8"), _
-                    Range("F:K"))
-
-    Dim rng_row As Range
-    For Each rng_row In rng_match.rows
-
-        Dim id As String
-        id = Join(Application.Transpose(Application.Transpose(rng_row.Value)), "")
-
-        If Not dict.Exists(id) Then
-            dict.Add id, RGB(Application.RandBetween(0, 255), Application.RandBetween(0, 255), Application.RandBetween(0, 255))
+    'We can only match based on one column - so select that column
+    Dim rngToMatch As Range
+TryAgain:
+    Set rngToColor = Application.InputBox("Select column to color", Type:=8)
+    If rngToColor.Columns.count > 1 Then
+        MsgBox ("You can only color based on one column")
+        GoTo TryAgain
+    End If
+    
+    'We can colorize the sorting column, or the entire row
+    allrows = MsgBox("Do you want to color the entire row?", vbYesNo)
+    
+    Application.ScreenUpdating = False
+    Set rngToColor = Intersect(rngToColor, ActiveSheet.UsedRange)
+    
+    rngToColor.AdvancedFilter Action:=xlFilterInPlace, Unique:=True
+    
+    Dim iCount As Integer
+    iCount = rngToColor.SpecialCells(xlCellTypeVisible).count
+    
+    Dim iColors As Integer
+    For i = 1 To iCount
+FindaColor:
+        iColors = Int((56) * Rnd + 1)
+        If dict.Exists(iColors) Then
+            GoTo FindaColor
         End If
-
-        rng_row.EntireRow.Interior.Color = dict(id)
-    Next rng_row
+        dict(iColors) = iColors
+    Next
+    
+    
+       
+    Dim j As Integer
+    j = 0
+    If allrows = vbNo Then
+        
+        For Each c In rngToColor.SpecialCells(xlCellTypeVisible)
+                'Row 1 contains headers, so skip
+                 If Not c.Row = 1 Then
+                    c.Interior.ColorIndex = dict.Items(j)
+                    j = j + 1
+                 End If
+        Next
+        
+    End If
+    
+    If allrows = vbYes Then
+    
+        For Each c In rngToColor.SpecialCells(xlCellTypeVisible)
+                 If Not c.Row = 1 Then
+                    c.EntireRow.Interior.ColorIndex = dict.Items(j)
+                    j = j + 1
+                 End If
+        Next
+    
+        
+    End If
+    
+   ActiveSheet.ShowAllData
+   Application.ScreenUpdating = True
 End Sub
 
 '---------------------------------------------------------------------------------------
@@ -135,7 +177,7 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub CombineCells()
-
+    'collect all user data up front
     Dim rngInput As Range
     On Error GoTo errHandler
     Set rngInput = Application.InputBox("Select the range of cells to combine:", Type:=8)
@@ -146,16 +188,33 @@ Sub CombineCells()
     If strDelim = "False" Then GoTo errHandler
     Dim rngOutput As Range
     Set rngOutput = Application.InputBox("Select the output range:", Type:=8)
-
-    'I don't understand the goal here
-    Dim arr_values As Variant
-    arr_values = Application.Transpose(Application.Transpose(rngInput.Value))
-
-    rngOutput = Join(arr_values, strDelim)
+    
+    'Check the size of input and adjust output
+    Dim y As Long
+    y = rngInput.Columns.count
+    
+    Dim x As Long
+    x = rngInput.rows.count
+    
+    rngOutput = rngOutput.Resize(x, 1)
+    
+    'Read input rows into a single string
+    Dim strOutput As String
+    For i = 1 To x
+        strOutput = vbNullString
+        For j = 1 To y
+            strOutput = strOutput & strDelim & rngInput(i, j)
+        Next
+        'Get rid of the first character (strDelim)
+        strOutput = Right(strOutput, Len(strOutput) - 1)
+        'Print it!
+        rngOutput(i, 1) = strOutput
+    Next
     Exit Sub
 errHandler:
     MsgBox ("No Range or Delimiter Selected!")
 End Sub
+
 
 '---------------------------------------------------------------------------------------
 ' Procedure : ConvertToNumber
@@ -419,7 +478,7 @@ Sub SplitIntoColumns()
 
     Dim rngInput As Range
 
-    Set rngInput = Intersect(Selection, ActiveSheet.UsedRange)
+    Set rngInput = Application.InputBox("Select the range of cells to split:", Type:=8)
 
     Dim c As Range
 
