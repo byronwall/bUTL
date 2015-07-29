@@ -58,7 +58,9 @@ End Sub
 '
 Sub ColorForUnique()
 
-    Dim dict As New Scripting.Dictionary
+    Dim dictKeysAndColors As New Scripting.Dictionary
+    Dim dictColorsOnly As New Scripting.Dictionary
+    
     Dim rngToColor As Range
 
     On Error GoTo ColorForUnique_Error
@@ -84,15 +86,24 @@ Sub ColorForUnique()
             id = rngRowToColor.Value
         End If
 
-        If Not dict.Exists(id) Then
-            dict.Add id, RGB(Application.RandBetween(50, 255), _
+        'new value, need a color
+        If Not dictKeysAndColors.Exists(id) Then
+            Dim lRgbColor As Long
+createNewColor:
+            lRgbColor = RGB(Application.RandBetween(50, 255), _
                              Application.RandBetween(50, 255), Application.RandBetween(50, 255))
+            If dictColorsOnly.Exists(lRgbColor) Then
+                'ensure unique colors only
+                GoTo createNewColor
+            End If
+                
+            dictKeysAndColors.Add id, lRgbColor
         End If
 
         If vShouldColorEntireRow = vbYes Then
-            rngRowToColor.EntireRow.Interior.Color = dict(id)
+            rngRowToColor.EntireRow.Interior.Color = dictKeysAndColors(id)
         Else
-            rngRowToColor.Interior.Color = dict(id)
+            rngRowToColor.Interior.Color = dictKeysAndColors(id)
         End If
     Next rngRowToColor
 
@@ -102,7 +113,7 @@ Sub ColorForUnique()
     Exit Sub
 
 ColorForUnique_Error:
-    MsgBox "Select a valid range."
+    MsgBox "Select a valid range or fewer than 65650 unique entries."
 
 End Sub
 
