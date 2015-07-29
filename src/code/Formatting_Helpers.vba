@@ -50,77 +50,60 @@ End Sub
 
 '---------------------------------------------------------------------------------------
 ' Procedure : ColorForUnique
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Adds a unique color to each unique value in a range
+' Author    : @byronwall, @RaymondWise
+' Date      : 2015 07 29
+' Purpose   : Adds the same unique color to each unique value in a range
 ' Flag      : not-used
 '---------------------------------------------------------------------------------------
 '
 Sub ColorForUnique()
 
     Dim dict As New Scripting.Dictionary
-    Set dict = CreateObject("Scripting.Dictionary")
+    Dim rngToColor As Range
 
-    'We can only match based on one column - so select that column
-    Dim rngToMatch As Range
-TryAgain:
+    On Error GoTo ColorForUnique_Error
+
     Set rngToColor = Application.InputBox("Select column to color", Type:=8)
-    If rngToColor.Columns.count > 1 Then
-        MsgBox ("You can only color based on one column")
-        GoTo TryAgain
-    End If
-    
+    Set rngToColor = Intersect(rngToColor, rngToColor.Parent.UsedRange)
+
     'We can colorize the sorting column, or the entire row
-    allrows = MsgBox("Do you want to color the entire row?", vbYesNo)
-    
+    Dim vShouldColorEntireRow As VbMsgBoxResult
+    vShouldColorEntireRow = MsgBox("Do you want to color the entire row?", vbYesNo)
+
     Application.ScreenUpdating = False
-    Set rngToColor = Intersect(rngToColor, ActiveSheet.UsedRange)
-    
-    rngToColor.AdvancedFilter Action:=xlFilterInPlace, Unique:=True
-    
-    Dim iCount As Integer
-    iCount = rngToColor.SpecialCells(xlCellTypeVisible).count
-    
-    Dim iColors As Integer
-    For i = 1 To iCount
-FindaColor:
-        iColors = Int((56) * Rnd + 1)
-        If dict.Exists(iColors) Then
-            GoTo FindaColor
+
+    Dim rngRowToColor As Range
+    For Each rngRowToColor In rngToColor.rows
+
+        'allow for a multi column key if intial range is multi-column
+        'TODO: consider making this another prompt... might (?) want to color multi range based on single column key
+        Dim id As String
+        If rngRowToColor.Columns.count > 1 Then
+            id = Join(Application.Transpose(Application.Transpose(rngRowToColor.Value)), "||")
+        Else
+            id = rngRowToColor.Value
         End If
-        dict(iColors) = iColors
-    Next
-    
-    
-       
-    Dim j As Integer
-    j = 0
-    If allrows = vbNo Then
-        
-        For Each c In rngToColor.SpecialCells(xlCellTypeVisible)
-                'Row 1 contains headers, so skip
-                 If Not c.Row = 1 Then
-                    c.Interior.ColorIndex = dict.Items(j)
-                    j = j + 1
-                 End If
-        Next
-        
-    End If
-    
-    If allrows = vbYes Then
-    
-        For Each c In rngToColor.SpecialCells(xlCellTypeVisible)
-                 If Not c.Row = 1 Then
-                    c.EntireRow.Interior.ColorIndex = dict.Items(j)
-                    j = j + 1
-                 End If
-        Next
-    
-        
-    End If
-    
-   ActiveSheet.ShowAllData
-   Application.ScreenUpdating = True
+
+        If Not dict.Exists(id) Then
+            dict.Add id, RGB(Application.RandBetween(50, 255), _
+                             Application.RandBetween(50, 255), Application.RandBetween(50, 255))
+        End If
+
+        If vShouldColorEntireRow = vbYes Then
+            rngRowToColor.EntireRow.Interior.Color = dict(id)
+        Else
+            rngRowToColor.Interior.Color = dict(id)
+        End If
+    Next rngRowToColor
+
+    Application.ScreenUpdating = True
+
+    On Error GoTo 0
+    Exit Sub
+
+ColorForUnique_Error:
+    MsgBox "Select a valid range."
+
 End Sub
 
 '---------------------------------------------------------------------------------------
@@ -171,7 +154,7 @@ End Sub
 
 '---------------------------------------------------------------------------------------
 ' Procedure : CombineCells
-' Author    : @byronwall
+' Author    : @byronwall, @RaymondWise
 ' Date      : 2015 07 24
 ' Purpose   : Takes a row of values and converts them to a single column
 '---------------------------------------------------------------------------------------
@@ -469,7 +452,7 @@ End Sub
 
 '---------------------------------------------------------------------------------------
 ' Procedure : SplitIntoColumns
-' Author    : @byronwall
+' Author    : @byronwall, @RaymondWise
 ' Date      : 2015 07 24
 ' Purpose   : Splits a cell into columns next to it based on a delimeter
 '---------------------------------------------------------------------------------------
