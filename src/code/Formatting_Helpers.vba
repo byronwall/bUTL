@@ -50,77 +50,71 @@ End Sub
 
 '---------------------------------------------------------------------------------------
 ' Procedure : ColorForUnique
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Adds a unique color to each unique value in a range
+' Author    : @byronwall, @RaymondWise
+' Date      : 2015 07 29
+' Purpose   : Adds the same unique color to each unique value in a range
 ' Flag      : not-used
 '---------------------------------------------------------------------------------------
 '
 Sub ColorForUnique()
 
-    Dim dict As New Scripting.Dictionary
-    Set dict = CreateObject("Scripting.Dictionary")
+    Dim dictKeysAndColors As New Scripting.Dictionary
+    Dim dictColorsOnly As New Scripting.Dictionary
+    
+    Dim rngToColor As Range
 
-    'We can only match based on one column - so select that column
-    Dim rngToMatch As Range
-TryAgain:
+    On Error GoTo ColorForUnique_Error
+
     Set rngToColor = Application.InputBox("Select column to color", Type:=8)
-    If rngToColor.Columns.count > 1 Then
-        MsgBox ("You can only color based on one column")
-        GoTo TryAgain
-    End If
-    
+    Set rngToColor = Intersect(rngToColor, rngToColor.Parent.UsedRange)
+
     'We can colorize the sorting column, or the entire row
-    allrows = MsgBox("Do you want to color the entire row?", vbYesNo)
-    
+    Dim vShouldColorEntireRow As VbMsgBoxResult
+    vShouldColorEntireRow = MsgBox("Do you want to color the entire row?", vbYesNo)
+
     Application.ScreenUpdating = False
-    Set rngToColor = Intersect(rngToColor, ActiveSheet.UsedRange)
-    
-    rngToColor.AdvancedFilter Action:=xlFilterInPlace, Unique:=True
-    
-    Dim iCount As Integer
-    iCount = rngToColor.SpecialCells(xlCellTypeVisible).count
-    
-    Dim iColors As Integer
-    For i = 1 To iCount
-FindaColor:
-        iColors = Int((56) * Rnd + 1)
-        If dict.Exists(iColors) Then
-            GoTo FindaColor
+
+    Dim rngRowToColor As Range
+    For Each rngRowToColor In rngToColor.rows
+
+        'allow for a multi column key if intial range is multi-column
+        'TODO: consider making this another prompt... might (?) want to color multi range based on single column key
+        Dim id As String
+        If rngRowToColor.Columns.count > 1 Then
+            id = Join(Application.Transpose(Application.Transpose(rngRowToColor.Value)), "||")
+        Else
+            id = rngRowToColor.Value
         End If
-        dict(iColors) = iColors
-    Next
-    
-    
-       
-    Dim j As Integer
-    j = 0
-    If allrows = vbNo Then
-        
-        For Each c In rngToColor.SpecialCells(xlCellTypeVisible)
-                'Row 1 contains headers, so skip
-                 If Not c.Row = 1 Then
-                    c.Interior.ColorIndex = dict.Items(j)
-                    j = j + 1
-                 End If
-        Next
-        
-    End If
-    
-    If allrows = vbYes Then
-    
-        For Each c In rngToColor.SpecialCells(xlCellTypeVisible)
-                 If Not c.Row = 1 Then
-                    c.EntireRow.Interior.ColorIndex = dict.Items(j)
-                    j = j + 1
-                 End If
-        Next
-    
-        
-    End If
-    
-   ActiveSheet.ShowAllData
-   Application.ScreenUpdating = True
+
+        'new value, need a color
+        If Not dictKeysAndColors.Exists(id) Then
+            Dim lRgbColor As Long
+createNewColor:
+            lRgbColor = RGB(Application.RandBetween(50, 255), _
+                             Application.RandBetween(50, 255), Application.RandBetween(50, 255))
+            If dictColorsOnly.Exists(lRgbColor) Then
+                'ensure unique colors only
+                GoTo createNewColor
+            End If
+                
+            dictKeysAndColors.Add id, lRgbColor
+        End If
+
+        If vShouldColorEntireRow = vbYes Then
+            rngRowToColor.EntireRow.Interior.Color = dictKeysAndColors(id)
+        Else
+            rngRowToColor.Interior.Color = dictKeysAndColors(id)
+        End If
+    Next rngRowToColor
+
+    Application.ScreenUpdating = True
+
+    On Error GoTo 0
+    Exit Sub
+
+ColorForUnique_Error:
+    MsgBox "Select a valid range or fewer than 65650 unique entries."
+
 End Sub
 
 '---------------------------------------------------------------------------------------
@@ -171,7 +165,7 @@ End Sub
 
 '---------------------------------------------------------------------------------------
 ' Procedure : CombineCells
-' Author    : @byronwall
+' Author    : @byronwall, @RaymondWise
 ' Date      : 2015 07 24
 ' Purpose   : Takes a row of values and converts them to a single column
 '---------------------------------------------------------------------------------------
@@ -246,41 +240,61 @@ End Sub
 
 '---------------------------------------------------------------------------------------
 ' Procedure : CopyTranspose
-' Author    : @byronwall
-' Date      : 2015 07 24
+' Author    : @byronwall, @RaymondWise
+' Date      : 2015 07 31
 ' Purpose   : Takes a range of cells and does a copy/tranpose
 ' Flag      : new-feature
 '---------------------------------------------------------------------------------------
 '
 Sub CopyTranspose()
-'Get range to transpose
-    Dim rngSrc As Range
-    Set rngSrc = Application.InputBox("What range do you want to transpose?", Type:=8)
-    'Obtain size of range
-    Dim rRow As Integer
-    rRow = rngSrc.rows.count
 
-    Dim rCol As Integer
-    rCol = rngSrc.Columns.count
+    'If user cancels a range input, we need to handle it when it occurs
+    On Error GoTo errCancel
+    Dim rngSelect As Range
+    'TODO #Should use new `inputbox or selection` function
+    Set rngSelect = Selection
 
-    'Create array and resize to the size of the range
-    Dim arrTranspose() As Variant
-    ReDim arrTranspose(1 To rCol, 1 To rRow)
-    For i = 1 To rRow
-        For j = 1 To rCol
-            arrTranspose(j, i) = rngSrc.Cells(i, j)
-        Next j
-    Next i
+    Dim rngOut As Range
+    Set rngOut = Application.InputBox("Select output corner", Type:=8)
 
-    'Where will we put it
-    Dim rngDest As Range
-    Set rngDest = Application.InputBox("Where would you like this to output?", Type:=8)
+    Application.ScreenUpdating = False
+    Application.EnableEvents = False
+    Application.Calculation = xlCalculationManual
 
-    'Transpose it
-    rngDest.Resize(UBound(arrTranspose, 1), UBound(arrTranspose, 2)).Value = arrTranspose
+    Dim rCorner As Range
+    Set rCorner = rngSelect.Cells(1, 1)
 
+    Dim iCRow As Integer
+    iCRow = rCorner.Row
+    Dim iCCol As Integer
+    iCCol = rCorner.Column
+
+    Dim iORow As Integer
+    Dim iOCol As Integer
+    iORow = rngOut.Row
+    iOCol = rngOut.Column
+
+    Dim c As Range
+    
+    'We check for the intersection to ensure we don't overwrite any of the original data
+    For Each c In rngSelect
+        If Not Intersect(rngSelect, Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow)) Is Nothing Then
+            MsgBox ("Your destination intersects with your data")
+            Exit Sub
+        End If
+    Next c
+
+    For Each c In rngSelect
+        ActiveSheet.Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow).Formula = c.Formula
+    Next c
+
+    Application.ScreenUpdating = True
+    Application.EnableEvents = True
+    Application.Calculation = xlCalculationAutomatic
+    Application.Calculate
+    
+errCancel:
 End Sub
-
 
 '---------------------------------------------------------------------------------------
 ' Procedure : CreateConditionalsForFormatting
@@ -469,7 +483,7 @@ End Sub
 
 '---------------------------------------------------------------------------------------
 ' Procedure : SplitIntoColumns
-' Author    : @byronwall
+' Author    : @byronwall, @RaymondWise
 ' Date      : 2015 07 24
 ' Purpose   : Splits a cell into columns next to it based on a delimeter
 '---------------------------------------------------------------------------------------
