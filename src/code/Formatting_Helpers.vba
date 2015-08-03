@@ -240,41 +240,61 @@ End Sub
 
 '---------------------------------------------------------------------------------------
 ' Procedure : CopyTranspose
-' Author    : @byronwall
-' Date      : 2015 07 24
+' Author    : @byronwall, @RaymondWise
+' Date      : 2015 07 31
 ' Purpose   : Takes a range of cells and does a copy/tranpose
 ' Flag      : new-feature
 '---------------------------------------------------------------------------------------
 '
 Sub CopyTranspose()
-'Get range to transpose
-    Dim rngSrc As Range
-    Set rngSrc = Application.InputBox("What range do you want to transpose?", Type:=8)
-    'Obtain size of range
-    Dim rRow As Integer
-    rRow = rngSrc.rows.count
 
-    Dim rCol As Integer
-    rCol = rngSrc.Columns.count
+    'If user cancels a range input, we need to handle it when it occurs
+    On Error GoTo errCancel
+    Dim rngSelect As Range
+    'TODO #Should use new `inputbox or selection` function
+    Set rngSelect = Selection
 
-    'Create array and resize to the size of the range
-    Dim arrTranspose() As Variant
-    ReDim arrTranspose(1 To rCol, 1 To rRow)
-    For i = 1 To rRow
-        For j = 1 To rCol
-            arrTranspose(j, i) = rngSrc.Cells(i, j)
-        Next j
-    Next i
+    Dim rngOut As Range
+    Set rngOut = Application.InputBox("Select output corner", Type:=8)
 
-    'Where will we put it
-    Dim rngDest As Range
-    Set rngDest = Application.InputBox("Where would you like this to output?", Type:=8)
+    Application.ScreenUpdating = False
+    Application.EnableEvents = False
+    Application.Calculation = xlCalculationManual
 
-    'Transpose it
-    rngDest.Resize(UBound(arrTranspose, 1), UBound(arrTranspose, 2)).Value = arrTranspose
+    Dim rCorner As Range
+    Set rCorner = rngSelect.Cells(1, 1)
 
+    Dim iCRow As Integer
+    iCRow = rCorner.Row
+    Dim iCCol As Integer
+    iCCol = rCorner.Column
+
+    Dim iORow As Integer
+    Dim iOCol As Integer
+    iORow = rngOut.Row
+    iOCol = rngOut.Column
+
+    Dim c As Range
+    
+    'We check for the intersection to ensure we don't overwrite any of the original data
+    For Each c In rngSelect
+        If Not Intersect(rngSelect, Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow)) Is Nothing Then
+            MsgBox ("Your destination intersects with your data")
+            Exit Sub
+        End If
+    Next c
+
+    For Each c In rngSelect
+        ActiveSheet.Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow).Formula = c.Formula
+    Next c
+
+    Application.ScreenUpdating = True
+    Application.EnableEvents = True
+    Application.Calculation = xlCalculationAutomatic
+    Application.Calculate
+    
+errCancel:
 End Sub
-
 
 '---------------------------------------------------------------------------------------
 ' Procedure : CreateConditionalsForFormatting

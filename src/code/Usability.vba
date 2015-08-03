@@ -241,16 +241,19 @@ End Sub
 
 '---------------------------------------------------------------------------------------
 ' Procedure : CutPasteTranspose
-' Author    : @byronwall
-' Date      : 2015 07 24
+' Author    : @byronwall, @RaymondWise
+' Date      : 2015 07 31
 ' Purpose   : Does a cut/transpose by cutting each cell individually
 '---------------------------------------------------------------------------------------
 '
+
+'########Still Needs to address Issue#23#############
 Sub CutPasteTranspose()
 
-
+    On Error GoTo errHandler
     Dim rngSelect As Range
-    Set rngSelect = rngSelectection
+    'TODO #Should use new inputbox function
+    Set rngSelect = Selection
 
     Dim rngOut As Range
     Set rngOut = Application.InputBox("Select output corner", Type:=8)
@@ -275,7 +278,15 @@ Sub CutPasteTranspose()
     iOCol = rngOut.Column
 
     rngOut.Activate
-
+    
+    'Check to not overwrite
+    For Each c In rngSelect
+        If Not Intersect(rngSelect, Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow)) Is Nothing Then
+            MsgBox ("Your destination intersects with your data")
+            Exit Sub
+        End If
+    Next
+    
     Dim c As Range
     For Each c In rngSelect
         c.Cut
@@ -289,6 +300,7 @@ Sub CutPasteTranspose()
     Application.EnableEvents = True
     Application.Calculation = xlCalculationAutomatic
     Application.Calculate
+errHandler:
 End Sub
 
 '---------------------------------------------------------------------------------------
