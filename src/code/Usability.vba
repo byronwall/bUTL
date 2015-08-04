@@ -27,6 +27,7 @@ Function GetRow(arr As Variant, ResultArr As Variant, RowNumber As Long) As Bool
     ' Ensure ColumnNumber is less than
     ' or equal to the number of columns.
     ''''''''''''''''''''''''''''''''''''
+    '###Needs error handling
     If UBound(arr, 1) < RowNumber Then
         GetRow = False
         Exit Function
@@ -359,7 +360,7 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub ExportFilesFromFolder()
-
+    '###Needs error handling
     Application.ScreenUpdating = False
 
     Dim file As Variant
@@ -406,7 +407,7 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub FillValueDown()
-
+    '### Needs error handling
     Dim rngInput As Range
     Set rngInput = Selection
 
@@ -520,7 +521,7 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub SeriesSplit()
-
+'####Needs error handling
 'find the unique values in the category field (assumes header and entire column)
     Dim rngSelection As Range
     Set rngSelection = Application.InputBox("Select category range with heading", Type:=8)

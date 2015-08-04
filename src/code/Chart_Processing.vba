@@ -94,7 +94,7 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub CreateMultipleTimeSeries()
-
+    '##Needs error handling
     Dim rng_dates As Range
     Dim rng_data As Range
     Dim rng_titles As Range

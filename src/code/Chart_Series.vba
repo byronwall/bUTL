@@ -287,7 +287,7 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub ChartMergeSeries()
-
+    '###Needs error handling
     Dim cht_obj As ChartObject
     Dim cht As Chart
     Dim sel As Variant
