@@ -150,26 +150,6 @@ Public Sub btn_joinCells_onAction(control As IRibbonControl)
     CombineCells
 End Sub
 
-Public Sub btn_offset_onAction(control As IRibbonControl)
-    Dim txt_rows, txt_cols
-    txt_rows = "txt_offRows"
-    txt_cols = "txt_offCols"
-
-    Dim rows, cols
-    rows = bUTLobj.GetTextValue(txt_rows)
-    cols = bUTLobj.GetTextValue(txt_cols)
-
-    If IsNull(rows) Then
-        rows = 0
-    End If
-
-    If IsNull(cols) Then
-        cols = 0
-    End If
-
-    Selection.Offset(rows, cols).Select
-End Sub
-
 Public Sub btn_openNewFeatures_onAction(control As IRibbonControl)
     Dim frm As New form_newCommands
     frm.Show
@@ -249,6 +229,19 @@ End Sub
 
 Public Sub btn_updateScrollbars_onAction(control As IRibbonControl)
     UpdateScrollbars
+End Sub
+
+'---------------------------------------------------------------------------------------
+' Procedure : RibbonOnLoad
+' Author    : @byronwall
+' Date      : 2015 08 05
+' Purpose   : OnLoad entry point for the add-in
+'---------------------------------------------------------------------------------------
+'
+Public Sub RibbonOnLoad(ribbon As IRibbonUI)
+
+    SetUpKeyboardHooksForSelection
+
 End Sub
 
 Public Sub txt_onChange(control As IRibbonControl, Text As String)
