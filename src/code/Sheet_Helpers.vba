@@ -23,11 +23,11 @@ Sub LockAllSheets()
     Else
         Application.ScreenUpdating = False
 
-        Dim sht As Worksheet
-        For Each sht In ThisWorkbook.Sheets
+        'Changed to activeworkbook so if add-in is not installed, it will target the active book rather than the xlam
+        For Each Sheet In ActiveWorkbook.Sheets
             On Error Resume Next
-            sht.Protect pass
-        Next sht
+            Sheet.Protect (pass)
+        Next
 
         Application.ScreenUpdating = True
     End If
@@ -43,26 +43,26 @@ End Sub
 '
 Sub OutputSheets()
 
-    Dim sht_out As Worksheet
-    Set sht_out = Worksheets.Add(Before:=Worksheets(1))
-    sht_out.Activate
+    Dim wsOut As Worksheet
+    Set wsOut = Worksheets.Add(Before:=Worksheets(1))
+    wsOut.Activate
 
-    Dim rng_out As Range
-    Set rng_out = sht_out.Range("B2")
+    Dim rngOut As Range
+    Set rngOut = wsOut.Range("B2")
 
-    Dim int_row As Integer
-    int_row = 0
+    Dim iRow As Integer
+    iRow = 0
 
     Dim sht As Worksheet
     For Each sht In Worksheets
 
-        If sht.name <> sht_out.name Then
+        If sht.name <> wsOut.name Then
 
             sht.Hyperlinks.Add _
-                    rng_out.Offset(int_row), "", _
+                    rngOut.Offset(iRow), "", _
                     "'" & sht.name & "'!A1", , _
                         sht.name
-            int_row = int_row + 1
+            iRow = iRow + 1
 
         End If
     Next sht
@@ -80,21 +80,29 @@ Sub UnlockAllSheets()
 
     Dim pass As Variant
     pass = Application.InputBox("Password to unlock")
-
+    
+    Dim iErr As Integer
+    iErr = 0
+    
     If pass = False Then
         MsgBox "Cancelled."
     Else
         Application.ScreenUpdating = False
-
+        'Changed to activeworkbook so if add-in is not installed, it will target the active book rather than the xlam
         Dim sht As Worksheet
-        For Each sht In ThisWorkbook.Sheets
+        For Each sht In ActiveWorkbook.Sheets
+            'Let's keep track of the errors to inform the user
+            If Err.Number <> 0 Then iErr = iErr + 1
+            Err.Clear
             On Error Resume Next
-            sht.Unprotect pass
+            sht.Unprotect (pass)
 
         Next sht
-
+        If Err.Number <> 0 Then iErr = iErr + 1
         Application.ScreenUpdating = True
     End If
-
+    If iErr <> 0 Then
+    MsgBox (iErr & " sheets could not be unlocked due to bad password.")
+    End If
 End Sub
 

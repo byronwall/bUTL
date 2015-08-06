@@ -125,7 +125,7 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub Chart_CreateDataLabels()
-
+    '###Needs error handling
     Dim cht As Chart
 
     Set cht = Selection.Chart
@@ -237,7 +237,7 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub ChartCreateXYGrid()
-
+    '###Needs error handling
     If MsgBox("Delete all charts?", vbYesNo) = vbYes Then
         Application.ScreenUpdating = False
         Dim cht_obj As ChartObject

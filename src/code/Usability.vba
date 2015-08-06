@@ -27,6 +27,7 @@ Function GetRow(arr As Variant, ResultArr As Variant, RowNumber As Long) As Bool
     ' Ensure ColumnNumber is less than
     ' or equal to the number of columns.
     ''''''''''''''''''''''''''''''''''''
+    '###Needs error handling
     If UBound(arr, 1) < RowNumber Then
         GetRow = False
         Exit Function
@@ -58,7 +59,7 @@ End Function
 Sub ColorInputs()
 
     Dim c As Range
-
+    'This is finding cells that aren't blank, but the description says it should be cells with no values..
     For Each c In Selection
         If c.Value <> "" Then
             If c.HasFormula Then
@@ -207,36 +208,27 @@ End Sub
 ' Purpose   : Copies the cells and clears the source Range
 '---------------------------------------------------------------------------------------
 '
-Sub CopyClear()
-
-'Save the selection
-    Dim rngSource As Range
-    Set rngSource = Selection
-
-    'Determine the destination
-    Dim rngDestination As Range
-    Set rngDestination = Application.InputBox("Select the destination", Type:=8)
-
-    'Freeze screen
+Sub Sheet_DeleteHiddenRows()
+    'These rows are unrecoverable
+    x = MsgBox("This will permanently delete hidden rows. They cannot be recovered. Are you sure?", vbYesNo)
+        If x = 7 Then Exit Sub
+        
     Application.ScreenUpdating = False
-
-    'Copy the source
-    rngSource.Copy
-
-    'Determine the offset of change
-    Dim rngOff As Range
-    Set rngOff = rngSource.Offset(rngDestination.Row - rngSource.Row, rngDestination.Column - rngSource.Column)
-
-    'Paste to the destination
-    rngDestination.PasteSpecial xlPasteAll
-
-    'Clear any cells that were in the source and not in the destination
-    Dim rngClear As Range
-    For Each rngClear In rngSource
-        If Intersect(rngClear, rngOff) Is Nothing Then
-            rngClear.Clear
-        End If
-    Next rngClear
+    
+    'We might as well tell the user how many rows were hidden
+    Dim iCount As Integer
+    iCount = 0
+    With ActiveSheet
+        For i = .UsedRange.rows.count To 1 Step -1
+            If .rows(i).Hidden Then
+                .rows(i).Delete
+                iCount = iCount + 1
+            End If
+        Next i
+    End With
+    Application.ScreenUpdating = True
+    
+    MsgBox (iCount & " rows were deleted")
 End Sub
 
 '---------------------------------------------------------------------------------------
@@ -368,7 +360,7 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub ExportFilesFromFolder()
-
+    '###Needs error handling
     Application.ScreenUpdating = False
 
     Dim file As Variant
@@ -415,7 +407,7 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub FillValueDown()
-
+    '### Needs error handling
     Dim rngInput As Range
     Set rngInput = Selection
 
@@ -529,7 +521,7 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub SeriesSplit()
-
+'####Needs error handling
 'find the unique values in the category field (assumes header and entire column)
     Dim rngSelection As Range
     Set rngSelection = Application.InputBox("Select category range with heading", Type:=8)
@@ -580,15 +572,18 @@ Sub SeriesSplit()
     rngFormula.FormulaR1C1 = strFormula
     rngFormula.EntireColumn.AutoFit
 End Sub
-
+'##########################################################
+'### This is the same as the copyclear() routine above? ###
+'##########################################################
 '---------------------------------------------------------------------------------------
-' Procedure : Sheet_DeleteHiddenRows
+' Procedure : Sht_DeleteHiddenRows
 ' Author    : @byronwall
 ' Date      : 2015 07 24
 ' Purpose   : Deletes the hidden rows in a sheet.  Good for a "permanent" filter
 '---------------------------------------------------------------------------------------
 '
-Sub Sheet_DeleteHiddenRows()
+'Changed sub name to avoid reserved object name
+Sub Sht_DeleteHiddenRows()
 
     Application.ScreenUpdating = False
     Dim Row As Range
