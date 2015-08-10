@@ -106,3 +106,62 @@ Sub UnlockAllSheets()
     End If
 End Sub
 
+'---------------------------------------------------------------------------------------
+' Procedure : AscendSheets
+' Author    : @raymondwise
+' Date      : 2015 08 07
+' Purpose   : Places worksheets in ascending alphabetical order.
+'---------------------------------------------------------------------------------------
+Sub AscendSheets()
+Application.ScreenUpdating = False
+Dim wb As Workbook
+Set wb = ActiveWorkbook
+
+Dim intSheets As Integer
+intSheets = wb.Sheets.count
+
+Dim i As Integer
+Dim j As Integer
+
+With wb
+    For j = 1 To intSheets
+        For i = 1 To intSheets - 1
+            If UCase(.Sheets(i).name) > UCase(.Sheets(i + 1).name) Then
+                .Sheets(i).Move after:=.Sheets(i + 1)
+            End If
+        Next i
+    Next j
+End With
+
+Application.ScreenUpdating = True
+End Sub
+'---------------------------------------------------------------------------------------
+' Procedure : DescendSheets
+' Author    : @raymondwise
+' Date      : 2015 08 07
+' Purpose   : Places worksheets in descending alphabetical order.
+'---------------------------------------------------------------------------------------
+Sub DescendSheets()
+Application.ScreenUpdating = False
+Dim wb As Workbook
+Set wb = ActiveWorkbook
+
+Dim intSheets As Integer
+intSheets = wb.Sheets.count
+
+Dim i As Integer
+Dim j As Integer
+
+With wb
+    For j = 1 To intSheets
+        For i = 1 To intSheets - 1
+            If UCase(.Sheets(i).name) < UCase(.Sheets(i + 1).name) Then
+                .Sheets(i).Move after:=.Sheets(i + 1)
+            End If
+        Next i
+    Next j
+End With
+
+Application.ScreenUpdating = True
+End Sub
+
