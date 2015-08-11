@@ -7,6 +7,32 @@ Attribute VB_Name = "SubsFuncs_Helpers"
 '---------------------------------------------------------------------------------------
 
 '---------------------------------------------------------------------------------------
+' Procedure : GetInputOrSelection
+' Author    : @byronwall
+' Date      : 2015 08 11
+' Purpose   : Provides a single Function to get the Selection or Input with error handling
+'---------------------------------------------------------------------------------------
+'
+Function GetInputOrSelection() As Range
+    
+    Dim strDefault As String
+    
+    If TypeOf Selection Is Range Then
+        strDefault = Selection.Address
+    End If
+    
+    On Error GoTo ErrorNoSelection
+    Set GetInputOrSelection = Application.InputBox("Select range", Type:=8, Default:=strDefault)
+    
+    Exit Function
+    
+ErrorNoSelection:
+    Set GetInputOrSelection = Nothing
+    
+End Function
+
+
+'---------------------------------------------------------------------------------------
 ' Procedure : RangeEnd
 ' Author    : @byronwall
 ' Date      : 2015 07 24

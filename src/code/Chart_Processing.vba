@@ -89,33 +89,32 @@ End Sub
 '---------------------------------------------------------------------------------------
 ' Procedure : CreateMultipleTimeSeries
 ' Author    : @byronwall
-' Date      : 2015 07 24
+' Date      : 2015 08 11
 ' Purpose   : Entry point from Ribbon to create a set of time series charts
 '---------------------------------------------------------------------------------------
 '
 Sub CreateMultipleTimeSeries()
-    '##Needs error handling
+
     Dim rng_dates As Range
     Dim rng_data As Range
     Dim rng_titles As Range
 
-    'delete all charts?
-    If MsgBox("Delete all charts?", vbYesNo) = vbYes Then
-        Application.ScreenUpdating = False
-        Dim cht_obj_del As ChartObject
-        For Each cht_obj_del In ActiveSheet.ChartObjects
-            cht_obj_del.Delete
-        Next cht_obj_del
+    On Error GoTo CreateMultipleTimeSeries_Error
 
-        Application.ScreenUpdating = True
-
-    End If
+    DeleteAllCharts
 
     Set rng_dates = Application.InputBox("Select date range", Type:=8)
     Set rng_data = Application.InputBox("Select data", Type:=8)
     Set rng_titles = Application.InputBox("Select titles", Type:=8)
 
     Chart_TimeSeries rng_dates, rng_data, rng_titles
+
+    On Error GoTo 0
+    Exit Sub
+
+CreateMultipleTimeSeries_Error:
+
+    MsgBox "Error " & Err.Number & " (" & Err.Description & "), likely due to Range selection."
 
 End Sub
 

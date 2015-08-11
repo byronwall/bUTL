@@ -282,12 +282,12 @@ End Sub
 '---------------------------------------------------------------------------------------
 ' Procedure : ChartMergeSeries
 ' Author    : @byronwall
-' Date      : 2015 07 24
+' Date      : 2015 08 11
 ' Purpose   : Merges all selected charts into a single chart
 '---------------------------------------------------------------------------------------
 '
 Sub ChartMergeSeries()
-    '###Needs error handling
+
     Dim cht_obj As ChartObject
     Dim cht As Chart
     Dim sel As Variant
@@ -295,7 +295,9 @@ Sub ChartMergeSeries()
 
     Dim bool_first As Boolean
     bool_first = True
-    For Each cht_obj In Selection
+    
+    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
+    
         Set cht = cht_obj.Chart
         If bool_first Then
             Set cht_first = cht
@@ -320,10 +322,7 @@ Sub ChartMergeSeries()
             cht_obj.Delete
 
         End If
-
     Next cht_obj
-
-
 
 End Sub
 

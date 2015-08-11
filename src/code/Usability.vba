@@ -7,48 +7,6 @@ Attribute VB_Name = "Usability"
 '---------------------------------------------------------------------------------------
 
 '---------------------------------------------------------------------------------------
-' Procedure : GetRow
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Returns an array that is a row of another array
-'---------------------------------------------------------------------------------------
-'
-Function GetRow(arr As Variant, ResultArr As Variant, RowNumber As Long) As Boolean
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-' GetRow
-' This populates ResultArr with a one-dimensional array that is the
-' specified row of Arr. The existing contents of ResultArr are
-' destroyed. ResultArr must be a dynamic array.
-' Returns True or False indicating success.
-''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-    Dim ColNdx As Long
-
-    ''''''''''''''''''''''''''''''''''''
-    ' Ensure ColumnNumber is less than
-    ' or equal to the number of columns.
-    ''''''''''''''''''''''''''''''''''''
-    '###Needs error handling
-    If UBound(arr, 1) < RowNumber Then
-        GetRow = False
-        Exit Function
-    End If
-    If LBound(arr, 1) > RowNumber Then
-        GetRow = False
-        Exit Function
-    End If
-
-    Erase ResultArr
-    ReDim ResultArr(LBound(arr, 2) To UBound(arr, 2))
-    For ColNdx = LBound(ResultArr) To UBound(ResultArr)
-        ResultArr(ColNdx) = arr(RowNumber, ColNdx)
-    Next ColNdx
-
-    GetRow = True
-
-
-End Function
-
-'---------------------------------------------------------------------------------------
 ' Procedure : ColorInputs
 ' Author    : @byronwall
 ' Date      : 2015 07 24
@@ -107,17 +65,17 @@ Sub CombineAllSheetsData()
             'get the headers squared up
             If boolFirst Then
                 'copy over all headers
-                wsData.rows(1).Copy wsCombined.Range("A1")
+                wsData.Rows(1).Copy wsCombined.Range("A1")
 
                 boolFirst = False
             Else
                 'search for missing columns
                 Dim rngHeader As Range
-                For Each rngHeader In Intersect(wsData.rows(1), wsData.UsedRange)
+                For Each rngHeader In Intersect(wsData.Rows(1), wsData.UsedRange)
 
                     'check if it exists
                     Dim varHdrMatch As Variant
-                    varHdrMatch = Application.Match(rngHeader, wsCombined.rows(1), 0)
+                    varHdrMatch = Application.Match(rngHeader, wsCombined.Rows(1), 0)
 
                     'if not, add to header row
                     If IsError(varHdrMatch) Then
@@ -128,11 +86,11 @@ Sub CombineAllSheetsData()
 
             'find the PnPID column for combo
             Dim int_colId As Integer
-            int_colId = Application.Match("PnPID", wsCombined.rows(1), 0)
+            int_colId = Application.Match("PnPID", wsCombined.Rows(1), 0)
 
             'find the PnPID column for data
             Dim iColIDData As Integer
-            iColIDData = Application.Match("PnPID", wsData.rows(1), 0)
+            iColIDData = Application.Match("PnPID", wsData.Rows(1), 0)
 
             'add the data, row by row
             Dim c As Range
@@ -148,13 +106,13 @@ Sub CombineAllSheetsData()
 
                     'add new row if it did not exist and id number
                     If IsError(iDataRow) Then
-                        iDataRow = wsCombined.Columns(int_colId).Cells(wsCombined.rows.count, 1).End(xlUp).Offset(1).Row
+                        iDataRow = wsCombined.Columns(int_colId).Cells(wsCombined.Rows.count, 1).End(xlUp).Offset(1).Row
                         wsCombined.Cells(iDataRow, int_colId) = wsData.Cells(c.Row, iColIDData)
                     End If
 
                     'get column
                     Dim iCol As Integer
-                    iCol = Application.Match(wsData.Cells(1, c.Column), wsCombined.rows(1), 0)
+                    iCol = Application.Match(wsData.Cells(1, c.Column), wsCombined.Rows(1), 0)
 
                     'update combo data
                     wsCombined.Cells(iDataRow, iCol) = c
@@ -168,27 +126,30 @@ End Sub
 '---------------------------------------------------------------------------------------
 ' Procedure : ConvertSelectionToCsv
 ' Author    : @byronwall
-' Date      : 2015 07 24
+' Date      : 2015 08 11
 ' Purpose   : Crude CSV output from the current selection, works with numbers
 ' Flag      : new-feature
 '---------------------------------------------------------------------------------------
 '
 Sub ConvertSelectionToCsv()
 
-    Dim csvRow As Range
-
     Dim rngCSV As Range
+    Set rngCSV = GetInputOrSelection
 
-    Set rngCSV = Selection
+    If rngCSV Is Nothing Then
+        Exit Sub
+    End If
 
     Dim csvOut As String
     csvOut = ""
 
-
-    For Each csvRow In rngCSV.rows
-        Dim arr() As Variant
-        GetRow csvRow.rows.Value, arr, 1
-
+    Dim csvRow As Range
+    For Each csvRow In rngCSV.Rows
+        
+        Dim arr As Variant
+        arr = Application.Transpose(Application.Transpose(csvRow.Rows.Value2))
+        
+        'TODO:  improve this to use another Join instead of string concats
         csvOut = csvOut & Join(arr, ",") & vbCrLf
 
     Next csvRow
@@ -219,9 +180,9 @@ Sub Sheet_DeleteHiddenRows()
     Dim iCount As Integer
     iCount = 0
     With ActiveSheet
-        For i = .UsedRange.rows.count To 1 Step -1
-            If .rows(i).Hidden Then
-                .rows(i).Delete
+        For i = .UsedRange.Rows.count To 1 Step -1
+            If .Rows(i).Hidden Then
+                .Rows(i).Delete
                 iCount = iCount + 1
             End If
         Next i
@@ -361,6 +322,7 @@ End Sub
 '
 Sub ExportFilesFromFolder()
     '###Needs error handling
+    'TODO: consider deleting this Sub since it is quite specific
     Application.ScreenUpdating = False
 
     Dim file As Variant
@@ -402,18 +364,21 @@ End Sub
 '---------------------------------------------------------------------------------------
 ' Procedure : FillValueDown
 ' Author    : @byronwall
-' Date      : 2015 07 24
+' Date      : 2015 08 11
 ' Purpose   : Does a fill of blank values from the cell above with a value
 '---------------------------------------------------------------------------------------
 '
 Sub FillValueDown()
-    '### Needs error handling
+
     Dim rngInput As Range
-    Set rngInput = Selection
+    Set rngInput = GetInputOrSelection()
+
+    If rngInput Is Nothing Then
+        Exit Sub
+    End If
 
     Dim c As Range
-
-    For Each c In Intersect(rngInput.SpecialCells(xlCellTypeBlanks), Selection.Parent.UsedRange)
+    For Each c In Intersect(rngInput.SpecialCells(xlCellTypeBlanks), rngInput.Parent.UsedRange)
         c = c.End(xlUp)
     Next c
 
@@ -516,35 +481,43 @@ End Sub
 '---------------------------------------------------------------------------------------
 ' Procedure : SeriesSplit
 ' Author    : @byronwall
-' Date      : 2015 07 24
+' Date      : 2015 08 11
 ' Purpose   : Takes a category columns and splits the values out into new columns for each unique entry
 '---------------------------------------------------------------------------------------
 '
 Sub SeriesSplit()
-'####Needs error handling
-'find the unique values in the category field (assumes header and entire column)
+
+    On Error GoTo ErrorNoSelection
+
     Dim rngSelection As Range
     Set rngSelection = Application.InputBox("Select category range with heading", Type:=8)
     Set rngSelection = Intersect(rngSelection, rngSelection.Parent.UsedRange).SpecialCells(xlCellTypeVisible, xlLogical + xlNumbers + xlTextValues)
+
+    Dim rngValues As Range
+    Set rngValues = Application.InputBox("Select values range with heading", Type:=8)
+    Set rngValues = Intersect(rngValues, rngValues.Parent.UsedRange)
+
+    On Error GoTo 0
+
+    'determine default value
+    Dim strDefault As Variant
+    strDefault = InputBox("Enter the default value", , "#N/A")
+
+    'detect cancel and exit
+    If StrPtr(strDefault) = 0 Then
+        Exit Sub
+    End If
 
     Dim dictCategories As New Dictionary
 
     Dim rngCategory As Range
     For Each rngCategory In rngSelection
         'skip the header row
-        If rngCategory.Address = rngSelection.Cells(1).Address Then
-
-        Else
+        If rngCategory.Address <> rngSelection.Cells(1).Address Then
             dictCategories(rngCategory.Value) = 1
         End If
 
     Next rngCategory
-
-    'create that number of columns next to value column
-
-    Dim rngValues As Range
-    Set rngValues = Application.InputBox("Select values range with heading", Type:=8)
-    Set rngValues = Intersect(rngValues, rngValues.Parent.UsedRange)
 
     rngValues.EntireColumn.Offset(, 1).Resize(, dictCategories.count).Insert
     'head the columns with the values
@@ -557,24 +530,25 @@ Sub SeriesSplit()
         iCount = iCount + 1
     Next varValues
 
-    'determine default value
-    Dim strDefault As Variant
-    strDefault = InputBox("Enter the default value", , """""")
-
     'put the formula in for each column
-    'FORMULA
     '=IF(RC13=R1C,RC16,#N/A)
     Dim strFormula As Variant
-    strFormula = "=IF(RC" & rngSelection.Column & " =R" & rngValues.Cells(1).Row & "C,RC" & rngValues.Column & "," & strDefault & ")"
+    strFormula = "=IF(RC" & rngSelection.Column & " =R" & _
+                 rngValues.Cells(1).Row & "C,RC" & rngValues.Column & "," & strDefault & ")"
 
     Dim rngFormula As Range
-    Set rngFormula = rngValues.Offset(1, 1).Resize(rngValues.rows.count - 1, dictCategories.count)
+    Set rngFormula = rngValues.Offset(1, 1).Resize(rngValues.Rows.count - 1, dictCategories.count)
     rngFormula.FormulaR1C1 = strFormula
     rngFormula.EntireColumn.AutoFit
+
+    Exit Sub
+
+ErrorNoSelection:
+    'TODO: consider removing this prompt
+    MsgBox "No selection made.  Exiting.", , "No selection"
+
 End Sub
-'##########################################################
-'### This is the same as the copyclear() routine above? ###
-'##########################################################
+
 '---------------------------------------------------------------------------------------
 ' Procedure : Sht_DeleteHiddenRows
 ' Author    : @byronwall
@@ -587,10 +561,10 @@ Sub Sht_DeleteHiddenRows()
 
     Application.ScreenUpdating = False
     Dim Row As Range
-    For i = ActiveSheet.UsedRange.rows.count To 1 Step -1
+    For i = ActiveSheet.UsedRange.Rows.count To 1 Step -1
 
 
-        Set Row = ActiveSheet.rows(i)
+        Set Row = ActiveSheet.Rows(i)
 
         If Row.Hidden Then
             Row.Delete
