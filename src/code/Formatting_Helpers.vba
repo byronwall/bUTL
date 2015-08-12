@@ -17,10 +17,10 @@ Public Sub CategoricalColoring()
 '+Get User Input
     Dim rngToColor As Range
     On Error GoTo errHandler
-    Set rngToColor = Application.InputBox("Select range to color", Type:=8)
+    Set rngToColor = GetInputOrSelection("Select Range to Color")
 
     Dim rngColors As Range
-    Set rngColors = Application.InputBox("Select range with colors", Type:=8)
+    Set rngColors = GetInputOrSelection("Select Range with Colors")
 
     '+Do Magic
     Application.ScreenUpdating = False
@@ -65,7 +65,7 @@ Sub ColorForUnique()
 
     On Error GoTo ColorForUnique_Error
 
-    Set rngToColor = Application.InputBox("Select column to color", Type:=8)
+    Set rngToColor = GetInputOrSelection("Select column to color")
     Set rngToColor = Intersect(rngToColor, rngToColor.Parent.UsedRange)
 
     'We can colorize the sorting column, or the entire row
@@ -128,7 +128,7 @@ Public Sub Colorize()
 
     Dim rngToColor As Range
     On Error GoTo errHandler
-    Set rngToColor = Application.InputBox("Select range to color", Type:=8)
+    Set rngToColor = GetInputOrSelection("Select range to color")
     Dim lastrow As Integer
     lastrow = rngToColor.Rows.count
 
@@ -174,14 +174,14 @@ Sub CombineCells()
     'collect all user data up front
     Dim rngInput As Range
     On Error GoTo errHandler
-    Set rngInput = Application.InputBox("Select the range of cells to combine:", Type:=8)
+    Set rngInput = GetInputOrSelection("Select the range of cells to combine")
 
     Dim strDelim As String
     strDelim = Application.InputBox("Delimeter:")
     If strDelim = "" Then GoTo errHandler
     If strDelim = "False" Then GoTo errHandler
     Dim rngOutput As Range
-    Set rngOutput = Application.InputBox("Select the output range:", Type:=8)
+    Set rngOutput = GetInputOrSelection("Select the output range")
     
     'Check the size of input and adjust output
     Dim y As Long
@@ -251,11 +251,11 @@ Sub CopyTranspose()
     'If user cancels a range input, we need to handle it when it occurs
     On Error GoTo errCancel
     Dim rngSelect As Range
-    'TODO #Should use new `inputbox or selection` function
-    Set rngSelect = Selection
+    
+    Set rngSelect = GetInputOrSelection("Select your range")
 
     Dim rngOut As Range
-    Set rngOut = Application.InputBox("Select output corner", Type:=8)
+    Set rngOut = GetInputOrSelection("Select the output corner")
 
     Application.ScreenUpdating = False
     Application.EnableEvents = False
@@ -306,7 +306,7 @@ End Sub
 Sub CreateConditionalsForFormatting()
     On Error GoTo errHandler
     Dim rngInput As Range
-    Set rngInput = Application.InputBox("Select the range of cells to convert:", Type:=8)
+    Set rngInput = GetInputOrSelection("Select the range of cells to convert")
     'add these in as powers of 3, starting at 1 = 10^0
     Dim arrMarkers As Variant
     arrMarkers = Array("", "k", "M", "B")
@@ -381,7 +381,7 @@ Sub MakeHyperlinks()
 '+Changed to inputbox
     On Error GoTo errHandler
     Dim rngEval As Range
-    Set rngEval = Application.InputBox("Select the range of cells to convert to hyperlink:", Type:=8)
+    Set rngEval = GetInputOrSelection("Select the range of cells to convert to hyperlink")
     For Each c In rngEval
         ActiveSheet.Hyperlinks.Add Anchor:=c, Address:=c
     Next c
@@ -417,7 +417,7 @@ Sub SelectedToValue()
 
     Dim rng As Range
     On Error GoTo errHandler
-    Set rng = Application.InputBox("Select the formulas you'd like to convert to static values::", Type:=8)
+    Set rng = GetInputOrSelection("Select the formulas you'd like to convert to static values")
 
     For Each c In rng
         c.Value = c.Value
@@ -440,7 +440,7 @@ Sub Selection_ColorWithHex()
     Dim c As Range
     Dim rngToColor As Range
     On Error GoTo errHandler
-    Set rngToColor = Application.InputBox("Select the range of cells to color:", Type:=8)
+    Set rngToColor = GetInputOrSelection("Select the range of cells to color")
 
     For Each c In rngToColor
 
@@ -492,7 +492,7 @@ Sub SplitIntoColumns()
 
     Dim rngInput As Range
 
-    Set rngInput = Application.InputBox("Select the range of cells to split:", Type:=8)
+    Set rngInput = GetInputOrSelection("Select the range of cells to split")
 
     Dim c As Range
 
@@ -533,7 +533,7 @@ Sub SplitIntoRows()
     Dim rngInput As Range
     Set rngInput = Selection
 
-    Set rngOutput = Application.InputBox("Select output corner", Type:=8)
+    Set rngOutput = GetInputOrSelection("Select the output corner")
 
     Dim varPart As Variant
     Dim iRow As Integer
@@ -562,7 +562,7 @@ End Sub
 Sub TrimSelection()
     Dim rngToTrim As Range
     On Error GoTo errHandler
-    Set rngToTrim = Application.InputBox("Select the formulas you'd like to convert to static values::", Type:=8)
+    Set rngToTrim = GetInputOrSelection("Select the formulas you'd like to convert to static values")
 
     For Each c In rngToTrim
         c.Value = Trim(c.Value)

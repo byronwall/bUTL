@@ -13,7 +13,7 @@ Attribute VB_Name = "SubsFuncs_Helpers"
 ' Purpose   : Provides a single Function to get the Selection or Input with error handling
 '---------------------------------------------------------------------------------------
 '
-Function GetInputOrSelection() As Range
+Function GetInputOrSelection(msg As String) As Range
     
     Dim strDefault As String
     
@@ -22,7 +22,7 @@ Function GetInputOrSelection() As Range
     End If
     
     On Error GoTo ErrorNoSelection
-    Set GetInputOrSelection = Application.InputBox("Select range", Type:=8, Default:=strDefault)
+    Set GetInputOrSelection = Application.InputBox(msg, Type:=8, Default:=strDefault)
     
     Exit Function
     
