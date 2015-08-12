@@ -37,11 +37,13 @@ End Function
 ' Author    : @byronwall
 ' Date      : 2015 07 24
 ' Purpose   : Helper function which finds a valid ChartObject based on what is actually selected
+'             Returns a Collection (possibly empty) and should be handled with a For Each
 '---------------------------------------------------------------------------------------
 '
 Function Chart_GetObjectsFromObject(obj_in As Object) As Variant
 
     Dim str_type As String
+    'TODO: these should be upgrade to TypeOf instead of strings
     str_type = TypeName(obj_in)
 
     Dim coll As New Collection
@@ -75,4 +77,28 @@ Function Chart_GetObjectsFromObject(obj_in As Object) As Variant
     Set Chart_GetObjectsFromObject = coll
 
 End Function
+
+'---------------------------------------------------------------------------------------
+' Procedure : DeleteAllCharts
+' Author    : @byronwall
+' Date      : 2015 08 11
+' Purpose   : Helper Sub to delete all charts on ActiveSheet
+'---------------------------------------------------------------------------------------
+'
+Sub DeleteAllCharts()
+
+    If MsgBox("Delete all charts?", vbYesNo) = vbYes Then
+        Application.ScreenUpdating = False
+
+        Dim iCounter As Integer
+        For iCounter = ActiveSheet.ChartObjects.count To 1 Step -1
+
+            ActiveSheet.ChartObjects(iCounter).Delete
+
+        Next iCounter
+
+        Application.ScreenUpdating = True
+
+    End If
+End Sub
 

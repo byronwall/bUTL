@@ -1,6 +1,7 @@
 <!--RibbonX Visual Designer 1.93 for Microsoft Excel 14.0. XML Code produced on 2014/06/26-->
 <customUI
-	xmlns="http://schemas.microsoft.com/office/2006/01/customui">
+	xmlns="http://schemas.microsoft.com/office/2006/01/customui"
+	onLoad="RibbonOnLoad" >
 	<ribbon >
 		<tabs >
 			<tab
@@ -75,22 +76,6 @@
 						label="split/keep"
 						supertip="This will do a &quot;split/keep&quot; in place on the current selection.  It will split by the delimeter and keep the values from the given index.  Note that this is 0-based indexing.  This ignores cells that cannot be split."
 						onAction="btn_split_onAction"/>
-					<separator  id="Separator1" />
-					<editBox
-						id="txt_offRows"
-						label="rows"
-						sizeString="ww"
-						onChange="txt_onChange"/>
-					<editBox
-						id="txt_offCols"
-						label="cols"
-						sizeString="ww"
-						onChange="txt_onChange"/>
-					<button
-						id="btn_offset"
-						label="offset"
-						supertip="This uses the text boxes above it.  It will offset the current range by the given amounts (postive or negative)."
-						onAction="btn_offset_onAction"/>
 					<separator  id="Separator3" />
 					<button
 						id="btn_cutTranspose"

@@ -75,7 +75,7 @@ Sub ColorForUnique()
     Application.ScreenUpdating = False
 
     Dim rngRowToColor As Range
-    For Each rngRowToColor In rngToColor.rows
+    For Each rngRowToColor In rngToColor.Rows
 
         'allow for a multi column key if intial range is multi-column
         'TODO: consider making this another prompt... might (?) want to color multi range based on single column key
@@ -130,7 +130,7 @@ Public Sub Colorize()
     On Error GoTo errHandler
     Set rngToColor = Application.InputBox("Select range to color", Type:=8)
     Dim lastrow As Integer
-    lastrow = rngToColor.rows.count
+    lastrow = rngToColor.Rows.count
 
     likevalues = MsgBox("Do you want to keep duplicate values the same color?", vbYesNo)
 
@@ -138,8 +138,8 @@ Public Sub Colorize()
 
         For i = 1 To lastrow
             If i Mod 2 = 0 Then
-                rngToColor.rows(i).Interior.Color = RGB(200, 200, 200)
-            Else: rngToColor.rows(i).Interior.ColorIndex = xlNone
+                rngToColor.Rows(i).Interior.Color = RGB(200, 200, 200)
+            Else: rngToColor.Rows(i).Interior.ColorIndex = xlNone
             End If
         Next
     End If
@@ -153,8 +153,8 @@ Public Sub Colorize()
             End If
 
             If flip Then
-                rngToColor.rows(i).Interior.Color = RGB(200, 200, 200)
-            Else: rngToColor.rows(i).Interior.ColorIndex = xlNone
+                rngToColor.Rows(i).Interior.Color = RGB(200, 200, 200)
+            Else: rngToColor.Rows(i).Interior.ColorIndex = xlNone
             End If
         Next
     End If
@@ -188,7 +188,7 @@ Sub CombineCells()
     y = rngInput.Columns.count
     
     Dim x As Long
-    x = rngInput.rows.count
+    x = rngInput.Rows.count
     
     rngOutput = rngOutput.Resize(x, 1)
     

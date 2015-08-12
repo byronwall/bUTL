@@ -125,26 +125,34 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub Chart_CreateDataLabels()
-    '###Needs error handling
-    Dim cht As Chart
 
-    Set cht = Selection.Chart
+    Dim chtObj As ChartObject
+    On Error GoTo Chart_CreateDataLabels_Error
 
-    Dim ser As series
+    For Each chtObj In Chart_GetObjectsFromObject(Selection)
 
-    For Each ser In cht.SeriesCollection
+        Dim ser As series
+        For Each ser In chtObj.Chart.SeriesCollection
 
-        Dim p As Point
-        Set p = ser.Points(2)
+            Dim p As Point
+            Set p = ser.Points(2)
 
-        p.HasDataLabel = False
-        p.DataLabel.Position = xlLabelPositionRight
-        p.DataLabel.ShowSeriesName = True
-        p.DataLabel.ShowValue = False
-        p.DataLabel.ShowCategoryName = False
-        p.DataLabel.ShowLegendKey = True
+            p.HasDataLabel = False
+            p.DataLabel.Position = xlLabelPositionRight
+            p.DataLabel.ShowSeriesName = True
+            p.DataLabel.ShowValue = False
+            p.DataLabel.ShowCategoryName = False
+            p.DataLabel.ShowLegendKey = True
 
-    Next ser
+        Next ser
+    Next chtObj
+
+    On Error GoTo 0
+    Exit Sub
+
+Chart_CreateDataLabels_Error:
+
+    MsgBox "Error " & Err.Number & " (" & Err.Description & ") in procedure Chart_CreateDataLabels of Module Chart_Format"
 
 End Sub
 
@@ -232,63 +240,49 @@ End Sub
 '---------------------------------------------------------------------------------------
 ' Procedure : ChartCreateXYGrid
 ' Author    : @byronwall
-' Date      : 2015 07 24
+' Date      : 2015 08 11
 ' Purpose   : Creates a matrix of charts similar to pairs in R
 '---------------------------------------------------------------------------------------
 '
 Sub ChartCreateXYGrid()
-    '###Needs error handling
-    If MsgBox("Delete all charts?", vbYesNo) = vbYes Then
-        Application.ScreenUpdating = False
-        Dim cht_obj As ChartObject
-        For Each cht_obj In ActiveSheet.ChartObjects
-            cht_obj.Delete
-        Next cht_obj
 
-        Application.ScreenUpdating = True
+    On Error GoTo ChartCreateXYGrid_Error
 
-    End If
+    DeleteAllCharts
 
     'rng_data will contain the block of data with titles included
+
     Dim rng_data As Range
     Set rng_data = Application.InputBox("Select data with titles", Type:=8)
 
     Application.ScreenUpdating = False
 
-    'iterate through each column
-    'iterate through each column again
+    Dim iRow As Integer, iCol As Integer
+    iRow = 0
 
-    'create a chart
-    'set the x data to one column, y data to the other
+    Dim dHeight As Double, dWidth As Double
+    dHeight = 300
+    dWidth = 400
 
-    Dim int_row As Integer, int_col As Integer
-    int_row = 0
+    Dim rngColXData As Range, rngColYData As Range
+    For Each rngColYData In rng_data.Columns
+        iCol = 0
 
-
-    Dim dbl_height As Double, dbl_width As Double
-    dbl_height = 300
-    dbl_width = 400
-
-    Dim rng_colXData As Range, rng_colYData As Range
-    For Each rng_colYData In rng_data.Columns
-        int_col = 0
-
-        For Each rng_colXData In rng_data.Columns
-
-            If int_row = int_col Then
-
-            Else
-
+        For Each rngColXData In rng_data.Columns
+            If iRow <> iCol Then
                 Dim cht As Chart
-                Set cht = ActiveSheet.ChartObjects.Add(int_col * dbl_width, int_row * dbl_height + 100, dbl_width, dbl_height).Chart
+                Set cht = ActiveSheet.ChartObjects.Add(iCol * dWidth, _
+                                                       iRow * dHeight + 100, _
+                                                       dWidth, _
+                                                       dHeight).Chart
 
                 Dim ser As series
                 Dim b_ser As New bUTLChartSeries
 
                 'offset allows for the title to be excluded
-                Set b_ser.XValues = Intersect(rng_colXData, rng_colXData.Offset(1))
-                Set b_ser.Values = Intersect(rng_colYData, rng_colYData.Offset(1))
-                Set b_ser.name = rng_colYData.Cells(1)
+                Set b_ser.XValues = Intersect(rngColXData, rngColXData.Offset(1))
+                Set b_ser.Values = Intersect(rngColYData, rngColYData.Offset(1))
+                Set b_ser.name = rngColYData.Cells(1)
                 b_ser.ChartType = xlXYScatter
 
                 Set ser = b_ser.AddSeriesToChart(cht)
@@ -299,34 +293,40 @@ Sub ChartCreateXYGrid()
                 Dim ax As Axis
                 Set ax = cht.Axes(xlCategory)
                 ax.HasTitle = True
-                ax.AxisTitle.Text = rng_colXData.Cells(1)
+                ax.AxisTitle.Text = rngColXData.Cells(1)
                 ax.MajorGridlines.Border.Color = RGB(200, 200, 200)
                 ax.MinorGridlines.Border.Color = RGB(220, 220, 220)
 
                 Set ax = cht.Axes(xlValue)
                 ax.HasTitle = True
-                ax.AxisTitle.Text = rng_colYData.Cells(1)
+                ax.AxisTitle.Text = rngColYData.Cells(1)
                 ax.MajorGridlines.Border.Color = RGB(200, 200, 200)
                 ax.MinorGridlines.Border.Color = RGB(220, 220, 220)
 
                 cht.HasTitle = True
-                cht.ChartTitle.Text = rng_colYData.Cells(1) & " vs. " & rng_colXData.Cells(1)
+                cht.ChartTitle.Text = rngColYData.Cells(1) & " vs. " & rngColXData.Cells(1)
                 'cht.ChartTitle.Characters.Font.Size = 8
                 cht.Legend.Delete
             End If
 
-            int_col = int_col + 1
-
-
+            iCol = iCol + 1
         Next
 
-
-        int_row = int_row + 1
+        iRow = iRow + 1
     Next
 
     Application.ScreenUpdating = True
 
     rng_data.Cells(1, 1).Activate
+
+    On Error GoTo 0
+    Exit Sub
+
+ChartCreateXYGrid_Error:
+
+    MsgBox "Error " & Err.Number & " (" & Err.Description & _
+           ") in procedure ChartCreateXYGrid of Module Chart_Format"
+    MsgBox "This is most likely due to Range issues"
 
 End Sub
 
