@@ -457,28 +457,52 @@ End Sub
 '---------------------------------------------------------------------------------------
 ' Procedure : SplitAndKeep
 ' Author    : @byronwall
-' Date      : 2015 07 24
+' Date      : 2015 08 12
 ' Purpose   : Reduces a cell's value to one item returned from Split
 '---------------------------------------------------------------------------------------
 '
-Sub SplitAndKeep(delim As Variant, vItemToKeep As Variant)
-    Dim vParts As Variant
-    Dim rngCell As Range
+Sub SplitAndKeep()
 
     On Error GoTo SplitAndKeep_Error
 
-    For Each rngCell In Intersect(Selection, ActiveSheet.UsedRange)
+    Dim rngToSplit As Range
+    Set rngToSplit = GetInputOrSelection("Select range to split")
+    
+    If rngToSplit Is Nothing Then
+        Exit Sub
+    End If
+
+    Dim delim As Variant
+    delim = InputBox("What delimeter to split on?")
+    
+    If StrPtr(delim) = 0 Then
+        Exit Sub
+    End If
+
+    Dim vItemToKeep As Variant
+    vItemToKeep = InputBox("Which item to keep? (This is 0-indexed)")
+    
+    If StrPtr(vItemToKeep) = 0 Then
+        Exit Sub
+    End If
+
+    Dim rngCell As Range
+    For Each rngCell In Intersect(rngToSplit, rngToSplit.Parent.UsedRange)
+        
+        Dim vParts As Variant
         vParts = Split(rngCell, delim)
+        
         If UBound(vParts) >= vItemToKeep Then
             rngCell.Value = vParts(vItemToKeep)
         End If
+        
     Next rngCell
 
     On Error GoTo 0
     Exit Sub
 
 SplitAndKeep_Error:
-    MsgBox "Check that a valid Range is selected"
+    MsgBox "Check that a valid Range is selected and that a number was entered for which item to keep."
 End Sub
 
 '---------------------------------------------------------------------------------------

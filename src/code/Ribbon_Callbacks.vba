@@ -6,8 +6,6 @@ Attribute VB_Name = "Ribbon_Callbacks"
 ' Purpose   : Contains all of the callbacks used by the Ribbon XML file
 '---------------------------------------------------------------------------------------
 
-
-Dim bUTLobj As New bUTL
 Dim frm_chartGrid As New form_chtGrid
 
 Public Sub btn_aboutForm_onAction(control As IRibbonControl)
@@ -19,10 +17,6 @@ Public Sub btn_aboutForm_onAction(control As IRibbonControl)
 
     ActiveWorkbook.FollowHyperlink "https://github.com/byronwall/bUTL"
 
-End Sub
-
-Public Sub btn_addIns_onAction(control As IRibbonControl)
-    Application.Dialogs(xlDialogAddinManager).Show
 End Sub
 
 Sub btn_chartAddTitles_onAction(control As IRibbonControl)
@@ -194,17 +188,7 @@ Sub btn_sht_unhide_onAction(control As IRibbonControl)
 End Sub
 
 Public Sub btn_split_onAction(control As IRibbonControl)
-    Dim txt_delim, txt_keep
-    txt_delim = "txt_sepDelim"
-    txt_keep = "txt_sepKeep"
-
-    Dim delim, keep
-    delim = bUTLobj.GetTextValue(txt_delim)
-    keep = bUTLobj.GetTextValue(txt_keep)
-
-    If Not IsNull(delim) And Not IsNull(keep) Then
-        SplitAndKeep delim, keep
-    End If
+    SplitAndKeep
 End Sub
 
 Public Sub btn_splitCol_onAction(control As IRibbonControl)
@@ -242,9 +226,5 @@ Public Sub RibbonOnLoad(ribbon As IRibbonUI)
 
     SetUpKeyboardHooksForSelection
 
-End Sub
-
-Public Sub txt_onChange(control As IRibbonControl, Text As String)
-    bUTLobj.SetTextValue control.id, Text
 End Sub
 

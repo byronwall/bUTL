@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} form_newCommands 
    Caption         =   "Additional Features"
-   ClientHeight    =   7680
+   ClientHeight    =   5970
    ClientLeft      =   45
    ClientTop       =   435
    ClientWidth     =   6585
@@ -13,6 +13,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 
 '---------------------------------------------------------------------------------------
 ' Module    : form_newCommands
@@ -77,10 +78,5 @@ End Sub
 
 Private Sub CommandButton26_Click()
     GenerateRandomData
-End Sub
-
-Private Sub CommandButton5_Click()
-    '###This function/sub doesn't exist
-    DownloadFromSheet
 End Sub
 

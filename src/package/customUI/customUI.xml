@@ -61,22 +61,11 @@
 				<group
 					id="grp_selection"
 					label="text selection">
-					<editBox
-						id="txt_sepDelim"
-						label="delim"
-						sizeString="www"
-						onChange="txt_onChange"/>
-					<editBox
-						id="txt_sepKeep"
-						label="keep"
-						sizeString="www"
-						onChange="txt_onChange"/>
 					<button
 						id="btn_split"
 						label="split/keep"
 						supertip="This will do a &quot;split/keep&quot; in place on the current selection.  It will split by the delimeter and keep the values from the given index.  Note that this is 0-based indexing.  This ignores cells that cannot be split."
 						onAction="btn_split_onAction"/>
-					<separator  id="Separator3" />
 					<button
 						id="btn_cutTranspose"
 						label="cut transpose"
@@ -194,6 +183,7 @@
 						id="btn_chtGrid"
 						imageMso="ControlLayoutStacked"
 						label="create grid"
+						supertip="This will create a grid of all charts on the sheet.  Opens a GUI to select rows, columns, and chart sizes."
 						onAction="btn_chtGrid_onAction"/>
 					<button
 						description="Creates a fake PivotChart"
@@ -204,6 +194,7 @@
 					<button
 						id="btn_chartTimeSeries"
 						label="time series"
+						supertip="Allows for creating a series of charts with a common X axis series and different Y axis series."
 						onAction="btn_chartTimeSeries_onAction"/>
 					<button
 						id="btn_chartXYMatrix"
@@ -346,11 +337,6 @@
 				<group
 					id="grp_others"
 					label="others">
-					<button
-						id="btn_addIns"
-						label="add-ins"
-						supertip="This will open the Excel dialog to see which add-ins are installed."
-						onAction="btn_addIns_onAction"/>
 					<button
 						id="btn_folder"
 						imageMso="FileOpen"
