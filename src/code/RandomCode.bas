@@ -67,8 +67,8 @@ Sub Rand_OpenFilesAndCopy()
         Set sht_data = wkbk.Sheets(1)
         sht_data.UsedRange.Copy
         
-        sht_output.Cells(sht_output.UsedRange.rows.count + 1, 1) = wkbk.name
-        sht_output.Cells(sht_output.UsedRange.rows.count, 2).PasteSpecial xlPasteValues
+        sht_output.Cells(sht_output.UsedRange.Rows.count + 1, 1) = wkbk.name
+        sht_output.Cells(sht_output.UsedRange.Rows.count, 2).PasteSpecial xlPasteValues
         
         wkbk.Close False
         
@@ -305,7 +305,7 @@ Sub Rand_Matrix()
     Dim int_left As Integer, int_top As Integer
     
     Set rng_body = Range(Cells(rng_left.Row, rng_top.Column), _
-                            Cells(rng_left.rows(rng_left.rows.count).Row, rng_top.Columns(rng_top.Columns.count).Column))
+                            Cells(rng_left.Rows(rng_left.Rows.count).Row, rng_top.Columns(rng_top.Columns.count).Column))
                             
     Dim sht_out As Worksheet
     Set sht_out = Application.Worksheets.Add()

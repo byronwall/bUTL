@@ -20,7 +20,7 @@ Sub CreateFileFromPackageAndCode()
 
     Dim strAddIn As String
     strAddIn = Replace(strZip, "temp.zip", "bUTL.xlam")
-    
+
     'delete add-in if it exists
     If FSO.FileExists(strAddIn) Then
         FSO.DeleteFile strAddIn
@@ -63,7 +63,7 @@ Sub CreateFileFromPackageAndCode()
     strFile = Dir(strPath)
 
     While (strFile <> "")
-        If InStr(strFile, ".vba") > 0 Then
+        If InStr(strFile, ".frm") > 0 Or InStr(strFile, ".bas") > 0 Or InStr(strFile, ".cls") > 0 Then
             wkAddIn.VBProject.VBComponents.Import FSO.BuildPath(strPath, strFile)
         End If
         strFile = Dir
@@ -116,11 +116,24 @@ Sub CreatePackageAndCodeFromFile()
         Dim i As Integer
         For i = .VBComponents.Count To 1 Step -1
             If .VBComponents(i).Type <> vbext_ct_Document Then
-                .VBComponents(i).Export FSO.BuildPath(strPath, .VBComponents(i).CodeModule.Name & ".vba")
+
+                'ensure the output file name is correct
+                Dim strExt As String
+                Select Case .VBComponents(i).Type
+
+                Case vbext_ct_StdModule
+                    strExt = ".bas"
+                Case vbext_ct_ClassModule
+                    strExt = ".cls"
+                Case vbext_ct_MSForm
+                    strExt = ".frm"
+
+                End Select
+
+                .VBComponents(i).Export FSO.BuildPath(strPath, .VBComponents(i).CodeModule.Name & strExt)
             End If
         Next i
     End With
-
     'close butl so it can be unzipped
     wkAddIn.Close
 
