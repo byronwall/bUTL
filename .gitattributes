@@ -1,6 +1,11 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 
+#custom setting to allow VBA to be text with CRLF
+*.cls text eol=crlf
+*.frm text eol=crlf
+*.bas text eol=crlf
+
 # Custom for Visual Studio
 *.cs     diff=csharp
 
