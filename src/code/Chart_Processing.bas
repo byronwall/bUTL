@@ -9,6 +9,37 @@ Attribute VB_Name = "Chart_Processing"
 Option Explicit
 
 
+Sub Chart_SortSeriesByName()
+'this will sort series by names
+    Dim cht_obj As ChartObject
+    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
+
+        'uses a simple bubble sort but it works... shouldn't have 1000 series anyways
+        Dim int_chart1 As Integer
+        Dim int_chart2 As Integer
+        For int_chart1 = 1 To cht_obj.Chart.SeriesCollection.count
+            For int_chart2 = (int_chart1 + 1) To cht_obj.Chart.SeriesCollection.count
+
+                Dim b_ser1 As New bUTLChartSeries
+                Dim b_ser2 As New bUTLChartSeries
+
+                b_ser1.UpdateFromChartSeries cht_obj.Chart.SeriesCollection(int_chart1)
+                b_ser2.UpdateFromChartSeries cht_obj.Chart.SeriesCollection(int_chart2)
+
+                If b_ser1.name.Value > b_ser2.name.Value Then
+                    Dim int_num As Integer
+                    int_num = b_ser2.SeriesNumber
+                    b_ser2.SeriesNumber = b_ser1.SeriesNumber
+                    b_ser1.SeriesNumber = int_num
+
+                    b_ser2.UpdateSeriesWithNewValues
+                    b_ser1.UpdateSeriesWithNewValues
+                End If
+            Next
+        Next
+    Next
+End Sub
+
 '---------------------------------------------------------------------------------------
 ' Procedure : Chart_TimeSeries
 ' Author    : @byronwall

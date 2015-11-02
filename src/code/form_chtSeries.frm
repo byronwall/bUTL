@@ -18,6 +18,7 @@ Attribute VB_Exposed = False
 
 
 
+
 '---------------------------------------------------------------------------------------
 ' Module    : form_chtSeries
 ' Author    : @byronwall
@@ -55,12 +56,12 @@ End Sub
 
 Private Sub btn_xrangedown_Click()
 
-    txt_xrange = RangeEnd(Range(txt_xrange), xlDown).Address
+    txt_xrange = RangeEnd(Range(txt_xrange), xlDown).Address(, , , True)
 
 End Sub
 
 Private Sub btn_ydown_Click()
-    txt_yrange = RangeEnd(Range(txt_yrange), xlDown).Address
+    txt_yrange = RangeEnd(Range(txt_yrange), xlDown).Address(, , , True)
 End Sub
 
 Private Sub btn_yrange_Click()

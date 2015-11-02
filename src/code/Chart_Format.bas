@@ -197,7 +197,7 @@ Sub Chart_GridOfCharts( _
         cht_obj.top = top
         cht_obj.left = left
         cht_obj.Width = cht_wid
-        cht_obj.height = cht_height
+        cht_obj.Height = cht_height
 
         count = count + 1
 
@@ -341,7 +341,7 @@ Sub ChartDefaultFormat()
 
     Dim cht_obj As ChartObject
 
-    For Each cht_obj In ActiveSheet.ChartObjects
+    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
         Dim cht As Chart
 
         Set cht = cht_obj.Chart
@@ -369,9 +369,14 @@ Sub ChartDefaultFormat()
         Dim ax As Axis
         Set ax = cht.Axes(xlValue)
 
-        ax.MajorGridlines.Border.Color = RGB(200, 200, 200)
-        ax.MinorGridlines.Border.Color = RGB(230, 230, 230)
+        ax.MajorGridlines.Border.Color = RGB(242, 242, 242)
         ax.Crosses = xlAxisCrossesMinimum
+        
+        Set ax = cht.Axes(xlCategory)
+        
+        ax.HasMajorGridlines = True
+
+        ax.MajorGridlines.Border.Color = RGB(242, 242, 242)
 
         If cht.HasTitle Then
             cht.ChartTitle.Characters.Font.Size = 12

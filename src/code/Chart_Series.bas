@@ -76,8 +76,10 @@ Sub Chart_ExtendSeriesToRanges()
             Dim b_ser As New bUTLChartSeries
             b_ser.UpdateFromChartSeries ser
 
-            ser.XValues = RangeEnd(b_ser.XValues, xlDown)
-            ser.Values = RangeEnd(b_ser.Values, xlDown)
+            If Not b_ser.XValues Is Nothing Then
+                ser.XValues = RangeEnd(b_ser.XValues.Cells(1), xlDown)
+            End If
+            ser.Values = RangeEnd(b_ser.Values.Cells(1), xlDown)
 
         Next ser
 
