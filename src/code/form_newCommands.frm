@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} form_newCommands 
    Caption         =   "Additional Features"
-   ClientHeight    =   5970
+   ClientHeight    =   7770
    ClientLeft      =   45
    ClientTop       =   435
    ClientWidth     =   6585
@@ -13,11 +13,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
-
-
-
-
+Option Explicit
 
 '---------------------------------------------------------------------------------------
 ' Module    : form_newCommands
@@ -25,12 +21,9 @@ Attribute VB_Exposed = False
 ' Date      : 2015 07 24
 ' Purpose   : This form is just buttons to easier get to new code
 '---------------------------------------------------------------------------------------
-Option Explicit
 
 Private Sub CommandButton1_Click()
-
     Chart_CreateDataLabels
-
 End Sub
 
 Private Sub CommandButton13_Click()
@@ -84,3 +77,14 @@ Private Sub CommandButton26_Click()
     GenerateRandomData
 End Sub
 
+Private Sub CommandButton27_Click()
+    SeriesSplitIntoBins
+End Sub
+
+Private Sub CommandButton28_Click()
+    Chart_SortSeriesByName
+End Sub
+
+Private Sub CommandButton29_Click()
+    CreatePdfOfEachXlsxFileInFolder
+End Sub
