@@ -236,6 +236,27 @@ Sub ConvertSelectionToCsv()
 
 End Sub
 
+Public Sub CopyCellAddress()
+'---------------------------------------------------------------------------------------
+' Procedure : CopyCellAddress
+' Author    : @byronwall
+' Date      : 2015 12 03
+' Purpose   : Copies the current cell address to the clipboard for paste use in a formula
+'---------------------------------------------------------------------------------------
+'
+
+'TODO: this need to get a button or a keyboard shortcut for easy use
+    Dim clipboard As MSForms.DataObject
+    Set clipboard = New MSForms.DataObject
+
+    Dim rng_sel As Range
+    Set rng_sel = Selection
+
+    clipboard.SetText rng_sel.Address(True, True, xlA1, True)
+    clipboard.PutInClipboard
+End Sub
+
+
 '---------------------------------------------------------------------------------------
 ' Procedure : CopyClear
 ' Author    : @byronwall

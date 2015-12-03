@@ -82,7 +82,8 @@ Sub Chart_FitAxisToMaxAndMin(xlCat As XlAxisType)
         Dim ser As series
         For Each ser In cht.SeriesCollection
 
-            Dim min_val As Double, max_val As Double
+            Dim min_val As Double
+            Dim max_val As Double
 
             If xlCat = xlCategory Then
 
@@ -125,7 +126,7 @@ End Sub
 ' Flags     : not-used
 '---------------------------------------------------------------------------------------
 '
-Sub Chart_YAxisRangeWithAvgAndStdev()
+Public Sub Chart_YAxisRangeWithAvgAndStdev()
     Dim dbl_std As Double
 
     dbl_std = CDbl(InputBox("How many standard deviations to include?"))
