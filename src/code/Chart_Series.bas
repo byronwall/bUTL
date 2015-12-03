@@ -1,4 +1,6 @@
 Attribute VB_Name = "Chart_Series"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : Chart_Series
 ' Author    : @byronwall
@@ -42,7 +44,11 @@ Sub Chart_AddTrendlineToSeriesAndColor()
             Set trend = ser.Trendlines.Add()
             trend.Type = xlLinear
             trend.Border.Color = ser.MarkerBackgroundColor
-            trend.name = b_ser.name
+            
+            '2015 11 06 test to avoid error without name
+            If Not b_ser.name Is Nothing Then
+                trend.name = b_ser.name
+            End If
 
             trend.DisplayEquation = True
             trend.DisplayRSquared = True

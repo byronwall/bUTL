@@ -1,4 +1,6 @@
 Attribute VB_Name = "Chart_Helpers"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : Chart_Helpers
 ' Author    : @byronwall

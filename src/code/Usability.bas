@@ -1,4 +1,6 @@
 Attribute VB_Name = "Usability"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : Usability
 ' Author    : @byronwall
@@ -206,7 +208,7 @@ End Sub
 Sub ConvertSelectionToCsv()
 
     Dim rngCSV As Range
-    Set rngCSV = GetInputOrSelection
+    Set rngCSV = GetInputOrSelection("Choose range for converting to CSV")
 
     If rngCSV Is Nothing Then
         Exit Sub
@@ -243,8 +245,12 @@ End Sub
 '
 Sub Sheet_DeleteHiddenRows()
     'These rows are unrecoverable
+    Dim x As VbMsgBoxResult
     x = MsgBox("This will permanently delete hidden rows. They cannot be recovered. Are you sure?", vbYesNo)
-        If x = 7 Then Exit Sub
+    
+    If Not x = vbYes Then
+        Exit Sub
+    End If
         
     Application.ScreenUpdating = False
     
@@ -252,6 +258,7 @@ Sub Sheet_DeleteHiddenRows()
     Dim iCount As Integer
     iCount = 0
     With ActiveSheet
+        Dim i As Integer
         For i = .UsedRange.Rows.count To 1 Step -1
             If .Rows(i).Hidden Then
                 .Rows(i).Delete
@@ -305,6 +312,7 @@ Sub CutPasteTranspose()
     rngOut.Activate
     
     'Check to not overwrite
+    Dim c As Range
     For Each c In rngSelect
         If Not Intersect(rngSelect, Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow)) Is Nothing Then
             MsgBox ("Your destination intersects with your data")
@@ -751,6 +759,7 @@ Sub Sht_DeleteHiddenRows()
 
     Application.ScreenUpdating = False
     Dim Row As Range
+    Dim i As Integer
     For i = ActiveSheet.UsedRange.Rows.count To 1 Step -1
 
 

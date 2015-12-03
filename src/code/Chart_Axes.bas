@@ -1,4 +1,6 @@
 Attribute VB_Name = "Chart_Axes"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : Chart_Axes
 ' Author    : @byronwall
@@ -68,13 +70,12 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub Chart_FitAxisToMaxAndMin(xlCat As XlAxisType)
-
-    Dim first As Boolean
-    first = True
-
     Dim cht_obj As ChartObject
-
     For Each cht_obj In Chart_GetObjectsFromObject(Selection)
+        '2015 11 09 moved first inside loop so that it works for multiple charts
+        Dim first As Boolean
+        first = True
+
         Dim cht As Chart
         Set cht = cht_obj.Chart
 

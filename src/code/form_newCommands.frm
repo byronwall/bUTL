@@ -88,3 +88,7 @@ End Sub
 Private Sub CommandButton29_Click()
     CreatePdfOfEachXlsxFileInFolder
 End Sub
+
+Private Sub CommandButton30_Click()
+    ApplyFormattingToEachColumn
+End Sub
