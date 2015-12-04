@@ -1,4 +1,6 @@
 Attribute VB_Name = "Ribbon_Callbacks"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : Ribbon_Callbacks
 ' Author    : @byronwall
@@ -113,7 +115,7 @@ Public Sub btn_convertValue_onAction(control As IRibbonControl)
 End Sub
 
 Public Sub btn_copyClear_onAction(control As IRibbonControl)
-    CopyClear
+    MsgBox "Copy clear is missing"
 End Sub
 
 Public Sub btn_cutTranspose_onAction(control As IRibbonControl)
@@ -162,7 +164,7 @@ Public Sub btn_protect_onAction(control As IRibbonControl)
 End Sub
 
 Public Sub btn_rmvComments_onAction(control As IRibbonControl)
-    RemoveComments
+    MsgBox "RemoveComments missing"
 End Sub
 
 Public Sub btn_seriesSplit_onAction(control As IRibbonControl)

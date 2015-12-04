@@ -1,110 +1,172 @@
 Attribute VB_Name = "Testing"
 Option Explicit
 
-Sub SeriesSplitIntoBins()
+Public Sub ComputeDistanceMatrix()
 
-    On Error GoTo ErrorNoSelection
+'get the range of inputs, along with input name
+    Dim rng_input As Range
+    Set rng_input = Application.InputBox("Select input data", "Input", Type:=8)
 
-    Dim rngSelection As Range
-    Set rngSelection = Application.InputBox("Select category range with heading", _
-                                            Type:=8)
-    Set rngSelection = Intersect(rngSelection, _
-                                 rngSelection.Parent.UsedRange).SpecialCells(xlCellTypeVisible, xlLogical + _
-                                                                                                xlNumbers + xlTextValues)
+    'Dim rng_ID As Range
+    'Set rng_ID = Application.InputBox("Select ID data", "ID", Type:=8)
 
-    Dim rngValues As Range
-    Set rngValues = Application.InputBox("Select values range with heading", _
-                                         Type:=8)
-    Set rngValues = Intersect(rngValues, rngValues.Parent.UsedRange)
+    'turning off updates makes a huge difference here... could also use array for output
+    Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationManual
+    Application.EnableEvents = False
 
-    ''need to prompt for max/min/bins
-    Dim dbl_max As Double, dbl_min As Double, int_bins As Integer
+    'create new workbook
+    Dim wkbk As Workbook
+    Set wkbk = Workbooks.Add
 
-    dbl_min = Application.InputBox("Minimum value.", "Min", _
-                                   WorksheetFunction.Min(rngSelection), Type:=1)
-    dbl_max = Application.InputBox("Maximum value.", "Max", _
-                                   WorksheetFunction.Max(rngSelection), Type:=1)
-    int_bins = Application.InputBox("Number of groups.", "Bins", _
-                                    WorksheetFunction.RoundDown(Math.Sqr(WorksheetFunction.count(rngSelection)), 0), _
-                                    Type:=1)
+    Dim sht_out As Worksheet
+    Set sht_out = wkbk.Sheets(1)
+    sht_out.name = "scaled data"
 
-    On Error GoTo 0
+    'copy data over to standardize
+    rng_input.Copy wkbk.Sheets(1).Range("A1")
 
-    'determine default value
-    Dim strDefault As Variant
-    strDefault = Application.InputBox("Enter the default value", "Default", "#N/A")
+    'go to edge of data, add a column, add STANDARDIZE, copy paste values, delete
+    
+    Dim rng_data As Range
+    Set rng_data = sht_out.Range("A1").CurrentRegion
 
-    'detect cancel and exit
-    If StrPtr(strDefault) = 0 Then
-        Exit Sub
-    End If
+    Dim rng_col As Range
+    For Each rng_col In rng_data.Columns
 
-    ''TODO prompt for output location
+        'edge cell
+        Dim rng_edge As Range
+        Set rng_edge = sht_out.Cells(1, sht_out.Columns.count).End(xlToLeft).Offset(, 1)
+        
+        'do a normal dist standardization
+        '=STANDARDIZE(A1,AVERAGE(A:A),STDEV.S(A:A))
+        
+        rng_edge.Formula = "=IFERROR(STANDARDIZE(" & rng_col.Cells(1, 1).Address(False, False) & ",AVERAGE(" & _
+            rng_col.Address & "),STDEV.S(" & rng_col.Address & ")),0)"
+        
+        'do a simple value over average to detect differences
+        rng_edge.Formula = "=IFERROR(" & rng_col.Cells(1, 1).Address(False, False) & "/AVERAGE(" & _
+            rng_col.Address & "),1)"
+            
+        'fill that down
+        Range(rng_edge, rng_edge.Offset(, -1).End(xlDown).Offset(, 1)).FillDown
 
-    rngValues.EntireColumn.Offset(, 1).Resize(, int_bins + 2).Insert
-    'head the columns with the values
+    Next
+    
+    Application.Calculate
+    sht_out.UsedRange.Value = sht_out.UsedRange.Value
+    rng_data.EntireColumn.Delete
+    
+    Dim sht_dist As Worksheet
+    Set sht_dist = wkbk.Worksheets.Add()
+    sht_dist.name = "distances"
 
-    ''TODO add a For loop to go through the bins
+    Dim rng_out As Range
+    Set rng_out = sht_dist.Range("A1")
 
-    Dim int_binNo As Integer
-    For int_binNo = 0 To int_bins
-        rngValues.Cells(1).Offset(, int_binNo + 1) = dbl_min + (dbl_max - dbl_min) * int_binNo / int_bins
+    'loop through each row with each other row
+    Dim rng_row1 As Range
+    Dim rng_row2 As Range
+    
+    Set rng_input = sht_out.Range("A1").CurrentRegion
+
+    For Each rng_row1 In rng_input.Rows
+        For Each rng_row2 In rng_input.Rows
+
+            'loop through each column and compute the distance
+            Dim dbl_dist_sq As Double
+            dbl_dist_sq = 0
+
+            Dim int_col As Integer
+            For int_col = 1 To rng_row1.Cells.count
+                dbl_dist_sq = dbl_dist_sq + (rng_row1.Cells(1, int_col) - rng_row2.Cells(1, int_col)) ^ 2
+            Next
+
+            'take the sqrt of that value and output
+            rng_out.Value = dbl_dist_sq ^ 0.5
+
+            'get to next column for output
+            Set rng_out = rng_out.Offset(, 1)
+        Next
+
+        'drop down a row and go back to left edge
+        Set rng_out = rng_out.Offset(1).End(xlToLeft)
     Next
 
-    'add the last item
-    rngValues.Cells(1).Offset(, int_bins + 2).FormulaR1C1 = "=RC[-1]"
-
-    ''TODO add formulas for first, mid, last columns
-    'FIRST =IF($D2 <=V$1,$U2,#N/A)
-    '=IF(RC4 <=R1C,RC21,#N/A)
-
-    'MID =IF(AND($D2 <=W$1, $D2>V$1),$U2,#N/A)  '''W current, then left
-    '=IF(AND(RC4 <=R1C, RC4>R1C[-1]),RC21,#N/A)
-
-    'LAST =IF($D2>AA$1,$U2,#N/A)
-    '=IF(RC4>R1C[-1],RC21,#N/A)
-
-    ''TODO add number format to display header correctly (helps with charts)
-
-    'put the formula in for each column
-    '=IF(RC13=R1C,RC16,#N/A)
-    Dim strFormula As Variant
-    strFormula = "=IF(AND(RC" & rngSelection.Column & _
-               " <=R" & rngValues.Cells(1).Row & "C," & _
-                 "RC" & rngSelection.Column & ">R" & rngValues.Cells(1).Row & "C[-1]" & _
-                 ")" & _
-                 ",RC" & rngValues.Column & "," & strDefault & ")"
-
-    Dim str_FirstFormula As Variant
-    str_FirstFormula = "=IF(AND(RC" & rngSelection.Column & _
-                     " <=R" & rngValues.Cells(1).Row & "C)" & _
-                       ",RC" & rngValues.Column & "," & strDefault & ")"
-
-    Dim str_LastFormula As Variant
-    str_LastFormula = "=IF(AND(RC" & rngSelection.Column & _
-                    " >R" & rngValues.Cells(1).Row & "C)" & _
-                      ",RC" & rngValues.Column & "," & strDefault & ")"
-
-    Dim rngFormula As Range
-    Set rngFormula = rngValues.Offset(1, 1).Resize(rngValues.Rows.count - 1, _
-                                                   int_bins + 2)
-    rngFormula.FormulaR1C1 = strFormula
-
-    'override with first/last
-    rngFormula.Columns(1).FormulaR1C1 = str_FirstFormula
-    rngFormula.Columns(rngFormula.Columns.count).FormulaR1C1 = str_LastFormula
-
-    rngFormula.EntireColumn.AutoFit
+    Application.EnableEvents = True
+    Application.Calculation = xlCalculationAutomatic
+    Application.ScreenUpdating = True
     
-    'set the number formats
-    rngFormula.Offset(-1).Rows(1).Resize(1, int_bins + 1).NumberFormat = "<= General"
-    rngFormula.Offset(-1).Rows(1).Offset(, int_bins + 1).NumberFormat = "> General"
+    sht_dist.UsedRange.NumberFormat = "0.00"
+    sht_dist.UsedRange.EntireColumn.AutoFit
+    
+    'do the coloring
+    Formatting_AddCondFormat sht_dist.UsedRange
 
-    Exit Sub
+End Sub
 
-ErrorNoSelection:
-    'TODO: consider removing this prompt
-    MsgBox "No selection made.  Exiting.", , "No selection"
+Sub RemoveAllLegends()
+
+    Dim cht_obj As ChartObject
+    
+    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
+        cht_obj.Chart.HasLegend = False
+        cht_obj.Chart.HasTitle = True
+        
+        cht_obj.Chart.SeriesCollection(1).MarkerSize = 4
+    Next
+
+End Sub
+
+Sub ApplyFormattingToEachColumn()
+    Dim rng As Range
+    For Each rng In Selection.Columns
+
+        Formatting_AddCondFormat rng
+    Next
+End Sub
+
+Private Sub Formatting_AddCondFormat(ByVal rng As Range)
+
+        rng.FormatConditions.AddColorScale ColorScaleType:=3
+        rng.FormatConditions(rng.FormatConditions.count).SetFirstPriority
+        rng.FormatConditions(1).ColorScaleCriteria(1).Type = _
+        xlConditionValueLowestValue
+        With rng.FormatConditions(1).ColorScaleCriteria(1).FormatColor
+            .Color = 7039480
+            .TintAndShade = 0
+        End With
+        rng.FormatConditions(1).ColorScaleCriteria(2).Type = _
+        xlConditionValuePercentile
+        rng.FormatConditions(1).ColorScaleCriteria(2).Value = 50
+        With rng.FormatConditions(1).ColorScaleCriteria(2).FormatColor
+            .Color = 8711167
+            .TintAndShade = 0
+        End With
+        rng.FormatConditions(1).ColorScaleCriteria(3).Type = _
+        xlConditionValueHighestValue
+        With Selection.FormatConditions(1).ColorScaleCriteria(3).FormatColor
+            .Color = 8109667
+            .TintAndShade = 0
+        End With
+End Sub
+
+
+
+'---------------------------------------------------------------------------------------
+' Procedure : TraceDependentsForAll
+' Author    : @byronwall
+' Date      : 2015 11 09
+' Purpose   : Quick Sub to iterate through Selection and Trace Dependents for all
+'---------------------------------------------------------------------------------------
+'
+Sub TraceDependentsForAll()
+
+    Dim rng As Range
+    
+    For Each rng In Intersect(Selection, Selection.Parent.UsedRange)
+        rng.ShowDependents
+    Next rng
 
 End Sub
 

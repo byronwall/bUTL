@@ -1,4 +1,6 @@
 Attribute VB_Name = "Formatting_Helpers"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : Formatting_Helpers
 ' Author    : @byronwall
@@ -131,11 +133,13 @@ Public Sub Colorize()
     Set rngToColor = GetInputOrSelection("Select range to color")
     Dim lastrow As Integer
     lastrow = rngToColor.Rows.count
-
+    
+    Dim likevalues As VbMsgBoxResult
     likevalues = MsgBox("Do you want to keep duplicate values the same color?", vbYesNo)
 
     If likevalues = vbNo Then
-
+        
+        Dim i As Integer
         For i = 1 To lastrow
             If i Mod 2 = 0 Then
                 rngToColor.Rows(i).Interior.Color = RGB(200, 200, 200)
@@ -194,8 +198,10 @@ Sub CombineCells()
     
     'Read input rows into a single string
     Dim strOutput As String
+    Dim i As Integer
     For i = 1 To x
         strOutput = vbNullString
+        Dim j As Integer
         For j = 1 To y
             strOutput = strOutput & strDelim & rngInput(i, j)
         Next
@@ -296,6 +302,8 @@ Sub CopyTranspose()
 errCancel:
 End Sub
 
+
+
 '---------------------------------------------------------------------------------------
 ' Procedure : CreateConditionalsForFormatting
 ' Author    : @byronwall
@@ -310,7 +318,8 @@ Sub CreateConditionalsForFormatting()
     'add these in as powers of 3, starting at 1 = 10^0
     Dim arrMarkers As Variant
     arrMarkers = Array("", "k", "M", "B")
-
+    
+    Dim i As Integer
     For i = UBound(arrMarkers) To 0 Step -1
 
         With rngInput.FormatConditions.Add(xlCellValue, xlGreaterEqual, 10 ^ (3 * i))
@@ -341,6 +350,8 @@ Sub ExtendArrayFormulaDown()
     Set rngArrForm = Selection
 
     For Each RngArea In rngArrForm.Areas
+    
+        Dim c As Range
         For Each c In RngArea.Cells
 
             If c.HasArray Then
@@ -382,6 +393,9 @@ Sub MakeHyperlinks()
     On Error GoTo errHandler
     Dim rngEval As Range
     Set rngEval = GetInputOrSelection("Select the range of cells to convert to hyperlink")
+    
+    'TODO: choose a better variable name
+    Dim c As Range
     For Each c In rngEval
         ActiveSheet.Hyperlinks.Add Anchor:=c, Address:=c
     Next c
@@ -399,7 +413,8 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub OutputColors()
-
+    
+    Dim i As Integer
     For i = 1 To 10
         ActiveCell.Offset(i).Interior.Color = Chart_GetColor(i)
     Next i
@@ -419,6 +434,7 @@ Sub SelectedToValue()
     On Error GoTo errHandler
     Set rng = GetInputOrSelection("Select the formulas you'd like to convert to static values")
 
+    Dim c As Range
     For Each c In rng
         c.Value = c.Value
     Next c
@@ -587,7 +603,8 @@ Sub TrimSelection()
     Dim rngToTrim As Range
     On Error GoTo errHandler
     Set rngToTrim = GetInputOrSelection("Select the formulas you'd like to convert to static values")
-
+    
+    Dim c As Range
     For Each c In rngToTrim
         c.Value = Trim(c.Value)
     Next c

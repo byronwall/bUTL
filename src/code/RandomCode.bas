@@ -1,4 +1,6 @@
 Attribute VB_Name = "RandomCode"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : RandomCode
 ' Author    : @byronwall
@@ -174,7 +176,7 @@ Sub Rand_DownloadFromSheet()
     
     For Each rng_addr In Range("B2:B35")
     
-        Download_File rng_add, str_folder & rng_addr.Offset(, 1)
+        Download_File rng_addr, str_folder & rng_addr.Offset(, 1)
     
     Next rng_addr
 

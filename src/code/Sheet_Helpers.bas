@@ -1,4 +1,6 @@
 Attribute VB_Name = "Sheet_Helpers"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : Sheet_Helpers
 ' Author    : @byronwall
@@ -24,9 +26,10 @@ Sub LockAllSheets()
         Application.ScreenUpdating = False
 
         'Changed to activeworkbook so if add-in is not installed, it will target the active book rather than the xlam
-        For Each Sheet In ActiveWorkbook.Sheets
+        Dim sheet As Worksheet
+        For Each sheet In ActiveWorkbook.Sheets
             On Error Resume Next
-            Sheet.Protect (pass)
+            sheet.Protect (pass)
         Next
 
         Application.ScreenUpdating = True

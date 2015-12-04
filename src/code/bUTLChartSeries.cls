@@ -7,6 +7,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : bUTLChartSeries
 ' Author    : @byronwall
@@ -20,6 +22,8 @@ Public name As Range
 Public SeriesNumber As Integer
 Public ChartType As XlChartType
 Public series As series
+
+Private str_name As String
 
 '---------------------------------------------------------------------------------------
 ' Procedure : AddSeriesToChart
@@ -69,8 +73,18 @@ End Function
 '---------------------------------------------------------------------------------------
 '
 Public Property Get SeriesFormula() As String
-    
-    SeriesFormula = "=SERIES(" & FullAddress(Me.name) & "," & FullAddress(Me.XValues) & "," & FullAddress(Me.Values) & "," & Me.SeriesNumber & ")"
+
+    '2015 11 09 add a trap here to allow for a string only name
+    If str_name <> "" Then
+        SeriesFormula = "=SERIES(" & str_name & "," & _
+                        FullAddress(Me.XValues) & "," & FullAddress(Me.Values) & "," & _
+                        Me.SeriesNumber & ")"
+    Else
+
+        SeriesFormula = "=SERIES(" & FullAddress(Me.name) & "," & _
+                        FullAddress(Me.XValues) & "," & FullAddress(Me.Values) & "," & _
+                        Me.SeriesNumber & ")"
+    End If
 
 End Property
 
@@ -88,74 +102,63 @@ End Sub
 '---------------------------------------------------------------------------------------
 ' Procedure : UpdateFromChartSeries
 ' Author    : @byronwall
-' Date      : 2015 07 24
+' Date      : 2015 11 09
 ' Purpose   : Reads the series info from a Series and stores it in the class
 '---------------------------------------------------------------------------------------
 '
 Sub UpdateFromChartSeries(ser As series)
-    'this will work for the simple case where all items are references
-    
+'this will work for the simple case where all items are references
+
     Set series = ser
 
     Dim form As Variant
-    
-    '          "=SERIES("Y",Sheet1!$C$8:$C$13,Sheet1!$D$8:$D$13,1)"
-    
+
+    '=SERIES("Y",Sheet1!$C$8:$C$13,Sheet1!$D$8:$D$13,1)
+
     'pull in teh formula
     form = ser.Formula
-    
+
     'uppercase to remove match errors
     form = UCase(form)
-    
+
     'remove the front of the formula
     form = Replace(form, "=SERIES(", "")
-    
-    'Debug.Print form & vbCrLf
-    '   "Y",SHEET1!$C$8:$C$13,SHEET1!$D$8:$D$13,1)
-    
+
     'find the first comma
     Dim comma
     comma = InStr(form, ",")
-    
-    'Debug.Print comma
-    
+
     If comma > 1 Then
-    Set Me.name = Range(left(form, comma - 1))
+
+        'need to catch an error here if a text name is used instead of a valid range
+        On Error Resume Next
+        Set Me.name = Range(left(form, comma - 1))
+
+        If Err <> 0 Then
+            str_name = left(form, comma - 1)
+        End If
+
+        On Error GoTo 0
     End If
-    
+
     'pull out the title from that
     form = Mid(form, comma + 1)
-    
-    'Debug.Print vbCrLf & form
-    '   SHEET1!$C$8:$C$13,SHEET1!$D$8:$D$13,1)
-    
-    'check the xvalues for multiple references (include paren)
-    
+
     comma = InStr(form, ",")
-    
+
     If comma > 1 Then
-    Set Me.XValues = Range(left(form, comma - 1))
+        Set Me.XValues = Range(left(form, comma - 1))
     End If
     form = Mid(form, comma + 1)
-    'Debug.Print vbCrLf & form
-        
+
     comma = InStr(form, ",")
     Set Me.Values = Range(left(form, comma - 1))
     form = Mid(form, comma + 1)
-    'Debug.Print vbCrLf & form
-    
+
     comma = InStr(form, ")")
     Me.SeriesNumber = left(form, comma - 1)
-    
+
     Me.ChartType = ser.ChartType
-        
-    'if parenth then bring in until ), // otherwise until next comma
-    
-    'do teh same thing for y values
-    
-    'pull in the series number
-    
-    
 End Sub
 
 '---------------------------------------------------------------------------------------

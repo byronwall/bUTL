@@ -1,10 +1,84 @@
 Attribute VB_Name = "Usability"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : Usability
 ' Author    : @byronwall
 ' Date      : 2015 07 24
 ' Purpose   : Contains an assortment of code that automates some task
 '---------------------------------------------------------------------------------------
+
+
+Sub CreatePdfOfEachXlsxFileInFolder()
+    
+    'pick a folder
+    Dim diag_folder As FileDialog
+    Set diag_folder = Application.FileDialog(msoFileDialogFolderPicker)
+    
+    diag_folder.Show
+    
+    Dim str_path As String
+    str_path = diag_folder.SelectedItems(1) & "\"
+    
+    'find all files in the folder
+    Dim str_file As String
+    str_file = Dir(str_path & "*.xlsx")
+
+    Do While str_file <> ""
+
+        Dim wkbk_file As Workbook
+        Set wkbk_file = Workbooks.Open(str_path & str_file, , True)
+        
+        Dim sht As Worksheet
+        
+        For Each sht In wkbk_file.Worksheets
+            sht.Range("A16").EntireRow.RowHeight = 15.75
+            sht.Range("A17").EntireRow.RowHeight = 15.75
+            sht.Range("A22").EntireRow.RowHeight = 15.75
+            sht.Range("A23").EntireRow.RowHeight = 15.75
+        Next
+
+        wkbk_file.ExportAsFixedFormat xlTypePDF, str_path & str_file & ".pdf"
+        wkbk_file.Close False
+
+        str_file = Dir
+    Loop
+End Sub
+
+Sub MakeSeveralBoxesWithNumbers()
+
+    Dim shp As Shape
+    Dim sht As Worksheet
+
+    Dim rng_loc As Range
+    Set rng_loc = Application.InputBox("select range", Type:=8)
+
+    Set sht = ActiveSheet
+
+    Dim int_counter As Integer
+
+    For int_counter = 1 To InputBox("How many?")
+
+        Set shp = sht.Shapes.AddTextbox(msoShapeRectangle, rng_loc.left, _
+            rng_loc.top + 20 * int_counter, 20, 20)
+
+        shp.Title = int_counter
+
+        shp.Fill.Visible = msoFalse
+        shp.Line.Visible = msoFalse
+
+        shp.TextFrame2.TextRange.Characters.Text = int_counter
+
+        With shp.TextFrame2.TextRange.Font.Fill
+            .Visible = msoTrue
+            .ForeColor.RGB = RGB(0, 0, 0)
+            .Transparency = 0
+            .Solid
+        End With
+
+    Next
+
+End Sub
 
 '---------------------------------------------------------------------------------------
 ' Procedure : ColorInputs
@@ -134,7 +208,7 @@ End Sub
 Sub ConvertSelectionToCsv()
 
     Dim rngCSV As Range
-    Set rngCSV = GetInputOrSelection
+    Set rngCSV = GetInputOrSelection("Choose range for converting to CSV")
 
     If rngCSV Is Nothing Then
         Exit Sub
@@ -162,6 +236,27 @@ Sub ConvertSelectionToCsv()
 
 End Sub
 
+Public Sub CopyCellAddress()
+'---------------------------------------------------------------------------------------
+' Procedure : CopyCellAddress
+' Author    : @byronwall
+' Date      : 2015 12 03
+' Purpose   : Copies the current cell address to the clipboard for paste use in a formula
+'---------------------------------------------------------------------------------------
+'
+
+'TODO: this need to get a button or a keyboard shortcut for easy use
+    Dim clipboard As MSForms.DataObject
+    Set clipboard = New MSForms.DataObject
+
+    Dim rng_sel As Range
+    Set rng_sel = Selection
+
+    clipboard.SetText rng_sel.Address(True, True, xlA1, True)
+    clipboard.PutInClipboard
+End Sub
+
+
 '---------------------------------------------------------------------------------------
 ' Procedure : CopyClear
 ' Author    : @byronwall
@@ -171,8 +266,12 @@ End Sub
 '
 Sub Sheet_DeleteHiddenRows()
     'These rows are unrecoverable
+    Dim x As VbMsgBoxResult
     x = MsgBox("This will permanently delete hidden rows. They cannot be recovered. Are you sure?", vbYesNo)
-        If x = 7 Then Exit Sub
+    
+    If Not x = vbYes Then
+        Exit Sub
+    End If
         
     Application.ScreenUpdating = False
     
@@ -180,6 +279,7 @@ Sub Sheet_DeleteHiddenRows()
     Dim iCount As Integer
     iCount = 0
     With ActiveSheet
+        Dim i As Integer
         For i = .UsedRange.Rows.count To 1 Step -1
             If .Rows(i).Hidden Then
                 .Rows(i).Delete
@@ -233,6 +333,7 @@ Sub CutPasteTranspose()
     rngOut.Activate
     
     'Check to not overwrite
+    Dim c As Range
     For Each c In rngSelect
         If Not Intersect(rngSelect, Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow)) Is Nothing Then
             MsgBox ("Your destination intersects with your data")
@@ -240,7 +341,6 @@ Sub CutPasteTranspose()
         End If
     Next
     
-    Dim c As Range
     For Each c In rngSelect
         c.Cut
         ActiveSheet.Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow).Activate
@@ -371,7 +471,7 @@ End Sub
 Sub FillValueDown()
 
     Dim rngInput As Range
-    Set rngInput = GetInputOrSelection()
+    Set rngInput = GetInputOrSelection("Select range for waterfall")
 
     If rngInput Is Nothing Then
         Exit Sub
@@ -550,6 +650,125 @@ ErrorNoSelection:
 End Sub
 
 '---------------------------------------------------------------------------------------
+' Procedure : SeriesSplitIntoBins
+' Author    : @byronwall
+' Date      : 2015 11 03
+' Purpose   : Code will break a column of continuous data into bins for plotting
+'---------------------------------------------------------------------------------------
+'
+Sub SeriesSplitIntoBins()
+
+    On Error GoTo ErrorNoSelection
+
+    Dim rngSelection As Range
+    Set rngSelection = Application.InputBox("Select category range with heading", _
+                                            Type:=8)
+    Set rngSelection = Intersect(rngSelection, _
+                                 rngSelection.Parent.UsedRange).SpecialCells(xlCellTypeVisible, xlLogical + _
+                                                                                                xlNumbers + xlTextValues)
+
+    Dim rngValues As Range
+    Set rngValues = Application.InputBox("Select values range with heading", _
+                                         Type:=8)
+    Set rngValues = Intersect(rngValues, rngValues.Parent.UsedRange)
+
+    ''need to prompt for max/min/bins
+    Dim dbl_max As Double, dbl_min As Double, int_bins As Integer
+
+    dbl_min = Application.InputBox("Minimum value.", "Min", _
+                                   WorksheetFunction.Min(rngSelection), Type:=1)
+    dbl_max = Application.InputBox("Maximum value.", "Max", _
+                                   WorksheetFunction.Max(rngSelection), Type:=1)
+    int_bins = Application.InputBox("Number of groups.", "Bins", _
+                                    WorksheetFunction.RoundDown(Math.Sqr(WorksheetFunction.count(rngSelection)), _
+                                                                0), Type:=1)
+
+    On Error GoTo 0
+
+    'determine default value
+    Dim strDefault As Variant
+    strDefault = Application.InputBox("Enter the default value", "Default", _
+                                      "#N/A")
+
+    'detect cancel and exit
+    If StrPtr(strDefault) = 0 Then
+        Exit Sub
+    End If
+
+    ''TODO prompt for output location
+
+    rngValues.EntireColumn.Offset(, 1).Resize(, int_bins + 2).Insert
+    'head the columns with the values
+
+    ''TODO add a For loop to go through the bins
+
+    Dim int_binNo As Integer
+    For int_binNo = 0 To int_bins
+        rngValues.Cells(1).Offset(, int_binNo + 1) = dbl_min + (dbl_max - _
+                                                                dbl_min) * int_binNo / int_bins
+    Next
+
+    'add the last item
+    rngValues.Cells(1).Offset(, int_bins + 2).FormulaR1C1 = "=RC[-1]"
+
+    'FIRST =IF($D2 <=V$1,$U2,#N/A)
+    '=IF(RC4 <=R1C,RC21,#N/A)
+
+    'MID =IF(AND($D2 <=W$1, $D2>V$1),$U2,#N/A)  '''W current, then left
+    '=IF(AND(RC4 <=R1C, RC4>R1C[-1]),RC21,#N/A)
+
+    'LAST =IF($D2>AA$1,$U2,#N/A)
+    '=IF(RC4>R1C[-1],RC21,#N/A)
+
+    ''TODO add number format to display header correctly (helps with charts)
+
+    'put the formula in for each column
+    '=IF(RC13=R1C,RC16,#N/A)
+    Dim strFormula As Variant
+    strFormula = "=IF(AND(RC" & rngSelection.Column & " <=R" & _
+                 rngValues.Cells(1).Row & "C," & "RC" & rngSelection.Column & ">R" & _
+                 rngValues.Cells(1).Row & "C[-1]" & ")" & ",RC" & rngValues.Column & "," & _
+                 strDefault & ")"
+
+    Dim str_FirstFormula As Variant
+    str_FirstFormula = "=IF(AND(RC" & rngSelection.Column & " <=R" & _
+                       rngValues.Cells(1).Row & "C)" & ",RC" & rngValues.Column & "," & strDefault _
+                     & ")"
+
+    Dim str_LastFormula As Variant
+    str_LastFormula = "=IF(AND(RC" & rngSelection.Column & " >R" & _
+                      rngValues.Cells(1).Row & "C)" & ",RC" & rngValues.Column & "," & strDefault _
+                    & ")"
+
+    Dim rngFormula As Range
+    Set rngFormula = rngValues.Offset(1, 1).Resize(rngValues.Rows.count - 1, _
+                                                   int_bins + 2)
+    rngFormula.FormulaR1C1 = strFormula
+
+    'override with first/last
+    rngFormula.Columns(1).FormulaR1C1 = str_FirstFormula
+    rngFormula.Columns(rngFormula.Columns.count).FormulaR1C1 = str_LastFormula
+
+    rngFormula.EntireColumn.AutoFit
+
+    'set the number formats
+    rngFormula.Offset(-1).Rows(1).Resize(1, int_bins + 1).NumberFormat = _
+    "<= General"
+    rngFormula.Offset(-1).Rows(1).Offset(, int_bins + 1).NumberFormat = _
+    "> General"
+
+    Exit Sub
+
+ErrorNoSelection:
+    'TODO: consider removing this prompt
+    MsgBox "No selection made.  Exiting.", , "No selection"
+
+End Sub
+
+
+
+
+'---------------------------------------------------------------------------------------
 ' Procedure : Sht_DeleteHiddenRows
 ' Author    : @byronwall
 ' Date      : 2015 07 24
@@ -561,6 +780,7 @@ Sub Sht_DeleteHiddenRows()
 
     Application.ScreenUpdating = False
     Dim Row As Range
+    Dim i As Integer
     For i = ActiveSheet.UsedRange.Rows.count To 1 Step -1
 
 

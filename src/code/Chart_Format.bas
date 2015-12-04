@@ -1,4 +1,6 @@
 Attribute VB_Name = "Chart_Format"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : Chart_Format
 ' Author    : @byronwall
@@ -111,6 +113,10 @@ Sub Chart_AxisTitleIsSeriesTitle()
 
             cht.Axes(xlValue, ser.AxisGroup).HasTitle = True
             cht.Axes(xlValue, ser.AxisGroup).AxisTitle.Text = b_ser.name
+            
+            '2015 11 11, adds the x-title assuming that the name is one cell above the data
+            cht.Axes(xlCategory).HasTitle = True
+            cht.Axes(xlCategory).AxisTitle.Text = b_ser.XValues.Cells(1, 1).Offset(-1).Value
 
         Next ser
     Next cht_obj
