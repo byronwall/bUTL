@@ -1,11 +1,12 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} form_newCommands 
    Caption         =   "Additional Features"
-   ClientHeight    =   7770
+   ClientHeight    =   8460
    ClientLeft      =   45
    ClientTop       =   435
    ClientWidth     =   6585
    OleObjectBlob   =   "form_newCommands.frx":0000
+   ShowModal       =   0   'False
    StartUpPosition =   1  'CenterOwner
 End
 Attribute VB_Name = "form_newCommands"
@@ -13,6 +14,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Option Explicit
 
 '---------------------------------------------------------------------------------------
@@ -91,4 +93,12 @@ End Sub
 
 Private Sub CommandButton30_Click()
     ApplyFormattingToEachColumn
+End Sub
+
+Private Sub CommandButton31_Click()
+    ComputeDistanceMatrix
+End Sub
+
+Private Sub CommandButton32_Click()
+    Chart_CreateChartWithSeriesForEachColumn
 End Sub
