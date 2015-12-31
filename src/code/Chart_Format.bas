@@ -26,9 +26,17 @@ Sub Chart_AddTitles()
             cht_obj.Chart.Axes(xlCategory).AxisTitle.Text = "x axis"
         End If
 
-        If Not cht_obj.Chart.Axes(xlValue).HasTitle Then
+        If Not cht_obj.Chart.Axes(xlValue, xlPrimary).HasTitle Then
             cht_obj.Chart.Axes(xlValue).HasTitle = True
             cht_obj.Chart.Axes(xlValue).AxisTitle.Text = "y axis"
+        End If
+
+        '2015 12 14, add support for 2nd y axis
+        If cht_obj.Chart.Axes.count = 3 Then
+            If Not cht_obj.Chart.Axes(xlValue, xlSecondary).HasTitle Then
+                cht_obj.Chart.Axes(xlValue, xlSecondary).HasTitle = True
+                cht_obj.Chart.Axes(xlValue, xlSecondary).AxisTitle.Text = "2nd y axis"
+            End If
         End If
 
         If Not cht_obj.Chart.HasTitle Then
@@ -113,10 +121,13 @@ Sub Chart_AxisTitleIsSeriesTitle()
 
             cht.Axes(xlValue, ser.AxisGroup).HasTitle = True
             cht.Axes(xlValue, ser.AxisGroup).AxisTitle.Text = b_ser.name
-            
+
             '2015 11 11, adds the x-title assuming that the name is one cell above the data
-            cht.Axes(xlCategory).HasTitle = True
-            cht.Axes(xlCategory).AxisTitle.Text = b_ser.XValues.Cells(1, 1).Offset(-1).Value
+            '2015 12 14, add a check to ensure that the XValue exists
+            If Not b_ser.XValues Is Nothing Then
+                cht.Axes(xlCategory).HasTitle = True
+                cht.Axes(xlCategory).AxisTitle.Text = b_ser.XValues.Cells(1, 1).Offset(-1).Value
+            End If
 
         Next ser
     Next cht_obj
