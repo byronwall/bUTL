@@ -14,6 +14,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
 Option Explicit
 
 '---------------------------------------------------------------------------------------
@@ -129,7 +130,13 @@ Private Sub UpdateSeries()
             ser_name = IIf(Not b_ser.name Is Nothing, b_ser.name, "")
 
             list_series.AddItem
+            If IsArray(ser_name) Then
+                ser_name = ser_name(1, 1)
+            End If
+
             list_series.List(list_series.ListCount - 1, 0) = ser_name
+
+
             list_series.List(list_series.ListCount - 1, 1) = b_ser.XValues.Address
             list_series.List(list_series.ListCount - 1, 2) = b_ser.Values.Address
 

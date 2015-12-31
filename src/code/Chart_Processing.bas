@@ -94,11 +94,13 @@ End Sub
 '---------------------------------------------------------------------------------------
 ' Procedure : Chart_TimeSeries
 ' Author    : @byronwall
-' Date      : 2015 07 24
+' Date      : 2015 12 30
 ' Purpose   : Helper Sub to create a set of charts with the same x axis and varying y
 '---------------------------------------------------------------------------------------
 '
 Sub Chart_TimeSeries(rng_dates As Range, rng_data As Range, rng_titles As Range)
+
+    Application.ScreenUpdating = False
 
     Dim int_counter As Integer
     int_counter = 1
@@ -136,6 +138,8 @@ Sub Chart_TimeSeries(rng_dates As Range, rng_data As Range, rng_titles As Range)
         int_counter = int_counter + 1
 
     Next rng_title
+
+    Application.ScreenUpdating = True
 End Sub
 
 '---------------------------------------------------------------------------------------

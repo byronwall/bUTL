@@ -46,8 +46,10 @@ Sub Chart_AddTrendlineToSeriesAndColor()
             trend.Border.Color = ser.MarkerBackgroundColor
             
             '2015 11 06 test to avoid error without name
+            '2015 12 07 dealing with multi-cell Names
+            'TODO: handle if the name is not a range also
             If Not b_ser.name Is Nothing Then
-                trend.name = b_ser.name
+                trend.name = b_ser.name.Cells(1, 1).Value
             End If
 
             trend.DisplayEquation = True
@@ -290,7 +292,7 @@ End Sub
 '---------------------------------------------------------------------------------------
 ' Procedure : ChartMergeSeries
 ' Author    : @byronwall
-' Date      : 2015 08 11
+' Date      : 2015 12 30
 ' Purpose   : Merges all selected charts into a single chart
 '---------------------------------------------------------------------------------------
 '
@@ -303,6 +305,8 @@ Sub ChartMergeSeries()
 
     Dim bool_first As Boolean
     bool_first = True
+    
+    Application.ScreenUpdating = False
     
     For Each cht_obj In Chart_GetObjectsFromObject(Selection)
     
@@ -331,6 +335,8 @@ Sub ChartMergeSeries()
 
         End If
     Next cht_obj
+    
+    Application.ScreenUpdating = True
 
 End Sub
 
