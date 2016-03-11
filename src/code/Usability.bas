@@ -12,64 +12,64 @@ Option Explicit
 Sub CreatePdfOfEachXlsxFileInFolder()
     
     'pick a folder
-    Dim diag_folder As FileDialog
-    Set diag_folder = Application.FileDialog(msoFileDialogFolderPicker)
+    Dim pickedFolder As FileDialog
+    Set pickedFolder = Application.FileDialog(msoFileDialogFolderPicker)
     
-    diag_folder.Show
+    pickedFolder.Show
     
-    Dim str_path As String
-    str_path = diag_folder.SelectedItems(1) & "\"
+    Dim path As String
+    path = pickedFolder.SelectedItems(1) & "\"
     
     'find all files in the folder
-    Dim str_file As String
-    str_file = Dir(str_path & "*.xlsx")
+    Dim fileName As String
+    fileName = Dir(path & "*.xlsx")
 
-    Do While str_file <> ""
+    Do While fileName <> ""
 
-        Dim wkbk_file As Workbook
-        Set wkbk_file = Workbooks.Open(str_path & str_file, , True)
+        Dim myBook As Workbook
+        Set myBook = Workbooks.Open(path & fileName, , True)
         
-        Dim sht As Worksheet
+        Dim mySheet As Worksheet
         
-        For Each sht In wkbk_file.Worksheets
-            sht.Range("A16").EntireRow.RowHeight = 15.75
-            sht.Range("A17").EntireRow.RowHeight = 15.75
-            sht.Range("A22").EntireRow.RowHeight = 15.75
-            sht.Range("A23").EntireRow.RowHeight = 15.75
+        For Each mySheet In myBook.Worksheets
+            mySheet.Range("A16").EntireRow.RowHeight = 15.75
+            mySheet.Range("A17").EntireRow.RowHeight = 15.75
+            mySheet.Range("A22").EntireRow.RowHeight = 15.75
+            mySheet.Range("A23").EntireRow.RowHeight = 15.75
         Next
 
-        wkbk_file.ExportAsFixedFormat xlTypePDF, str_path & str_file & ".pdf"
-        wkbk_file.Close False
+        myBook.ExportAsFixedFormat xlTypePDF, path & fileName & ".pdf"
+        myBook.Close False
 
-        str_file = Dir
+        fileName = Dir
     Loop
 End Sub
 
 Sub MakeSeveralBoxesWithNumbers()
 
-    Dim shp As Shape
-    Dim sht As Worksheet
+    Dim myShape As Shape
+    Dim mySheet As Worksheet
 
-    Dim rng_loc As Range
-    Set rng_loc = Application.InputBox("select range", Type:=8)
+    Dim selectedRange As Range
+    Set selectedRange = Application.InputBox("select range", Type:=8)
 
-    Set sht = ActiveSheet
+    Set mySheet = ActiveSheet
 
-    Dim int_counter As Long
+    Dim counter As Long
 
-    For int_counter = 1 To InputBox("How many?")
+    For counter = 1 To InputBox("How many?")
 
-        Set shp = sht.Shapes.AddTextbox(msoShapeRectangle, rng_loc.left, _
-            rng_loc.top + 20 * int_counter, 20, 20)
+        Set myShape = mySheet.Shapes.AddTextbox(msoShapeRectangle, selectedRange.left, _
+            selectedRange.top + 20 * counter, 20, 20)
 
-        shp.Title = int_counter
+        myShape.title = counter
 
-        shp.Fill.Visible = msoFalse
-        shp.Line.Visible = msoFalse
+        myShape.Fill.Visible = msoFalse
+        myShape.Line.Visible = msoFalse
 
-        shp.TextFrame2.TextRange.Characters.Text = int_counter
+        myShape.TextFrame2.TextRange.Characters.Text = counter
 
-        With shp.TextFrame2.TextRange.Font.Fill
+        With myShape.TextFrame2.TextRange.Font.Fill
             .Visible = msoTrue
             .ForeColor.RGB = RGB(0, 0, 0)
             .Transparency = 0
@@ -90,17 +90,17 @@ End Sub
 '
 Sub ColorInputs()
 
-    Dim c As Range
+    Dim myRange As Range
     'This is finding cells that aren't blank, but the description says it should be cells with no values..
-    For Each c In Selection
-        If c.Value <> "" Then
-            If c.HasFormula Then
-                c.Interior.ThemeColor = msoThemeColorAccent1
+    For Each myRange In Selection
+        If myRange.Value <> "" Then
+            If myRange.HasFormula Then
+                myRange.Interior.ThemeColor = msoThemeColorAccent1
             Else
-                c.Interior.ThemeColor = msoThemeColorAccent2
+                myRange.Interior.ThemeColor = msoThemeColorAccent2
             End If
         End If
-    Next c
+    Next myRange
 
 End Sub
 
@@ -115,86 +115,86 @@ End Sub
 Sub CombineAllSheetsData()
 
 'create the new wkbk and sheet
-    Dim wbCombo As Workbook
-    Dim wbData As Workbook
+    Dim combinedBook As Workbook
+    Dim dataBook As Workbook
 
-    Set wbData = ActiveWorkbook
-    Set wbCombo = Workbooks.Add
+    Set dataBook = ActiveWorkbook
+    Set combinedBook = Workbooks.Add
 
     Dim wsCombined As Worksheet
-    Set wsCombined = wbCombo.Sheets.Add
+    Set wsCombined = combinedBook.Sheets.Add
 
-    Dim boolFirst As Boolean
-    boolFirst = True
+    Dim first As Boolean
+    first = True
 
-    Dim iComboRow As Long
-    iComboRow = 1
+    Dim combinedRow As Long
+    combinedRow = 1
 
-    Dim wsData As Worksheet
-    For Each wsData In wbData.Sheets
-        If wsData.name <> wsCombined.name Then
+    Dim dataSheet As Worksheet
+    For Each dataSheet In dataBook.Sheets
+        If dataSheet.name <> wsCombined.name Then
 
-            wsData.Unprotect
+            dataSheet.Unprotect
 
             'get the headers squared up
-            If boolFirst Then
+            If first Then
                 'copy over all headers
-                wsData.Rows(1).Copy wsCombined.Range("A1")
+                dataSheet.Rows(1).Copy wsCombined.Range("A1")
 
-                boolFirst = False
+                first = False
             Else
                 'search for missing columns
-                Dim rngHeader As Range
-                For Each rngHeader In Intersect(wsData.Rows(1), wsData.UsedRange)
+                Dim headerRange As Range
+                For Each headerRange In Intersect(dataSheet.Rows(1), dataSheet.UsedRange)
 
                     'check if it exists
                     Dim varHdrMatch As Variant
-                    varHdrMatch = Application.Match(rngHeader, wsCombined.Rows(1), 0)
+                    varHdrMatch = Application.Match(headerRange, wsCombined.Rows(1), 0)
 
                     'if not, add to header row
                     If IsError(varHdrMatch) Then
-                        wsCombined.Range("A1").End(xlToRight).Offset(, 1) = rngHeader
+                        wsCombined.Range("A1").End(xlToRight).Offset(, 1) = headerRange
                     End If
-                Next rngHeader
+                Next headerRange
             End If
 
             'find the PnPID column for combo
-            Dim int_colId As Long
-            int_colId = Application.Match("PnPID", wsCombined.Rows(1), 0)
+            Dim columnID As Long
+            columnID = Application.Match("PnPID", wsCombined.Rows(1), 0)
 
             'find the PnPID column for data
-            Dim iColIDData As Long
-            iColIDData = Application.Match("PnPID", wsData.Rows(1), 0)
+            Dim dateColumn As Long
+            dateColumn = Application.Match("PnPID", dataSheet.Rows(1), 0)
 
             'add the data, row by row
-            Dim c As Range
-            For Each c In wsData.UsedRange.SpecialCells(xlCellTypeConstants)
-                If c.Row > 1 Then
+            Dim myRange As Range
+            For Each myRange In dataSheet.UsedRange.SpecialCells(xlCellTypeConstants)
+                If myRange.row > 1 Then
 
                     'check if the PnPID exists in the combo sheet
-                    Dim iDataRow As Variant
-                    iDataRow = Application.Match( _
-                               wsData.Cells(c.Row, iColIDData), _
-                               wsCombined.Columns(int_colId), _
+                    Dim dataRow As Variant
+                    dataRow = Application.Match( _
+                               dataSheet.Cells(myRange.row, dateColumn), _
+                               wsCombined.Columns(columnID), _
                                0)
 
                     'add new row if it did not exist and id number
-                    If IsError(iDataRow) Then
-                        iDataRow = wsCombined.Columns(int_colId).Cells(wsCombined.Rows.count, 1).End(xlUp).Offset(1).Row
-                        wsCombined.Cells(iDataRow, int_colId) = wsData.Cells(c.Row, iColIDData)
+                    If IsError(dataRow) Then
+                        dataRow = wsCombined.Columns(columnID).Cells(wsCombined.Rows.count, 1).End(xlUp).Offset(1).row
+                        wsCombined.Cells(dataRow, columnID) = dataSheet.Cells(myRange.row, dateColumn)
                     End If
 
                     'get column
-                    Dim iCol As Long
-                    iCol = Application.Match(wsData.Cells(1, c.Column), wsCombined.Rows(1), 0)
+                    Dim myColumn As Long
+                    myColumn = Application.Match(dataSheet.Cells(1, myRange.Column), wsCombined.Rows(1), 0)
 
                     'update combo data
-                    wsCombined.Cells(iDataRow, iCol) = c
+                    wsCombined.Cells(dataRow, myColumn) = myRange
 
                 End If
-            Next c
+            Next myRange
         End If
-    Next wsData
+    Next dataSheet
 End Sub
 
 '---------------------------------------------------------------------------------------
@@ -207,32 +207,32 @@ End Sub
 '
 Sub ConvertSelectionToCsv()
 
-    Dim rngCSV As Range
-    Set rngCSV = GetInputOrSelection("Choose range for converting to CSV")
+    Dim rangeForCSV As Range
+    Set rangeForCSV = GetInputOrSelection("Choose range for converting to CSV")
 
-    If rngCSV Is Nothing Then
+    If rangeForCSV Is Nothing Then
         Exit Sub
     End If
 
-    Dim csvOut As String
-    csvOut = ""
+    Dim outboundCSV As String
+    outboundCSV = ""
 
     Dim csvRow As Range
-    For Each csvRow In rngCSV.Rows
+    For Each csvRow In rangeForCSV.Rows
         
-        Dim arr As Variant
-        arr = Application.Transpose(Application.Transpose(csvRow.Rows.Value2))
+        Dim myArray As Variant
+        myArray = Application.Transpose(Application.Transpose(csvRow.Rows.Value2))
         
         'TODO:  improve this to use another Join instead of string concats
-        csvOut = csvOut & Join(arr, ",") & vbCrLf
+        outboundCSV = outboundCSV & Join(myArray, ",") & vbCrLf
 
     Next csvRow
 
-    Dim clipboard As MSForms.DataObject
-    Set clipboard = New MSForms.DataObject
+    Dim clipBoard As MSForms.DataObject
+    Set clipBoard = New MSForms.DataObject
 
-    clipboard.SetText csvOut
-    clipboard.PutInClipboard
+    clipBoard.SetText outboundCSV
+    clipBoard.PutInClipboard
 
 End Sub
 
@@ -241,19 +241,19 @@ Public Sub CopyCellAddress()
 ' Procedure : CopyCellAddress
 ' Author    : @byronwall
 ' Date      : 2015 12 03
-' Purpose   : Copies the current cell address to the clipboard for paste use in a formula
+' Purpose   : Copies the current cell address to the clipBoard for paste use in a formula
 '---------------------------------------------------------------------------------------
 '
 
 'TODO: this need to get a button or a keyboard shortcut for easy use
-    Dim clipboard As MSForms.DataObject
-    Set clipboard = New MSForms.DataObject
+    Dim clipBoard As MSForms.DataObject
+    Set clipBoard = New MSForms.DataObject
 
-    Dim rng_sel As Range
-    Set rng_sel = Selection
+    Dim selectedRange As Range
+    Set selectedRange = Selection
 
-    clipboard.SetText rng_sel.Address(True, True, xlA1, True)
-    clipboard.PutInClipboard
+    clipBoard.SetText selectedRange.Address(True, True, xlA1, True)
+    clipBoard.PutInClipboard
 End Sub
 
 
@@ -276,20 +276,20 @@ Sub Sheet_DeleteHiddenRows()
     Application.ScreenUpdating = False
     
     'We might as well tell the user how many rows were hidden
-    Dim iCount As Long
-    iCount = 0
+    Dim counter As Long
+    counter = 0
     With ActiveSheet
         Dim i As Long
         For i = .UsedRange.Rows.count To 1 Step -1
             If .Rows(i).Hidden Then
                 .Rows(i).Delete
-                iCount = iCount + 1
+                counter = counter + 1
             End If
         Next i
     End With
     Application.ScreenUpdating = True
     
-    MsgBox (iCount & " rows were deleted")
+    MsgBox (counter & " rows were deleted")
 End Sub
 
 '---------------------------------------------------------------------------------------
@@ -304,12 +304,12 @@ End Sub
 Sub CutPasteTranspose()
 
     On Error GoTo errHandler
-    Dim rngSelect As Range
+    Dim rangeToSelect As Range
     'TODO #Should use new inputbox function
-    Set rngSelect = Selection
+    Set rangeToSelect = Selection
 
-    Dim rngOut As Range
-    Set rngOut = Application.InputBox("Select output corner", Type:=8)
+    Dim outboundRange As Range
+    Set outboundRange = Application.InputBox("Select output corner", Type:=8)
 
     Application.ScreenUpdating = False
     Application.EnableEvents = False
@@ -317,35 +317,35 @@ Sub CutPasteTranspose()
 
 
 
-    Dim rCorner As Range
-    Set rCorner = rngSelect.Cells(1, 1)
+    Dim myCorner As Range
+    Set myCorner = rangeToSelect.Cells(1, 1)
 
-    Dim iCRow As Long
-    iCRow = rCorner.Row
-    Dim iCCol As Long
-    iCCol = rCorner.Column
+    Dim myRow As Long
+    myRow = myCorner.row
+    Dim incomingColumn As Long
+    incomingColumn = myCorner.Column
 
-    Dim iORow As Long
-    Dim iOCol As Long
-    iORow = rngOut.Row
-    iOCol = rngOut.Column
+    Dim outboundRow As Long
+    Dim outboundColumn As Long
+    outboundRow = outboundRange.row
+    outboundColumn = outboundRange.Column
 
-    rngOut.Activate
+    outboundRange.Activate
     
     'Check to not overwrite
-    Dim c As Range
-    For Each c In rngSelect
-        If Not Intersect(rngSelect, Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow)) Is Nothing Then
+    Dim myRange As Range
+    For Each myRange In rangeToSelect
+        If Not Intersect(rangeToSelect, Cells(outboundRow + myRange.Column - incomingColumn, outboundColumn + myRange.row - myRow)) Is Nothing Then
             MsgBox ("Your destination intersects with your data")
             Exit Sub
         End If
     Next
     
-    For Each c In rngSelect
-        c.Cut
-        ActiveSheet.Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow).Activate
+    For Each myRange In rangeToSelect
+        myRange.Cut
+        ActiveSheet.Cells(outboundRow + myRange.Column - incomingColumn, outboundColumn + myRange.row - myRow).Activate
         ActiveSheet.Paste
-    Next c
+    Next myRange
 
     Application.CutCopyMode = False
 
@@ -360,53 +360,53 @@ End Sub
 ' Procedure : EvaluateArrayFormulaOnNewSheet
 ' Author    : @byronwall
 ' Date      : 2015 07 24
-' Purpose   : Wacky thing to force an array formula to return as an array
+' Purpose   : Wacky thing to force an Array formula to return as an Array
 ' Flag      : not-used
 '---------------------------------------------------------------------------------------
 '
 Sub EvaluateArrayFormulaOnNewSheet()
 
 'cut cell with formula
-    Dim StrAddress As String
-    Dim rngStart As Range
-    Set rngStart = Sheet1.Range("J2")
-    StrAddress = rngStart.Address
+    Dim streetAddress As String
+    Dim startingRange As Range
+    Set startingRange = Sheet1.Range("J2")
+    streetAddress = startingRange.Address
 
-    rngStart.Cut
+    startingRange.Cut
 
     'create new sheet
-    Dim sht As Worksheet
-    Set sht = Worksheets.Add
+    Dim mySheet As Worksheet
+    Set mySheet = Worksheets.Add
 
     'paste cell onto sheet
-    Dim rngArr As Range
-    Set rngArr = sht.Range("A1")
-    sht.Paste rngArr
+    Dim myArrayRange As Range
+    Set myArrayRange = mySheet.Range("A1")
+    mySheet.Paste myArrayRange
 
-    'expand array formula size.. resize to whatever size is needed
-    rngArr.Resize(3).FormulaArray = rngArr.FormulaArray
+    'expand Array formula size.. resize to whatever size is needed
+    myArrayRange.Resize(3).FormulaArray = myArrayRange.FormulaArray
 
     'get your result
-    Dim VarArr As Variant
-    VarArr = Application.Evaluate(rngArr.CurrentArray.Address)
+    Dim myArray As Variant
+    myArray = Application.Evaluate(myArrayRange.CurrentArray.Address)
 
-    ''''do something with your result here... it is an array
+    ''''do something with your result here... it is an Array
 
 
     'shrink the formula back to one cell
-    Dim strFormula As String
-    strFormula = rngArr.FormulaArray
+    Dim myFormula As String
+    myFormula = myArrayRange.FormulaArray
 
-    rngArr.CurrentArray.ClearContents
-    rngArr.FormulaArray = strFormula
+    myArrayRange.CurrentArray.ClearContents
+    myArrayRange.FormulaArray = myFormula
 
     'cut and paste back to original spot
-    rngArr.Cut
+    myArrayRange.Cut
 
-    Sheet1.Paste Sheet1.Range(StrAddress)
+    Sheet1.Paste Sheet1.Range(streetAddress)
 
     Application.DisplayAlerts = False
-    sht.Delete
+    mySheet.Delete
     Application.DisplayAlerts = True
 
 End Sub
@@ -434,12 +434,12 @@ Sub ExportFilesFromFolder()
 
         Debug.Print path & file
 
-        Dim FileName As String
+        Dim fileName As String
 
-        FileName = path & file
+        fileName = path & file
 
         Dim wbActive As Workbook
-        Set wbActive = Workbooks.Open(FileName)
+        Set wbActive = Workbooks.Open(fileName)
 
         Dim wsActive As Worksheet
         Set wsActive = wbActive.Sheets("Case Summary")
@@ -470,17 +470,17 @@ End Sub
 '
 Sub FillValueDown()
 
-    Dim rngInput As Range
-    Set rngInput = GetInputOrSelection("Select range for waterfall")
+    Dim inputRange As Range
+    Set inputRange = GetInputOrSelection("Select range for waterfall")
 
-    If rngInput Is Nothing Then
+    If inputRange Is Nothing Then
         Exit Sub
     End If
 
-    Dim c As Range
-    For Each c In Intersect(rngInput.SpecialCells(xlCellTypeBlanks), rngInput.Parent.UsedRange)
-        c = c.End(xlUp)
-    Next c
+    Dim myRange As Range
+    For Each myRange In Intersect(inputRange.SpecialCells(xlCellTypeBlanks), inputRange.Parent.UsedRange)
+        myRange = myRange.End(xlUp)
+    Next myRange
 
 End Sub
 
@@ -506,15 +506,15 @@ End Sub
 '
 Sub GenerateRandomData()
 
-    Dim c As Range
-    Set c = Range("B2")
+    Dim myRange As Range
+    Set myRange = Range("B2")
 
     Dim i As Long
 
     For i = 0 To 3
-        c.Offset(, i) = Chr(65 + i)
+        myRange.Offset(, i) = Chr(65 + i)
 
-        With c.Offset(1, i).Resize(10)
+        With myRange.Offset(1, i).Resize(10)
             Select Case i
             Case 0
                 .Formula = "=TODAY()+ROW()"
@@ -560,20 +560,20 @@ End Sub
 '
 Sub PivotSetAllFields()
 
-    Dim pTable As PivotTable
-    Dim ws As Worksheet
+    Dim myPivotTable As PivotTable
+    Dim mySheet As Worksheet
 
-    Set ws = ActiveSheet
+    Set mySheet = ActiveSheet
 
     MsgBox "This defaults to the average for every Pivot table on the sheet.  Edit code for other result."
 
-    For Each pTable In ws.PivotTables
-        Dim pField As PivotField
-        For Each pField In pTable.DataFields
+    For Each myPivotTable In mySheet.PivotTables
+        Dim myPivotField As PivotField
+        For Each myPivotField In myPivotTable.DataFields
             On Error Resume Next
-            pField.Function = xlAverage
-        Next pField
-    Next pTable
+            myPivotField.Function = xlAverage
+        Next myPivotField
+    Next myPivotTable
 
 End Sub
 
@@ -589,56 +589,56 @@ Sub SeriesSplit()
 
     On Error GoTo ErrorNoSelection
 
-    Dim rngSelection As Range
-    Set rngSelection = Application.InputBox("Select category range with heading", Type:=8)
-    Set rngSelection = Intersect(rngSelection, rngSelection.Parent.UsedRange).SpecialCells(xlCellTypeVisible, xlLogical + xlNumbers + xlTextValues)
+    Dim rangeToSelection As Range
+    Set rangeToSelection = Application.InputBox("Select category range with heading", Type:=8)
+    Set rangeToSelection = Intersect(rangeToSelection, rangeToSelection.Parent.UsedRange).SpecialCells(xlCellTypeVisible, xlLogical + xlNumbers + xlTextValues)
 
-    Dim rngValues As Range
-    Set rngValues = Application.InputBox("Select values range with heading", Type:=8)
-    Set rngValues = Intersect(rngValues, rngValues.Parent.UsedRange)
+    Dim valueRange As Range
+    Set valueRange = Application.InputBox("Select values range with heading", Type:=8)
+    Set valueRange = Intersect(valueRange, valueRange.Parent.UsedRange)
 
     On Error GoTo 0
 
     'determine default value
-    Dim strDefault As Variant
-    strDefault = InputBox("Enter the default value", , "#N/A")
+    Dim defaultValue As Variant
+    defaultValue = InputBox("Enter the default value", , "#N/A")
 
     'detect cancel and exit
-    If StrPtr(strDefault) = 0 Then
+    If StrPtr(defaultValue) = 0 Then
         Exit Sub
     End If
 
     Dim dictCategories As New Dictionary
 
-    Dim rngCategory As Range
-    For Each rngCategory In rngSelection
+    Dim myCategory As Range
+    For Each myCategory In rangeToSelection
         'skip the header row
-        If rngCategory.Address <> rngSelection.Cells(1).Address Then
-            dictCategories(rngCategory.Value) = 1
+        If myCategory.Address <> rangeToSelection.Cells(1).Address Then
+            dictCategories(myCategory.Value) = 1
         End If
 
-    Next rngCategory
+    Next myCategory
 
-    rngValues.EntireColumn.Offset(, 1).Resize(, dictCategories.count).Insert
+    valueRange.EntireColumn.Offset(, 1).Resize(, dictCategories.count).Insert
     'head the columns with the values
 
-    Dim varValues As Variant
-    Dim iCount As Long
-    iCount = 1
-    For Each varValues In dictCategories
-        rngValues.Cells(1).Offset(, iCount) = varValues
-        iCount = iCount + 1
-    Next varValues
+    Dim myValues As Variant
+    Dim counter As Long
+    counter = 1
+    For Each myValues In dictCategories
+        valueRange.Cells(1).Offset(, counter) = myValues
+        counter = counter + 1
+    Next myValues
 
     'put the formula in for each column
     '=IF(RC13=R1C,RC16,#N/A)
-    Dim strFormula As Variant
-    strFormula = "=IF(RC" & rngSelection.Column & " =R" & _
-                 rngValues.Cells(1).Row & "C,RC" & rngValues.Column & "," & strDefault & ")"
+    Dim myFormula As Variant
+    myFormula = "=IF(RC" & rangeToSelection.Column & " =R" & _
+                 valueRange.Cells(1).row & "C,RC" & valueRange.Column & "," & defaultValue & ")"
 
     Dim rngFormula As Range
-    Set rngFormula = rngValues.Offset(1, 1).Resize(rngValues.Rows.count - 1, dictCategories.count)
-    rngFormula.FormulaR1C1 = strFormula
+    Set rngFormula = valueRange.Offset(1, 1).Resize(valueRange.Rows.count - 1, dictCategories.count)
+    rngFormula.FormulaR1C1 = myFormula
     rngFormula.EntireColumn.AutoFit
 
     Exit Sub
@@ -660,56 +660,56 @@ Sub SeriesSplitIntoBins()
 
     On Error GoTo ErrorNoSelection
 
-    Dim rngSelection As Range
-    Set rngSelection = Application.InputBox("Select category range with heading", _
+    Dim rangeToSelection As Range
+    Set rangeToSelection = Application.InputBox("Select category range with heading", _
                                             Type:=8)
-    Set rngSelection = Intersect(rngSelection, _
-                                 rngSelection.Parent.UsedRange).SpecialCells(xlCellTypeVisible, xlLogical + _
+    Set rangeToSelection = Intersect(rangeToSelection, _
+                                 rangeToSelection.Parent.UsedRange).SpecialCells(xlCellTypeVisible, xlLogical + _
                                                                                                 xlNumbers + xlTextValues)
 
-    Dim rngValues As Range
-    Set rngValues = Application.InputBox("Select values range with heading", _
+    Dim valueRange As Range
+    Set valueRange = Application.InputBox("Select values range with heading", _
                                          Type:=8)
-    Set rngValues = Intersect(rngValues, rngValues.Parent.UsedRange)
+    Set valueRange = Intersect(valueRange, valueRange.Parent.UsedRange)
 
     ''need to prompt for max/min/bins
-    Dim dbl_max As Double, dbl_min As Double, int_bins As Long
+    Dim maximumValue As Double, minimumValue As Double, myBins As Long
 
-    dbl_min = Application.InputBox("Minimum value.", "Min", _
-                                   WorksheetFunction.Min(rngSelection), Type:=1)
-    dbl_max = Application.InputBox("Maximum value.", "Max", _
-                                   WorksheetFunction.Max(rngSelection), Type:=1)
-    int_bins = Application.InputBox("Number of groups.", "Bins", _
-                                    WorksheetFunction.RoundDown(Math.Sqr(WorksheetFunction.count(rngSelection)), _
+    minimumValue = Application.InputBox("Minimum value.", "Min", _
+                                   WorksheetFunction.Min(rangeToSelection), Type:=1)
+    maximumValue = Application.InputBox("Maximum value.", "Max", _
+                                   WorksheetFunction.Max(rangeToSelection), Type:=1)
+    myBins = Application.InputBox("Number of groups.", "Bins", _
+                                    WorksheetFunction.RoundDown(Math.Sqr(WorksheetFunction.count(rangeToSelection)), _
                                                                 0), Type:=1)
 
     On Error GoTo 0
 
     'determine default value
-    Dim strDefault As Variant
-    strDefault = Application.InputBox("Enter the default value", "Default", _
+    Dim defaultValue As Variant
+    defaultValue = Application.InputBox("Enter the default value", "Default", _
                                       "#N/A")
 
     'detect cancel and exit
-    If StrPtr(strDefault) = 0 Then
+    If StrPtr(defaultValue) = 0 Then
         Exit Sub
     End If
 
     ''TODO prompt for output location
 
-    rngValues.EntireColumn.Offset(, 1).Resize(, int_bins + 2).Insert
+    valueRange.EntireColumn.Offset(, 1).Resize(, myBins + 2).Insert
     'head the columns with the values
 
     ''TODO add a For loop to go through the bins
 
-    Dim int_binNo As Long
-    For int_binNo = 0 To int_bins
-        rngValues.Cells(1).Offset(, int_binNo + 1) = dbl_min + (dbl_max - _
-                                                                dbl_min) * int_binNo / int_bins
+    Dim binNumber As Long
+    For binNumber = 0 To myBins
+        valueRange.Cells(1).Offset(, binNumber + 1) = minimumValue + (maximumValue - _
+                                                                minimumValue) * binNumber / myBins
     Next
 
     'add the last item
-    rngValues.Cells(1).Offset(, int_bins + 2).FormulaR1C1 = "=RC[-1]"
+    valueRange.Cells(1).Offset(, myBins + 2).FormulaR1C1 = "=RC[-1]"
 
     'FIRST =IF($D2 <=V$1,$U2,#N/A)
     '=IF(RC4 <=R1C,RC21,#N/A)
@@ -724,37 +724,37 @@ Sub SeriesSplitIntoBins()
 
     'put the formula in for each column
     '=IF(RC13=R1C,RC16,#N/A)
-    Dim strFormula As Variant
-    strFormula = "=IF(AND(RC" & rngSelection.Column & " <=R" & _
-                 rngValues.Cells(1).Row & "C," & "RC" & rngSelection.Column & ">R" & _
-                 rngValues.Cells(1).Row & "C[-1]" & ")" & ",RC" & rngValues.Column & "," & _
-                 strDefault & ")"
+    Dim myFormula As Variant
+    myFormula = "=IF(AND(RC" & rangeToSelection.Column & " <=R" & _
+                 valueRange.Cells(1).row & "C," & "RC" & rangeToSelection.Column & ">R" & _
+                 valueRange.Cells(1).row & "C[-1]" & ")" & ",RC" & valueRange.Column & "," & _
+                 defaultValue & ")"
 
-    Dim str_FirstFormula As Variant
-    str_FirstFormula = "=IF(AND(RC" & rngSelection.Column & " <=R" & _
-                       rngValues.Cells(1).Row & "C)" & ",RC" & rngValues.Column & "," & strDefault _
+    Dim firstFormula As Variant
+    firstFormula = "=IF(AND(RC" & rangeToSelection.Column & " <=R" & _
+                       valueRange.Cells(1).row & "C)" & ",RC" & valueRange.Column & "," & defaultValue _
                      & ")"
 
-    Dim str_LastFormula As Variant
-    str_LastFormula = "=IF(AND(RC" & rngSelection.Column & " >R" & _
-                      rngValues.Cells(1).Row & "C)" & ",RC" & rngValues.Column & "," & strDefault _
+    Dim lastFormula As Variant
+    lastFormula = "=IF(AND(RC" & rangeToSelection.Column & " >R" & _
+                      valueRange.Cells(1).row & "C)" & ",RC" & valueRange.Column & "," & defaultValue _
                     & ")"
 
     Dim rngFormula As Range
-    Set rngFormula = rngValues.Offset(1, 1).Resize(rngValues.Rows.count - 1, _
-                                                   int_bins + 2)
-    rngFormula.FormulaR1C1 = strFormula
+    Set rngFormula = valueRange.Offset(1, 1).Resize(valueRange.Rows.count - 1, _
+                                                   myBins + 2)
+    rngFormula.FormulaR1C1 = myFormula
 
     'override with first/last
-    rngFormula.Columns(1).FormulaR1C1 = str_FirstFormula
-    rngFormula.Columns(rngFormula.Columns.count).FormulaR1C1 = str_LastFormula
+    rngFormula.Columns(1).FormulaR1C1 = firstFormula
+    rngFormula.Columns(rngFormula.Columns.count).FormulaR1C1 = lastFormula
 
     rngFormula.EntireColumn.AutoFit
 
     'set the number formats
-    rngFormula.Offset(-1).Rows(1).Resize(1, int_bins + 1).NumberFormat = _
+    rngFormula.Offset(-1).Rows(1).Resize(1, myBins + 1).NumberFormat = _
     "<= General"
-    rngFormula.Offset(-1).Rows(1).Offset(, int_bins + 1).NumberFormat = _
+    rngFormula.Offset(-1).Rows(1).Offset(, myBins + 1).NumberFormat = _
     "> General"
 
     Exit Sub
@@ -769,25 +769,25 @@ End Sub
 
 
 '---------------------------------------------------------------------------------------
-' Procedure : Sht_DeleteHiddenRows
+' Procedure : mySheet_DeleteHiddenRows
 ' Author    : @byronwall
 ' Date      : 2015 07 24
 ' Purpose   : Deletes the hidden rows in a sheet.  Good for a "permanent" filter
 '---------------------------------------------------------------------------------------
 '
 'Changed sub name to avoid reserved object name
-Sub Sht_DeleteHiddenRows()
+Sub mySheet_DeleteHiddenRows()
 
     Application.ScreenUpdating = False
-    Dim Row As Range
+    Dim row As Range
     Dim i As Long
     For i = ActiveSheet.UsedRange.Rows.count To 1 Step -1
 
 
-        Set Row = ActiveSheet.Rows(i)
+        Set row = ActiveSheet.Rows(i)
 
-        If Row.Hidden Then
-            Row.Delete
+        If row.Hidden Then
+            row.Delete
         End If
     Next i
 
@@ -819,8 +819,8 @@ End Sub
 '
 Sub UpdateScrollbars()
 
-    Dim rng As Variant
-    rng = ActiveSheet.UsedRange.Address
+    Dim myRange As Variant
+    myRange = ActiveSheet.UsedRange.Address
 
 End Sub
 

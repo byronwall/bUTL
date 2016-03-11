@@ -17,21 +17,21 @@ Option Explicit
 '
 Sub Chart_Axis_AutoX()
 
-    Dim cht_obj As ChartObject
-    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
-        Dim cht As Chart
+    Dim chartObj As ChartObject
+    For Each chartObj In Chart_GetObjectsFromObject(Selection)
+        Dim myChart As Chart
 
-        Dim ax As Axis
+        Dim xAxis As Axis
 
-        Set cht = cht_obj.Chart
+        Set myChart = chartObj.Chart
 
-        Set ax = cht.Axes(xlCategory)
-        ax.MaximumScaleIsAuto = True
-        ax.MinimumScaleIsAuto = True
-        ax.MajorUnitIsAuto = True
-        ax.MinorUnitIsAuto = True
+        Set xAxis = myChart.Axes(xlCategory)
+        xAxis.MaximumScaleIsAuto = True
+        xAxis.MinimumScaleIsAuto = True
+        xAxis.MajorUnitIsAuto = True
+        xAxis.MinorUnitIsAuto = True
 
-    Next cht_obj
+    Next chartObj
 
 End Sub
 
@@ -44,21 +44,21 @@ End Sub
 '
 Sub Chart_Axis_AutoY()
 
-    Dim cht_obj As ChartObject
-    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
-        Dim cht As Chart
+    Dim chartObj As ChartObject
+    For Each chartObj In Chart_GetObjectsFromObject(Selection)
+        Dim myChart As Chart
 
-        Dim ax As Axis
+        Dim yAxis As Axis
 
-        Set cht = cht_obj.Chart
+        Set myChart = chartObj.Chart
 
-        Set ax = cht.Axes(xlValue)
-        ax.MaximumScaleIsAuto = True
-        ax.MinimumScaleIsAuto = True
-        ax.MajorUnitIsAuto = True
-        ax.MinorUnitIsAuto = True
+        Set yAxis = myChart.Axes(xlValue)
+        yAxis.MaximumScaleIsAuto = True
+        yAxis.MinimumScaleIsAuto = True
+        yAxis.MajorUnitIsAuto = True
+        yAxis.MinorUnitIsAuto = True
 
-    Next cht_obj
+    Next chartObj
 
 End Sub
 
@@ -69,52 +69,54 @@ End Sub
 ' Purpose   : Iterates through all series and sets desired axis to max/min of data
 '---------------------------------------------------------------------------------------
 '
-Sub Chart_FitAxisToMaxAndMin(xlCat As XlAxisType)
-    Dim cht_obj As ChartObject
-    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
+Sub Chart_FitAxisToMaxAndMin(typeOfAxis As XlAxisType)
+    Dim chartObj As ChartObject
+    For Each chartObj In Chart_GetObjectsFromObject(Selection)
         '2015 11 09 moved first inside loop so that it works for multiple charts
         Dim first As Boolean
         first = True
 
-        Dim cht As Chart
-        Set cht = cht_obj.Chart
+        Dim myChart As Chart
+        Set myChart = chartObj.Chart
 
-        Dim ser As series
-        For Each ser In cht.SeriesCollection
+        Dim mySeries As series
+        For Each mySeries In myChart.SeriesCollection
 
-            Dim min_val As Double
-            Dim max_val As Double
+            Dim minimumValue As Double
+            Dim maximumValue As Double
 
-            If xlCat = xlCategory Then
+            If typeOfAxis = xlCategory Then
 
-                min_val = Application.Min(ser.XValues)
-                max_val = Application.Max(ser.XValues)
+                minimumValue = Application.Min(mySeries.XValues)
+                maximumValue = Application.Max(mySeries.XValues)
 
-            ElseIf xlCat = xlValue Then
+            ElseIf typeOfAxis = xlValue Then
 
-                min_val = Application.Min(ser.Values)
-                max_val = Application.Max(ser.Values)
+                minimumValue = Application.Min(mySeries.Values)
+                maximumValue = Application.Max(mySeries.Values)
 
             End If
 
 
-            Dim ax As Axis
-            Set ax = cht.Axes(xlCat)
+            Dim myAxis As Axis
+            Set myAxis = myChart.Axes(typeOfAxis)
 
-            Dim bool_max As Boolean, bool_min As Boolean
-            bool_max = max_val > ax.MaximumScale
-            bool_min = min_val < ax.MinimumScale
+            Dim newMinimum As Boolean
+            Dim newMaximum As Boolean
+            
+            newMaximum = maximumValue > myAxis.MaximumScale
+            newMinimum = minimumValue < myAxis.MinimumScale
 
-            If first Or bool_min Then
-                ax.MinimumScale = min_val
+            If first Or newMinimum Then
+                myAxis.MinimumScale = minimumValue
             End If
-            If first Or bool_max Then
-                ax.MaximumScale = max_val
+            If first Or newMaximum Then
+                myAxis.MaximumScale = maximumValue
             End If
 
             first = False
-        Next ser
-    Next cht_obj
+        Next mySeries
+    Next chartObj
 
 End Sub
 
@@ -127,25 +129,25 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Public Sub Chart_YAxisRangeWithAvgAndStdev()
-    Dim dbl_std As Double
+    Dim numberStandardDeviations As Double
 
-    dbl_std = CDbl(InputBox("How many standard deviations to include?"))
+    numberStandardDeviations = CDbl(InputBox("How many standard deviations to include?"))
 
-    Dim cht_obj As ChartObject
+    Dim chartObj As ChartObject
 
-    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
+    For Each chartObj In Chart_GetObjectsFromObject(Selection)
 
-        Dim ser As series
-        Set ser = cht_obj.Chart.SeriesCollection(1)
+        Dim mySeries As series
+        Set mySeries = chartObj.Chart.SeriesCollection(1)
 
-        Dim avg_val As Double
-        Dim std_val As Double
+        Dim averageValue As Double
+        Dim standardValue As Double
 
-        avg_val = WorksheetFunction.Average(ser.Values)
-        std_val = WorksheetFunction.StDev(ser.Values)
+        averageValue = WorksheetFunction.Average(mySeries.Values)
+        standardValue = WorksheetFunction.StDev(mySeries.Values)
 
-        cht_obj.Chart.Axes(xlValue).MinimumScale = avg_val - std_val * dbl_std
-        cht_obj.Chart.Axes(xlValue).MaximumScale = avg_val + std_val * dbl_std
+        chartObj.Chart.Axes(xlValue).MinimumScale = averageValue - standardValue * numberStandardDeviations
+        chartObj.Chart.Axes(xlValue).MaximumScale = averageValue + standardValue * numberStandardDeviations
 
     Next
 

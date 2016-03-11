@@ -4,11 +4,11 @@ Option Explicit
 Public Sub ComputeDistanceMatrix()
 
 'get the range of inputs, along with input name
-    Dim rng_input As Range
-    Set rng_input = Application.InputBox("Select input data", "Input", Type:=8)
+    Dim inputRange As Range
+    Set inputRange = Application.InputBox("Select input data", "Input", Type:=8)
 
-    'Dim rng_ID As Range
-    'Set rng_ID = Application.InputBox("Select ID data", "ID", Type:=8)
+    'Dim myRange_ID As Range
+    'Set myRange_ID = Application.InputBox("Select ID data", "ID", Type:=8)
 
     'turning off updates makes a huge difference here... could also use array for output
     Application.ScreenUpdating = False
@@ -16,134 +16,134 @@ Public Sub ComputeDistanceMatrix()
     Application.EnableEvents = False
 
     'create new workbook
-    Dim wkbk As Workbook
-    Set wkbk = Workbooks.Add
+    Dim myBook As Workbook
+    Set myBook = Workbooks.Add
 
-    Dim sht_out As Worksheet
-    Set sht_out = wkbk.Sheets(1)
-    sht_out.name = "scaled data"
+    Dim newSheet As Worksheet
+    Set newSheet = myBook.Sheets(1)
+    newSheet.name = "scaled data"
 
     'copy data over to standardize
-    rng_input.Copy wkbk.Sheets(1).Range("A1")
+    inputRange.Copy myBook.Sheets(1).Range("A1")
 
     'go to edge of data, add a column, add STANDARDIZE, copy paste values, delete
     
-    Dim rng_data As Range
-    Set rng_data = sht_out.Range("A1").CurrentRegion
+    Dim dataRange As Range
+    Set dataRange = newSheet.Range("A1").CurrentRegion
 
-    Dim rng_col As Range
-    For Each rng_col In rng_data.Columns
+    Dim myColumn As Range
+    For Each myColumn In dataRange.Columns
 
         'edge cell
-        Dim rng_edge As Range
-        Set rng_edge = sht_out.Cells(1, sht_out.Columns.count).End(xlToLeft).Offset(, 1)
+        Dim edgeCell As Range
+        Set edgeCell = newSheet.Cells(1, newSheet.Columns.count).End(xlToLeft).Offset(, 1)
         
         'do a normal dist standardization
         '=STANDARDIZE(A1,AVERAGE(A:A),STDEV.S(A:A))
         
-        rng_edge.Formula = "=IFERROR(STANDARDIZE(" & rng_col.Cells(1, 1).Address(False, False) & ",AVERAGE(" & _
-            rng_col.Address & "),STDEV.S(" & rng_col.Address & ")),0)"
+        edgeCell.Formula = "=IFERROR(STANDARDIZE(" & myColumn.Cells(1, 1).Address(False, False) & ",AVERAGE(" & _
+            myColumn.Address & "),STDEV.S(" & myColumn.Address & ")),0)"
         
         'do a simple value over average to detect differences
-        rng_edge.Formula = "=IFERROR(" & rng_col.Cells(1, 1).Address(False, False) & "/AVERAGE(" & _
-            rng_col.Address & "),1)"
+        edgeCell.Formula = "=IFERROR(" & myColumn.Cells(1, 1).Address(False, False) & "/AVERAGE(" & _
+            myColumn.Address & "),1)"
             
         'fill that down
-        Range(rng_edge, rng_edge.Offset(, -1).End(xlDown).Offset(, 1)).FillDown
+        Range(edgeCell, edgeCell.Offset(, -1).End(xlDown).Offset(, 1)).FillDown
 
     Next
     
     Application.Calculate
-    sht_out.UsedRange.Value = sht_out.UsedRange.Value
-    rng_data.EntireColumn.Delete
+    newSheet.UsedRange.Value = newSheet.UsedRange.Value
+    dataRange.EntireColumn.Delete
     
-    Dim sht_dist As Worksheet
-    Set sht_dist = wkbk.Worksheets.Add()
-    sht_dist.name = "distances"
+    Dim distanceSheet As Worksheet
+    Set distanceSheet = myBook.Worksheets.Add()
+    distanceSheet.name = "distances"
 
-    Dim rng_out As Range
-    Set rng_out = sht_dist.Range("A1")
+    Dim outboundRange As Range
+    Set outboundRange = distanceSheet.Range("A1")
 
     'loop through each row with each other row
-    Dim rng_row1 As Range
-    Dim rng_row2 As Range
+    Dim firstRow As Range
+    Dim secondRow As Range
     
-    Set rng_input = sht_out.Range("A1").CurrentRegion
+    Set inputRange = newSheet.Range("A1").CurrentRegion
 
-    For Each rng_row1 In rng_input.Rows
-        For Each rng_row2 In rng_input.Rows
+    For Each firstRow In inputRange.Rows
+        For Each secondRow In inputRange.Rows
 
             'loop through each column and compute the distance
-            Dim dbl_dist_sq As Double
-            dbl_dist_sq = 0
+            Dim squaredDistance As Double
+            squaredDistance = 0
 
-            Dim int_col As Long
-            For int_col = 1 To rng_row1.Cells.count
-                dbl_dist_sq = dbl_dist_sq + (rng_row1.Cells(1, int_col) - rng_row2.Cells(1, int_col)) ^ 2
+            Dim currentColumn As Long
+            For currentColumn = 1 To firstRow.Cells.count
+                squaredDistance = squaredDistance + (firstRow.Cells(1, currentColumn) - secondRow.Cells(1, currentColumn)) ^ 2
             Next
 
             'take the sqrt of that value and output
-            rng_out.Value = dbl_dist_sq ^ 0.5
+            outboundRange.Value = squaredDistance ^ 0.5
 
             'get to next column for output
-            Set rng_out = rng_out.Offset(, 1)
+            Set outboundRange = outboundRange.Offset(, 1)
         Next
 
         'drop down a row and go back to left edge
-        Set rng_out = rng_out.Offset(1).End(xlToLeft)
+        Set outboundRange = outboundRange.Offset(1).End(xlToLeft)
     Next
 
     Application.EnableEvents = True
     Application.Calculation = xlCalculationAutomatic
     Application.ScreenUpdating = True
     
-    sht_dist.UsedRange.NumberFormat = "0.00"
-    sht_dist.UsedRange.EntireColumn.AutoFit
+    distanceSheet.UsedRange.NumberFormat = "0.00"
+    distanceSheet.UsedRange.EntireColumn.AutoFit
     
     'do the coloring
-    Formatting_AddCondFormat sht_dist.UsedRange
+    Formatting_AddCondFormat distanceSheet.UsedRange
 
 End Sub
 
 Sub RemoveAllLegends()
 
-    Dim cht_obj As ChartObject
+    Dim myChartObject As ChartObject
     
-    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
-        cht_obj.Chart.HasLegend = False
-        cht_obj.Chart.HasTitle = True
+    For Each myChartObject In Chart_GetObjectsFromObject(Selection)
+        myChartObject.Chart.HasLegend = False
+        myChartObject.Chart.HasTitle = True
         
-        cht_obj.Chart.SeriesCollection(1).MarkerSize = 4
+        myChartObject.Chart.SeriesCollection(1).MarkerSize = 4
     Next
 
 End Sub
 
 Sub ApplyFormattingToEachColumn()
-    Dim rng As Range
-    For Each rng In Selection.Columns
+    Dim myRange As Range
+    For Each myRange In Selection.Columns
 
-        Formatting_AddCondFormat rng
+        Formatting_AddCondFormat myRange
     Next
 End Sub
 
-Private Sub Formatting_AddCondFormat(ByVal rng As Range)
+Private Sub Formatting_AddCondFormat(ByVal myRange As Range)
 
-        rng.FormatConditions.AddColorScale ColorScaleType:=3
-        rng.FormatConditions(rng.FormatConditions.count).SetFirstPriority
-        rng.FormatConditions(1).ColorScaleCriteria(1).Type = _
+        myRange.FormatConditions.AddColorScale ColorScaleType:=3
+        myRange.FormatConditions(myRange.FormatConditions.count).SetFirstPriority
+        myRange.FormatConditions(1).ColorScaleCriteria(1).Type = _
         xlConditionValueLowestValue
-        With rng.FormatConditions(1).ColorScaleCriteria(1).FormatColor
+        With myRange.FormatConditions(1).ColorScaleCriteria(1).FormatColor
             .Color = 7039480
             .TintAndShade = 0
         End With
-        rng.FormatConditions(1).ColorScaleCriteria(2).Type = _
+        myRange.FormatConditions(1).ColorScaleCriteria(2).Type = _
         xlConditionValuePercentile
-        rng.FormatConditions(1).ColorScaleCriteria(2).Value = 50
-        With rng.FormatConditions(1).ColorScaleCriteria(2).FormatColor
+        myRange.FormatConditions(1).ColorScaleCriteria(2).Value = 50
+        With myRange.FormatConditions(1).ColorScaleCriteria(2).FormatColor
             .Color = 8711167
             .TintAndShade = 0
         End With
-        rng.FormatConditions(1).ColorScaleCriteria(3).Type = _
+        myRange.FormatConditions(1).ColorScaleCriteria(3).Type = _
         xlConditionValueHighestValue
         With Selection.FormatConditions(1).ColorScaleCriteria(3).FormatColor
             .Color = 8109667
@@ -162,11 +162,11 @@ End Sub
 '
 Sub TraceDependentsForAll()
 
-    Dim rng As Range
+    Dim myRange As Range
     
-    For Each rng In Intersect(Selection, Selection.Parent.UsedRange)
-        rng.ShowDependents
-    Next rng
+    For Each myRange In Intersect(Selection, Selection.Parent.UsedRange)
+        myRange.ShowDependents
+    Next myRange
 
 End Sub
 

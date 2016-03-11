@@ -42,41 +42,41 @@ End Function
 '             Returns a Collection (possibly empty) and should be handled with a For Each
 '---------------------------------------------------------------------------------------
 '
-Function Chart_GetObjectsFromObject(obj_in As Object) As Variant
+Function Chart_GetObjectsFromObject(incomingObject As Object) As Variant
 
-    Dim str_type As String
+    Dim objectType As String
     'TODO: these should be upgrade to TypeOf instead of strings
-    str_type = TypeName(obj_in)
+    objectType = TypeName(incomingObject)
 
-    Dim coll As New Collection
+    Dim newCollection As New Collection
 
-    Dim obj As Variant
+    Dim newObject As Variant
 
-    If str_type = "DrawingObjects" Then
+    If objectType = "DrawingObjects" Then
         'this means that multiple charts are selected
-        For Each obj In obj_in
-            If TypeName(obj) = "ChartObject" Then
+        For Each newObject In incomingObject
+            If TypeName(newObject) = "ChartObject" Then
                 'add it to the set
-                coll.Add obj
+                newCollection.Add newObject
             End If
-        Next obj
+        Next newObject
 
-    ElseIf str_type = "Chart" Then
-        coll.Add obj_in.Parent
+    ElseIf objectType = "Chart" Then
+        newCollection.Add incomingObject.Parent
 
-    ElseIf str_type = "ChartArea" Or str_type = "PlotArea" Then
+    ElseIf objectType = "ChartArea" Or objectType = "PlotArea" Then
         'parent is the chart, parent of that is the chart obj
-        coll.Add obj_in.Parent.Parent
+        newCollection.Add incomingObject.Parent.Parent
 
-    ElseIf str_type = "Series" Then
+    ElseIf objectType = "Series" Then
         'need to go up three levels
-        coll.Add obj_in.Parent.Parent.Parent
+        newCollection.Add incomingObject.Parent.Parent.Parent
 
     Else
         MsgBox "Select an object that is supported."
     End If
 
-    Set Chart_GetObjectsFromObject = coll
+    Set Chart_GetObjectsFromObject = newCollection
 
 End Function
 
