@@ -1,4 +1,6 @@
 Attribute VB_Name = "RandomCode"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : RandomCode
 ' Author    : @byronwall
@@ -24,7 +26,7 @@ Sub AlphabetizeAndReportWithDupes()
     QuickSort arr
     'arr is now sorted
 
-    Dim i As Integer
+    Dim i As Long
     For i = LBound(arr) To UBound(arr)
         
         'if duplicate, use FindNext, else just Find
@@ -174,7 +176,7 @@ Sub Rand_DownloadFromSheet()
     
     For Each rng_addr In Range("B2:B35")
     
-        Download_File rng_add, str_folder & rng_addr.Offset(, 1)
+        Download_File rng_addr, str_folder & rng_addr.Offset(, 1)
     
     Next rng_addr
 
@@ -262,7 +264,7 @@ Sub Rand_DumpTextFromAllSheets()
     Set w = Application.Workbooks.Add
     Set sw = w.Sheets.Add
     
-    Dim Row As Integer
+    Dim Row As Long
     Row = 0
     For Each s In main.Sheets
         For Each c In s.UsedRange.SpecialCells(xlCellTypeConstants)
@@ -302,7 +304,7 @@ Sub Rand_Matrix()
     Set rng_left = Application.InputBox("Select left column", Type:=8)
     Set rng_top = Application.InputBox("Select top column", Type:=8)
     
-    Dim int_left As Integer, int_top As Integer
+    Dim int_left As Long, int_top As Long
     
     Set rng_body = Range(Cells(rng_left.Row, rng_top.Column), _
                             Cells(rng_left.Rows(rng_left.Rows.count).Row, rng_top.Columns(rng_top.Columns.count).Column))
@@ -312,7 +314,7 @@ Sub Rand_Matrix()
     
     Dim rng_cell As Range
     
-    Dim int_row As Integer
+    Dim int_row As Long
     int_row = 1
     
     For Each rng_cell In rng_body.SpecialCells(xlCellTypeConstants)

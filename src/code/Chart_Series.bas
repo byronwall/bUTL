@@ -1,4 +1,6 @@
 Attribute VB_Name = "Chart_Series"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : Chart_Series
 ' Author    : @byronwall
@@ -22,7 +24,7 @@ Sub Chart_AddTrendlineToSeriesAndColor()
 
         Dim ser As series
 
-        Dim i As Integer
+        Dim i As Long
         i = 1
 
         For Each ser In cht_obj.Chart.SeriesCollection
@@ -31,7 +33,7 @@ Sub Chart_AddTrendlineToSeriesAndColor()
             b_ser.UpdateFromChartSeries ser
 
             'clear out old ones
-            Dim j As Integer
+            Dim j As Long
             For j = 1 To ser.Trendlines.count
                 ser.Trendlines(j).Delete
             Next j
@@ -42,7 +44,11 @@ Sub Chart_AddTrendlineToSeriesAndColor()
             Set trend = ser.Trendlines.Add()
             trend.Type = xlLinear
             trend.Border.Color = ser.MarkerBackgroundColor
-            trend.name = b_ser.name
+            
+            '2015 11 06 test to avoid error without name
+            If Not b_ser.name Is Nothing Then
+                trend.name = b_ser.name
+            End If
 
             trend.DisplayEquation = True
             trend.DisplayRSquared = True
@@ -76,8 +82,10 @@ Sub Chart_ExtendSeriesToRanges()
             Dim b_ser As New bUTLChartSeries
             b_ser.UpdateFromChartSeries ser
 
-            ser.XValues = RangeEnd(b_ser.XValues, xlDown)
-            ser.Values = RangeEnd(b_ser.Values, xlDown)
+            If Not b_ser.XValues Is Nothing Then
+                ser.XValues = RangeEnd(b_ser.XValues.Cells(1), xlDown)
+            End If
+            ser.Values = RangeEnd(b_ser.Values.Cells(1), xlDown)
 
         Next ser
 
@@ -237,7 +245,7 @@ Sub ChartFlipXYValues()
             'assume that title is same offset
             'code blocked for now
             If False And Not b_ser.name Is Nothing Then
-                Dim int_offset_rows As Integer, int_offset_cols As Integer
+                Dim int_offset_rows As Long, int_offset_cols As Long
                 int_offset_rows = b_ser.name.Row - b_ser.XValues.Cells(1, 1).Row
                 int_offset_cols = b_ser.name.Column - b_ser.XValues.Cells(1, 1).Column
 

@@ -1,4 +1,6 @@
 Attribute VB_Name = "Chart_Helpers"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : Chart_Helpers
 ' Author    : @byronwall
@@ -90,7 +92,7 @@ Sub DeleteAllCharts()
     If MsgBox("Delete all charts?", vbYesNo) = vbYes Then
         Application.ScreenUpdating = False
 
-        Dim iCounter As Integer
+        Dim iCounter As Long
         For iCounter = ActiveSheet.ChartObjects.count To 1 Step -1
 
             ActiveSheet.ChartObjects(iCounter).Delete

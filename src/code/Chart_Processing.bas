@@ -8,6 +8,88 @@ Attribute VB_Name = "Chart_Processing"
 
 Option Explicit
 
+Public Sub Chart_CreateChartWithSeriesForEachColumn()
+'will create a chart that includes a series with no x value for each column
+
+    Dim rng_data As Range
+    Set rng_data = GetInputOrSelection("Select chart data")
+
+    'create a chart
+    Dim cht_obj As ChartObject
+    Set cht_obj = ActiveSheet.ChartObjects.Add(0, 0, 300, 300)
+    
+    cht_obj.Chart.ChartType = xlXYScatter
+
+    Dim rng_col As Range
+    For Each rng_col In rng_data.Columns
+
+        Dim rng_chart As Range
+        Set rng_chart = RangeEnd(rng_col.Cells(1, 1), xlDown)
+        
+        Dim b_ser As New bUTLChartSeries
+        Set b_ser.Values = rng_chart
+        
+        b_ser.AddSeriesToChart cht_obj.Chart
+    Next
+
+End Sub
+
+Public Sub Chart_CopyToSheet()
+
+    Dim cht_obj As ChartObject
+    
+    Dim obj_all As Object
+    Set obj_all = Selection
+    
+    Dim msg_newSheet As VbMsgBoxResult
+    msg_newSheet = MsgBox("New sheet?", vbYesNo, "New sheet?")
+    
+    Dim sht_out As Worksheet
+    If msg_newSheet = vbYes Then
+        Set sht_out = Worksheets.Add()
+    Else
+        Set sht_out = Application.InputBox("Pick a cell on a sheet", "Pick sheet", Type:=8).Parent
+    End If
+    
+    For Each cht_obj In Chart_GetObjectsFromObject(obj_all)
+        cht_obj.Copy
+        
+        sht_out.Paste
+    Next
+    
+    sht_out.Activate
+End Sub
+
+Sub Chart_SortSeriesByName()
+'this will sort series by names
+    Dim cht_obj As ChartObject
+    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
+
+        'uses a simple bubble sort but it works... shouldn't have 1000 series anyways
+        Dim int_chart1 As Long
+        Dim int_chart2 As Long
+        For int_chart1 = 1 To cht_obj.Chart.SeriesCollection.count
+            For int_chart2 = (int_chart1 + 1) To cht_obj.Chart.SeriesCollection.count
+
+                Dim b_ser1 As New bUTLChartSeries
+                Dim b_ser2 As New bUTLChartSeries
+
+                b_ser1.UpdateFromChartSeries cht_obj.Chart.SeriesCollection(int_chart1)
+                b_ser2.UpdateFromChartSeries cht_obj.Chart.SeriesCollection(int_chart2)
+
+                If b_ser1.name.Value > b_ser2.name.Value Then
+                    Dim int_num As Long
+                    int_num = b_ser2.SeriesNumber
+                    b_ser2.SeriesNumber = b_ser1.SeriesNumber
+                    b_ser1.SeriesNumber = int_num
+
+                    b_ser2.UpdateSeriesWithNewValues
+                    b_ser1.UpdateSeriesWithNewValues
+                End If
+            Next
+        Next
+    Next
+End Sub
 
 '---------------------------------------------------------------------------------------
 ' Procedure : Chart_TimeSeries
@@ -18,7 +100,7 @@ Option Explicit
 '
 Sub Chart_TimeSeries(rng_dates As Range, rng_data As Range, rng_titles As Range)
 
-    Dim int_counter As Integer
+    Dim int_counter As Long
     int_counter = 1
 
     Dim rng_title As Range
@@ -142,7 +224,7 @@ Sub RemoveZeroValueDataLabel()
         ser.ApplyDataLabels xlDataLabelsShowLabel, , , , True, False, False, False, False
 
         'loop through values and delete 0-value labels
-        Dim i As Integer
+        Dim i As Long
         For i = LBound(vals) To UBound(vals)
             If vals(i) = 0 Then
                 With ser.Points(i)

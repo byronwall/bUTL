@@ -1,4 +1,6 @@
 Attribute VB_Name = "SubsFuncs_Helpers"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : SubsFuncs_Helpers
 ' Author    : @byronwall

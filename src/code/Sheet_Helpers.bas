@@ -1,4 +1,6 @@
 Attribute VB_Name = "Sheet_Helpers"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : Sheet_Helpers
 ' Author    : @byronwall
@@ -24,9 +26,10 @@ Sub LockAllSheets()
         Application.ScreenUpdating = False
 
         'Changed to activeworkbook so if add-in is not installed, it will target the active book rather than the xlam
-        For Each Sheet In ActiveWorkbook.Sheets
+        Dim sheet As Worksheet
+        For Each sheet In ActiveWorkbook.Sheets
             On Error Resume Next
-            Sheet.Protect (pass)
+            sheet.Protect (pass)
         Next
 
         Application.ScreenUpdating = True
@@ -50,7 +53,7 @@ Sub OutputSheets()
     Dim rngOut As Range
     Set rngOut = wsOut.Range("B2")
 
-    Dim iRow As Integer
+    Dim iRow As Long
     iRow = 0
 
     Dim sht As Worksheet
@@ -81,7 +84,7 @@ Sub UnlockAllSheets()
     Dim pass As Variant
     pass = Application.InputBox("Password to unlock")
     
-    Dim iErr As Integer
+    Dim iErr As Long
     iErr = 0
     
     If pass = False Then
@@ -117,11 +120,11 @@ Application.ScreenUpdating = False
 Dim wb As Workbook
 Set wb = ActiveWorkbook
 
-Dim intSheets As Integer
+Dim intSheets As Long
 intSheets = wb.Sheets.count
 
-Dim i As Integer
-Dim j As Integer
+Dim i As Long
+Dim j As Long
 
 With wb
     For j = 1 To intSheets
@@ -146,11 +149,11 @@ Application.ScreenUpdating = False
 Dim wb As Workbook
 Set wb = ActiveWorkbook
 
-Dim intSheets As Integer
+Dim intSheets As Long
 intSheets = wb.Sheets.count
 
-Dim i As Integer
-Dim j As Integer
+Dim i As Long
+Dim j As Long
 
 With wb
     For j = 1 To intSheets

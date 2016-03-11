@@ -15,7 +15,7 @@ Option Explicit
 ' Purpose   : Offsets and selects the Selection a given number of rows/columns
 '---------------------------------------------------------------------------------------
 '
-Sub OffsetSelectionByRowsAndColumns(iRowsOff As Integer, iColsOff As Integer)
+Sub OffsetSelectionByRowsAndColumns(iRowsOff As Long, iColsOff As Long)
 
     If TypeOf Selection Is Range Then
 

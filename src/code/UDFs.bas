@@ -15,9 +15,9 @@ Option Explicit
 ' Purpose   : UDF that generates a sequence of random letters
 '---------------------------------------------------------------------------------------
 '
-Public Function RandLetters(num As Integer) As String
+Public Function RandLetters(num As Long) As String
 
-    Dim i As Integer
+    Dim i As Long
     
     Dim letters() As String
     ReDim letters(1 To num)

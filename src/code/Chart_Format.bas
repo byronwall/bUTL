@@ -1,4 +1,6 @@
 Attribute VB_Name = "Chart_Format"
+Option Explicit
+
 '---------------------------------------------------------------------------------------
 ' Module    : Chart_Format
 ' Author    : @byronwall
@@ -111,6 +113,10 @@ Sub Chart_AxisTitleIsSeriesTitle()
 
             cht.Axes(xlValue, ser.AxisGroup).HasTitle = True
             cht.Axes(xlValue, ser.AxisGroup).AxisTitle.Text = b_ser.name
+            
+            '2015 11 11, adds the x-title assuming that the name is one cell above the data
+            cht.Axes(xlCategory).HasTitle = True
+            cht.Axes(xlCategory).AxisTitle.Text = b_ser.XValues.Cells(1, 1).Offset(-1).Value
 
         Next ser
     Next cht_obj
@@ -165,7 +171,7 @@ End Sub
 '---------------------------------------------------------------------------------------
 '
 Sub Chart_GridOfCharts( _
-    Optional int_cols As Integer = 3, _
+    Optional int_cols As Long = 3, _
     Optional cht_wid As Double = 400, _
     Optional cht_height As Double = 300, _
     Optional v_off As Double = 80, _
@@ -180,7 +186,7 @@ Sub Chart_GridOfCharts( _
 
     Application.ScreenUpdating = False
 
-    Dim count As Integer
+    Dim count As Long
     count = 0
 
     For Each cht_obj In sht.ChartObjects
@@ -197,7 +203,7 @@ Sub Chart_GridOfCharts( _
         cht_obj.top = top
         cht_obj.left = left
         cht_obj.Width = cht_wid
-        cht_obj.height = cht_height
+        cht_obj.Height = cht_height
 
         count = count + 1
 
@@ -205,7 +211,7 @@ Sub Chart_GridOfCharts( _
 
     'loop through columsn to find how far to zoom
     If bool_zoom Then
-        Dim col_zoom As Integer
+        Dim col_zoom As Long
         col_zoom = 1
         Do While sht.Cells(1, col_zoom).left < int_cols * cht_wid
             col_zoom = col_zoom + 1
@@ -257,7 +263,7 @@ Sub ChartCreateXYGrid()
 
     Application.ScreenUpdating = False
 
-    Dim iRow As Integer, iCol As Integer
+    Dim iRow As Long, iCol As Long
     iRow = 0
 
     Dim dHeight As Double, dWidth As Double
@@ -341,7 +347,7 @@ Sub ChartDefaultFormat()
 
     Dim cht_obj As ChartObject
 
-    For Each cht_obj In ActiveSheet.ChartObjects
+    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
         Dim cht As Chart
 
         Set cht = cht_obj.Chart
@@ -369,9 +375,14 @@ Sub ChartDefaultFormat()
         Dim ax As Axis
         Set ax = cht.Axes(xlValue)
 
-        ax.MajorGridlines.Border.Color = RGB(200, 200, 200)
-        ax.MinorGridlines.Border.Color = RGB(230, 230, 230)
+        ax.MajorGridlines.Border.Color = RGB(242, 242, 242)
         ax.Crosses = xlAxisCrossesMinimum
+        
+        Set ax = cht.Axes(xlCategory)
+        
+        ax.HasMajorGridlines = True
+
+        ax.MajorGridlines.Border.Color = RGB(242, 242, 242)
 
         If cht.HasTitle Then
             cht.ChartTitle.Characters.Font.Size = 12
