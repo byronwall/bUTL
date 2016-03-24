@@ -35,7 +35,7 @@ Private str_name As String
 Function AddSeriesToChart(cht As Chart) As series
 
     Dim ser As series
-    Set ser = cht.SeriesCollection.NewSeries
+    Set ser = cht.SeriesCollection.newSeries
     
     ser.Formula = Me.SeriesFormula
     
