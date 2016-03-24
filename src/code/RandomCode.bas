@@ -26,7 +26,7 @@ Sub AlphabetizeAndReportWithDupes()
     QuickSort arr
     'arr is now sorted
 
-    Dim i As Integer
+    Dim i As Long
     For i = LBound(arr) To UBound(arr)
         
         'if duplicate, use FindNext, else just Find
@@ -264,12 +264,12 @@ Sub Rand_DumpTextFromAllSheets()
     Set w = Application.Workbooks.Add
     Set sw = w.Sheets.Add
     
-    Dim Row As Integer
-    Row = 0
+    Dim row As Long
+    row = 0
     For Each s In main.Sheets
         For Each c In s.UsedRange.SpecialCells(xlCellTypeConstants)
-            sw.Range("A1").Offset(Row) = c
-            Row = Row + 1
+            sw.Range("A1").Offset(row) = c
+            row = row + 1
         Next c
     Next s
 
@@ -304,21 +304,21 @@ Sub Rand_Matrix()
     Set rng_left = Application.InputBox("Select left column", Type:=8)
     Set rng_top = Application.InputBox("Select top column", Type:=8)
     
-    Dim int_left As Integer, int_top As Integer
+    Dim int_left As Long, int_top As Long
     
-    Set rng_body = Range(Cells(rng_left.Row, rng_top.Column), _
-                            Cells(rng_left.Rows(rng_left.Rows.count).Row, rng_top.Columns(rng_top.Columns.count).Column))
+    Set rng_body = Range(Cells(rng_left.row, rng_top.Column), _
+                            Cells(rng_left.Rows(rng_left.Rows.count).row, rng_top.Columns(rng_top.Columns.count).Column))
                             
     Dim sht_out As Worksheet
     Set sht_out = Application.Worksheets.Add()
     
     Dim rng_cell As Range
     
-    Dim int_row As Integer
+    Dim int_row As Long
     int_row = 1
     
     For Each rng_cell In rng_body.SpecialCells(xlCellTypeConstants)
-        sht_out.Range("A1").Offset(int_row) = rng_left.Cells(rng_cell.Row - rng_left.Row + 1, 1)
+        sht_out.Range("A1").Offset(int_row) = rng_left.Cells(rng_cell.row - rng_left.row + 1, 1)
         sht_out.Range("B1").Offset(int_row) = rng_top.Cells(1, rng_cell.Column - rng_top.Column + 1)
         sht_out.Range("C1").Offset(int_row) = rng_cell
         

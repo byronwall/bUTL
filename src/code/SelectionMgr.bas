@@ -15,14 +15,14 @@ Option Explicit
 ' Purpose   : Offsets and selects the Selection a given number of rows/columns
 '---------------------------------------------------------------------------------------
 '
-Sub OffsetSelectionByRowsAndColumns(iRowsOff As Integer, iColsOff As Integer)
+Sub OffsetSelectionByRowsAndColumns(rowsOff As Long, columnsOff As Long)
 
     If TypeOf Selection Is Range Then
 
         'this error should only get called if the new range is outside the sheet boundaries
         On Error GoTo OffsetSelectionByRowsAndColumns_Exit
 
-        Selection.Offset(iRowsOff, iColsOff).Select
+        Selection.Offset(rowsOff, columnsOff).Select
 
         On Error GoTo 0
     End If

@@ -17,32 +17,32 @@ Option Explicit
 '
 Public Sub CategoricalColoring()
 '+Get User Input
-    Dim rngToColor As Range
+    Dim rangeToColor As Range
     On Error GoTo errHandler
-    Set rngToColor = GetInputOrSelection("Select Range to Color")
+    Set rangeToColor = GetInputOrSelection("Select Range to Color")
 
-    Dim rngColors As Range
-    Set rngColors = GetInputOrSelection("Select Range with Colors")
+    Dim rangeWithColors As Range
+    Set rangeWithColors = GetInputOrSelection("Select Range with Colors")
 
     '+Do Magic
     Application.ScreenUpdating = False
-    Dim c As Range
-    Dim varRow As Variant
+    Dim myRange As Range
+    Dim variableRow As Variant
 
-    For Each c In rngToColor
-        varRow = Application.Match(c, rngColors, 0)
+    For Each myRange In rangeToColor
+        variableRow = Application.Match(myRange, rangeWithColors, 0)
         '+ Matches font style as well as interior color
-        If IsNumeric(varRow) Then
-            c.Font.FontStyle = rngColors.Cells(varRow).Font.FontStyle
-            c.Font.Color = rngColors.Cells(varRow).Font.Color
+        If IsNumeric(variableRow) Then
+            myRange.Font.FontStyle = rangeWithColors.Cells(variableRow).Font.FontStyle
+            myRange.Font.Color = rangeWithColors.Cells(variableRow).Font.Color
             '+Skip interior color if there is none
-            If Not rngColors.Cells(varRow).Interior.ColorIndex = xlNone Then
-                c.Interior.Color = rngColors.Cells(varRow).Interior.Color
+            If Not rangeWithColors.Cells(variableRow).Interior.ColorIndex = xlNone Then
+                myRange.Interior.Color = rangeWithColors.Cells(variableRow).Interior.Color
             End If
         End If
-    Next c
+    Next myRange
     '+ If no fill, restore gridlines
-    rngToColor.Borders.LineStyle = xlNone
+    rangeToColor.Borders.LineStyle = xlNone
     Application.ScreenUpdating = True
     Exit Sub
 errHandler:
@@ -63,49 +63,49 @@ Sub ColorForUnique()
     Dim dictKeysAndColors As New Scripting.Dictionary
     Dim dictColorsOnly As New Scripting.Dictionary
     
-    Dim rngToColor As Range
+    Dim rangeToColor As Range
 
     On Error GoTo ColorForUnique_Error
 
-    Set rngToColor = GetInputOrSelection("Select column to color")
-    Set rngToColor = Intersect(rngToColor, rngToColor.Parent.UsedRange)
+    Set rangeToColor = GetInputOrSelection("Select column to color")
+    Set rangeToColor = Intersect(rangeToColor, rangeToColor.Parent.UsedRange)
 
     'We can colorize the sorting column, or the entire row
-    Dim vShouldColorEntireRow As VbMsgBoxResult
-    vShouldColorEntireRow = MsgBox("Do you want to color the entire row?", vbYesNo)
+    Dim colorEntireRow As VbMsgBoxResult
+    colorEntireRow = MsgBox("Do you want to color the entire row?", vbYesNo)
 
     Application.ScreenUpdating = False
 
     Dim rngRowToColor As Range
-    For Each rngRowToColor In rngToColor.Rows
+    For Each rngRowToColor In rangeToColor.Rows
 
         'allow for a multi column key if intial range is multi-column
         'TODO: consider making this another prompt... might (?) want to color multi range based on single column key
-        Dim id As String
+        Dim identification As String
         If rngRowToColor.Columns.count > 1 Then
-            id = Join(Application.Transpose(Application.Transpose(rngRowToColor.Value)), "||")
+            identification = Join(Application.Transpose(Application.Transpose(rngRowToColor.Value)), "||")
         Else
-            id = rngRowToColor.Value
+            identification = rngRowToColor.Value
         End If
 
         'new value, need a color
-        If Not dictKeysAndColors.Exists(id) Then
-            Dim lRgbColor As Long
+        If Not dictKeysAndColors.Exists(identification) Then
+            Dim newRGB As Long
 createNewColor:
-            lRgbColor = RGB(Application.RandBetween(50, 255), _
+            newRGB = RGB(Application.RandBetween(50, 255), _
                              Application.RandBetween(50, 255), Application.RandBetween(50, 255))
-            If dictColorsOnly.Exists(lRgbColor) Then
+            If dictColorsOnly.Exists(newRGB) Then
                 'ensure unique colors only
                 GoTo createNewColor
             End If
                 
-            dictKeysAndColors.Add id, lRgbColor
+            dictKeysAndColors.Add identification, newRGB
         End If
 
-        If vShouldColorEntireRow = vbYes Then
-            rngRowToColor.EntireRow.Interior.Color = dictKeysAndColors(id)
+        If colorEntireRow = vbYes Then
+            rngRowToColor.EntireRow.Interior.Color = dictKeysAndColors(identification)
         Else
-            rngRowToColor.Interior.Color = dictKeysAndColors(id)
+            rngRowToColor.Interior.Color = dictKeysAndColors(identification)
         End If
     Next rngRowToColor
 
@@ -128,37 +128,37 @@ End Sub
 '
 Public Sub Colorize()
 
-    Dim rngToColor As Range
+    Dim rangeToColor As Range
     On Error GoTo errHandler
-    Set rngToColor = GetInputOrSelection("Select range to color")
-    Dim lastrow As Integer
-    lastrow = rngToColor.Rows.count
+    Set rangeToColor = GetInputOrSelection("Select range to color")
+    Dim lastRow As Long
+    lastRow = rangeToColor.Rows.count
     
-    Dim likevalues As VbMsgBoxResult
-    likevalues = MsgBox("Do you want to keep duplicate values the same color?", vbYesNo)
+    Dim likeValues As VbMsgBoxResult
+    likeValues = MsgBox("Do you want to keep duplicate values the same color?", vbYesNo)
 
-    If likevalues = vbNo Then
+    If likeValues = vbNo Then
         
-        Dim i As Integer
-        For i = 1 To lastrow
+        Dim i As Long
+        For i = 1 To lastRow
             If i Mod 2 = 0 Then
-                rngToColor.Rows(i).Interior.Color = RGB(200, 200, 200)
-            Else: rngToColor.Rows(i).Interior.ColorIndex = xlNone
+                rangeToColor.Rows(i).Interior.Color = RGB(200, 200, 200)
+            Else: rangeToColor.Rows(i).Interior.ColorIndex = xlNone
             End If
         Next
     End If
 
 
-    If likevalues = vbYes Then
-        Dim flip As Boolean
-        For i = 2 To lastrow
-            If rngToColor.Cells(i, 1) <> rngToColor.Cells(i - 1, 1) Then
-                flip = Not flip
+    If likeValues = vbYes Then
+        Dim flipColors As Boolean
+        For i = 2 To lastRow
+            If rangeToColor.Cells(i, 1) <> rangeToColor.Cells(i - 1, 1) Then
+                flipColors = Not flipColors
             End If
 
-            If flip Then
-                rngToColor.Rows(i).Interior.Color = RGB(200, 200, 200)
-            Else: rngToColor.Rows(i).Interior.ColorIndex = xlNone
+            If flipColors Then
+                rangeToColor.Rows(i).Interior.Color = RGB(200, 200, 200)
+            Else: rangeToColor.Rows(i).Interior.ColorIndex = xlNone
             End If
         Next
     End If
@@ -198,10 +198,10 @@ Sub CombineCells()
     
     'Read input rows into a single string
     Dim strOutput As String
-    Dim i As Integer
+    Dim i As Long
     For i = 1 To x
         strOutput = vbNullString
-        Dim j As Integer
+        Dim j As Long
         For j = 1 To y
             strOutput = strOutput & strDelim & rngInput(i, j)
         Next
@@ -270,28 +270,28 @@ Sub CopyTranspose()
     Dim rCorner As Range
     Set rCorner = rngSelect.Cells(1, 1)
 
-    Dim iCRow As Integer
-    iCRow = rCorner.Row
-    Dim iCCol As Integer
+    Dim iCRow As Long
+    iCRow = rCorner.row
+    Dim iCCol As Long
     iCCol = rCorner.Column
 
-    Dim iORow As Integer
-    Dim iOCol As Integer
-    iORow = rngOut.Row
+    Dim iORow As Long
+    Dim iOCol As Long
+    iORow = rngOut.row
     iOCol = rngOut.Column
 
     Dim c As Range
     
     'We check for the intersection to ensure we don't overwrite any of the original data
     For Each c In rngSelect
-        If Not Intersect(rngSelect, Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow)) Is Nothing Then
+        If Not Intersect(rngSelect, Cells(iORow + c.Column - iCCol, iOCol + c.row - iCRow)) Is Nothing Then
             MsgBox ("Your destination intersects with your data")
             Exit Sub
         End If
     Next c
 
     For Each c In rngSelect
-        ActiveSheet.Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow).Formula = c.Formula
+        ActiveSheet.Cells(iORow + c.Column - iCCol, iOCol + c.row - iCRow).Formula = c.Formula
     Next c
 
     Application.ScreenUpdating = True
@@ -319,7 +319,7 @@ Sub CreateConditionalsForFormatting()
     Dim arrMarkers As Variant
     arrMarkers = Array("", "k", "M", "B")
     
-    Dim i As Integer
+    Dim i As Long
     For i = UBound(arrMarkers) To 0 Step -1
 
         With rngInput.FormatConditions.Add(xlCellValue, xlGreaterEqual, 10 ^ (3 * i))
@@ -414,7 +414,7 @@ End Sub
 '
 Sub OutputColors()
     
-    Dim i As Integer
+    Dim i As Long
     For i = 1 To 10
         ActiveCell.Offset(i).Interior.Color = Chart_GetColor(i)
     Next i
@@ -454,11 +454,11 @@ End Sub
 Sub Selection_ColorWithHex()
 
     Dim c As Range
-    Dim rngToColor As Range
+    Dim rangeToColor As Range
     On Error GoTo errHandler
-    Set rngToColor = GetInputOrSelection("Select the range of cells to color")
+    Set rangeToColor = GetInputOrSelection("Select the range of cells to color")
 
-    For Each c In rngToColor
+    For Each c In rangeToColor
 
         c.Interior.Color = RGB(WorksheetFunction.Hex2Dec(Mid(c.Value, 2, 2)), _
             WorksheetFunction.Hex2Dec(Mid(c.Value, 4, 2)), _
@@ -576,7 +576,7 @@ Sub SplitIntoRows()
     Set rngOutput = GetInputOrSelection("Select the output corner")
 
     Dim varPart As Variant
-    Dim iRow As Integer
+    Dim iRow As Long
     iRow = 0
     Dim c As Range
 

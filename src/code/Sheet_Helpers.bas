@@ -46,29 +46,29 @@ End Sub
 '
 Sub OutputSheets()
 
-    Dim wsOut As Worksheet
-    Set wsOut = Worksheets.Add(Before:=Worksheets(1))
-    wsOut.Activate
+    Dim newSheet As Worksheet
+    Set newSheet = Worksheets.Add(Before:=Worksheets(1))
+    newSheet.Activate
 
-    Dim rngOut As Range
-    Set rngOut = wsOut.Range("B2")
+    Dim newRange As Range
+    Set newRange = newSheet.Range("B2")
 
-    Dim iRow As Integer
-    iRow = 0
+    Dim row As Long
+    row = 0
 
-    Dim sht As Worksheet
-    For Each sht In Worksheets
+    Dim mySheet As Worksheet
+    For Each mySheet In Worksheets
 
-        If sht.name <> wsOut.name Then
+        If mySheet.name <> newSheet.name Then
 
-            sht.Hyperlinks.Add _
-                    rngOut.Offset(iRow), "", _
-                    "'" & sht.name & "'!A1", , _
-                        sht.name
-            iRow = iRow + 1
+            mySheet.Hyperlinks.Add _
+                    newRange.Offset(row), "", _
+                    "'" & mySheet.name & "'!A1", , _
+                        mySheet.name
+            row = row + 1
 
         End If
-    Next sht
+    Next mySheet
 
 End Sub
 
@@ -84,7 +84,7 @@ Sub UnlockAllSheets()
     Dim pass As Variant
     pass = Application.InputBox("Password to unlock")
     
-    Dim iErr As Integer
+    Dim iErr As Long
     iErr = 0
     
     If pass = False Then
@@ -92,15 +92,15 @@ Sub UnlockAllSheets()
     Else
         Application.ScreenUpdating = False
         'Changed to activeworkbook so if add-in is not installed, it will target the active book rather than the xlam
-        Dim sht As Worksheet
-        For Each sht In ActiveWorkbook.Sheets
+        Dim mySheet As Worksheet
+        For Each mySheet In ActiveWorkbook.Sheets
             'Let's keep track of the errors to inform the user
             If Err.Number <> 0 Then iErr = iErr + 1
             Err.Clear
             On Error Resume Next
-            sht.Unprotect (pass)
+            mySheet.Unprotect (pass)
 
-        Next sht
+        Next mySheet
         If Err.Number <> 0 Then iErr = iErr + 1
         Application.ScreenUpdating = True
     End If
@@ -117,18 +117,18 @@ End Sub
 '---------------------------------------------------------------------------------------
 Sub AscendSheets()
 Application.ScreenUpdating = False
-Dim wb As Workbook
-Set wb = ActiveWorkbook
+Dim myBook As Workbook
+Set myBook = ActiveWorkbook
 
-Dim intSheets As Integer
-intSheets = wb.Sheets.count
+Dim numberOfSheets As Long
+numberOfSheets = myBook.Sheets.count
 
-Dim i As Integer
-Dim j As Integer
+Dim i As Long
+Dim j As Long
 
-With wb
-    For j = 1 To intSheets
-        For i = 1 To intSheets - 1
+With myBook
+    For j = 1 To numberOfSheets
+        For i = 1 To numberOfSheets - 1
             If UCase(.Sheets(i).name) > UCase(.Sheets(i + 1).name) Then
                 .Sheets(i).Move after:=.Sheets(i + 1)
             End If
@@ -146,18 +146,18 @@ End Sub
 '---------------------------------------------------------------------------------------
 Sub DescendSheets()
 Application.ScreenUpdating = False
-Dim wb As Workbook
-Set wb = ActiveWorkbook
+Dim myBook As Workbook
+Set myBook = ActiveWorkbook
 
-Dim intSheets As Integer
-intSheets = wb.Sheets.count
+Dim numberOfSheets As Long
+numberOfSheets = myBook.Sheets.count
 
-Dim i As Integer
-Dim j As Integer
+Dim i As Long
+Dim j As Long
 
-With wb
-    For j = 1 To intSheets
-        For i = 1 To intSheets - 1
+With myBook
+    For j = 1 To numberOfSheets
+        For i = 1 To numberOfSheets - 1
             If UCase(.Sheets(i).name) < UCase(.Sheets(i + 1).name) Then
                 .Sheets(i).Move after:=.Sheets(i + 1)
             End If
