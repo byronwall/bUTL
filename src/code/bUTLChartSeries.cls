@@ -23,7 +23,7 @@ Public SeriesNumber As Long
 Public ChartType As XlChartType
 Public series As series
 
-Private str_name As String
+Private StringName As String
 
 '---------------------------------------------------------------------------------------
 ' Procedure : AddSeriesToChart
@@ -32,19 +32,19 @@ Private str_name As String
 ' Purpose   : Adds the represented series to a chart
 '---------------------------------------------------------------------------------------
 '
-Function AddSeriesToChart(cht As Chart) As series
+Function AddSeriesToChart(targetChart As Chart) As series
 
-    Dim ser As series
-    Set ser = cht.SeriesCollection.newSeries
+    Dim mySeries As series
+    Set mySeries = targetChart.SeriesCollection.newSeries
     
-    ser.Formula = Me.SeriesFormula
+    mySeries.Formula = Me.SeriesFormula
     
     If Me.ChartType <> 0 Then
-        ser.ChartType = Me.ChartType
+        mySeries.ChartType = Me.ChartType
     End If
     
     
-    Set AddSeriesToChart = ser
+    Set AddSeriesToChart = mySeries
 
 End Function
 
@@ -55,12 +55,12 @@ End Function
 ' Purpose   : Gets the full address for a range
 '---------------------------------------------------------------------------------------
 '
-Private Function FullAddress(rng As Range) As Variant
+Private Function FullAddress(targetRange As Range) As Variant
 
-    If rng Is Nothing Then
+    If targetRange Is Nothing Then
         FullAddress = ""
     Else
-        FullAddress = "'" & rng.Parent.name & "'!" & rng.Address(External:=False)
+        FullAddress = "'" & targetRange.Parent.name & "'!" & targetRange.Address(External:=False)
     End If
 
 End Function
@@ -75,8 +75,8 @@ End Function
 Public Property Get SeriesFormula() As String
 
     '2015 11 09 add a trap here to allow for a string only name
-    If str_name <> "" Then
-        SeriesFormula = "=SERIES(" & str_name & "," & _
+    If StringName <> "" Then
+        SeriesFormula = "=SERIES(" & StringName & "," & _
                         FullAddress(Me.XValues) & "," & FullAddress(Me.Values) & "," & _
                         Me.SeriesNumber & ")"
     Else
@@ -106,59 +106,59 @@ End Sub
 ' Purpose   : Reads the series info from a Series and stores it in the class
 '---------------------------------------------------------------------------------------
 '
-Sub UpdateFromChartSeries(ser As series)
+Sub UpdateFromChartSeries(mySeries As series)
 'this will work for the simple case where all items are references
 
-    Set series = ser
+    Set series = mySeries
 
-    Dim form As Variant
+    Dim myForm As Variant
 
     '=SERIES("Y",Sheet1!$C$8:$C$13,Sheet1!$D$8:$D$13,1)
 
     'pull in teh formula
-    form = ser.Formula
+    myForm = mySeries.Formula
 
     'uppercase to remove match errors
-    form = UCase(form)
+    myForm = UCase(myForm)
 
     'remove the front of the formula
-    form = Replace(form, "=SERIES(", "")
+    myForm = Replace(myForm, "=SERIES(", "")
 
-    'find the first comma
-    Dim comma
-    comma = InStr(form, ",")
+    'find the first delimiterPosition
+    Dim delimiterPosition As Long
+    delimiterPosition = InStr(myForm, ",")
 
-    If comma > 1 Then
+    If delimiterPosition > 1 Then
 
         'need to catch an error here if a text name is used instead of a valid range
         On Error Resume Next
-        Set Me.name = Range(left(form, comma - 1))
+        Set Me.name = Range(left(myForm, delimiterPosition - 1))
 
         If Err <> 0 Then
-            str_name = left(form, comma - 1)
+            StringName = left(myForm, delimiterPosition - 1)
         End If
 
         On Error GoTo 0
     End If
 
     'pull out the title from that
-    form = Mid(form, comma + 1)
+    myForm = Mid(myForm, delimiterPosition + 1)
 
-    comma = InStr(form, ",")
+    delimiterPosition = InStr(myForm, ",")
 
-    If comma > 1 Then
-        Set Me.XValues = Range(left(form, comma - 1))
+    If delimiterPosition > 1 Then
+        Set Me.XValues = Range(left(myForm, delimiterPosition - 1))
     End If
-    form = Mid(form, comma + 1)
+    myForm = Mid(myForm, delimiterPosition + 1)
 
-    comma = InStr(form, ",")
-    Set Me.Values = Range(left(form, comma - 1))
-    form = Mid(form, comma + 1)
+    delimiterPosition = InStr(myForm, ",")
+    Set Me.Values = Range(left(myForm, delimiterPosition - 1))
+    myForm = Mid(myForm, delimiterPosition + 1)
 
-    comma = InStr(form, ")")
-    Me.SeriesNumber = left(form, comma - 1)
+    delimiterPosition = InStr(myForm, ")")
+    Me.SeriesNumber = left(myForm, delimiterPosition - 1)
 
-    Me.ChartType = ser.ChartType
+    Me.ChartType = mySeries.ChartType
 End Sub
 
 '---------------------------------------------------------------------------------------
