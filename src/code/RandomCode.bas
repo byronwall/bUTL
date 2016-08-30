@@ -26,7 +26,7 @@ Sub AlphabetizeAndReportWithDupes()
     QuickSort arr
     'arr is now sorted
 
-    Dim i As Long
+    Dim i As Integer
     For i = LBound(arr) To UBound(arr)
         
         'if duplicate, use FindNext, else just Find
@@ -144,23 +144,27 @@ Function Download_File(ByVal vWebFile As String, ByVal vLocalFile As String) As 
     Dim oXMLHTTP As Object, i As Long, vFF As Long, oResp() As Byte
 
     'You can also set a ref. to Microsoft XML, and Dim oXMLHTTP as MSXML2.XMLHTTP
-    Set oXMLHTTP = CreateObject("MSXML2.XMLHTTP")
-    oXMLHTTP.Open "GET", vWebFile, False 'Open socket to get the website
-    oXMLHTTP.Send 'send request
+    Set oXMLHTTP = CreateObject("MSXML2.ServerXMLHTTP.6.0")
+    oXMLHTTP.Open "GET", vWebFile, False    'Open socket to get the website
+    oXMLHTTP.Send    'send request
 
     'Wait for request to finish
     Do While oXMLHTTP.readyState <> 4
-    DoEvents
+        DoEvents
     Loop
 
-    oResp = oXMLHTTP.responseBody 'Returns the results as a byte array
+    oResp = oXMLHTTP.responseBody    'Returns the results as a byte array
 
     'Create local file and save results to it
-    vFF = FreeFile
-    If Dir(vLocalFile) <> "" Then Kill vLocalFile
-    Open vLocalFile For Binary As #vFF
-    Put #vFF, , oResp
-    Close #vFF
+    Dim oStream As Object
+    If oXMLHTTP.Status = 200 Then
+        Set oStream = CreateObject("ADODB.Stream")
+        oStream.Open
+        oStream.Type = 1
+        oStream.Write oXMLHTTP.responseBody
+        oStream.SaveToFile vLocalFile, 2    ' 1 = no overwrite, 2 = overwrite
+        oStream.Close
+    End If
 
     'Clear memory
     Set oXMLHTTP = Nothing
@@ -264,12 +268,12 @@ Sub Rand_DumpTextFromAllSheets()
     Set w = Application.Workbooks.Add
     Set sw = w.Sheets.Add
     
-    Dim row As Long
-    row = 0
+    Dim Row As Integer
+    Row = 0
     For Each s In main.Sheets
         For Each c In s.UsedRange.SpecialCells(xlCellTypeConstants)
-            sw.Range("A1").Offset(row) = c
-            row = row + 1
+            sw.Range("A1").Offset(Row) = c
+            Row = Row + 1
         Next c
     Next s
 
@@ -304,21 +308,21 @@ Sub Rand_Matrix()
     Set rng_left = Application.InputBox("Select left column", Type:=8)
     Set rng_top = Application.InputBox("Select top column", Type:=8)
     
-    Dim int_left As Long, int_top As Long
+    Dim int_left As Integer, int_top As Integer
     
-    Set rng_body = Range(Cells(rng_left.row, rng_top.Column), _
-                            Cells(rng_left.Rows(rng_left.Rows.count).row, rng_top.Columns(rng_top.Columns.count).Column))
+    Set rng_body = Range(Cells(rng_left.Row, rng_top.Column), _
+                            Cells(rng_left.Rows(rng_left.Rows.count).Row, rng_top.Columns(rng_top.Columns.count).Column))
                             
     Dim sht_out As Worksheet
     Set sht_out = Application.Worksheets.Add()
     
     Dim rng_cell As Range
     
-    Dim int_row As Long
+    Dim int_row As Integer
     int_row = 1
     
     For Each rng_cell In rng_body.SpecialCells(xlCellTypeConstants)
-        sht_out.Range("A1").Offset(int_row) = rng_left.Cells(rng_cell.row - rng_left.row + 1, 1)
+        sht_out.Range("A1").Offset(int_row) = rng_left.Cells(rng_cell.Row - rng_left.Row + 1, 1)
         sht_out.Range("B1").Offset(int_row) = rng_top.Cells(1, rng_cell.Column - rng_top.Column + 1)
         sht_out.Range("C1").Offset(int_row) = rng_cell
         

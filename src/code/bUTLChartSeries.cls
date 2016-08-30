@@ -19,7 +19,7 @@ Option Explicit
 Public Values As Range
 Public XValues As Range
 Public name As Range
-Public SeriesNumber As Long
+Public SeriesNumber As Integer
 Public ChartType As XlChartType
 Public series As series
 
@@ -35,7 +35,7 @@ Private str_name As String
 Function AddSeriesToChart(cht As Chart) As series
 
     Dim ser As series
-    Set ser = cht.SeriesCollection.newSeries
+    Set ser = cht.SeriesCollection.NewSeries
     
     ser.Formula = Me.SeriesFormula
     

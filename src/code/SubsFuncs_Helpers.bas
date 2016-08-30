@@ -17,14 +17,14 @@ Option Explicit
 '
 Function GetInputOrSelection(msg As String) As Range
     
-    Dim defaultString As String
+    Dim strDefault As String
     
     If TypeOf Selection Is Range Then
-        defaultString = Selection.Address
+        strDefault = Selection.Address
     End If
     
     On Error GoTo ErrorNoSelection
-    Set GetInputOrSelection = Application.InputBox(msg, Type:=8, Default:=defaultString)
+    Set GetInputOrSelection = Application.InputBox(msg, Type:=8, Default:=strDefault)
     
     Exit Function
     
@@ -41,12 +41,12 @@ End Function
 ' Purpose   : Helper function to return a block of cells using a starting Range and an End direction
 '---------------------------------------------------------------------------------------
 '
-Function RangeEnd(start As Range, firstDirection As XlDirection, Optional secondDirection As XlDirection = -1) As Range
+Function RangeEnd(start As Range, direction As XlDirection, Optional direction2 As XlDirection = -1) As Range
 
-    If secondDirection = -1 Then
-        Set RangeEnd = Range(start, start.End(firstDirection))
+    If direction2 = -1 Then
+        Set RangeEnd = Range(start, start.End(direction))
     Else
-        Set RangeEnd = Range(start, start.End(firstDirection).End(secondDirection))
+        Set RangeEnd = Range(start, start.End(direction).End(direction2))
     End If
 End Function
 
@@ -57,12 +57,12 @@ End Function
 ' Purpose   : Helper function to return a range limited by the starting cell's CurrentRegion
 '---------------------------------------------------------------------------------------
 '
-Function RangeEnd_Boundary(start As Range, firstDirection As XlDirection, Optional secondDirection As XlDirection = -1) As Range
+Function RangeEnd_Boundary(start As Range, direction As XlDirection, Optional direction2 As XlDirection = -1) As Range
 
-    If secondDirection = -1 Then
-        Set RangeEnd_Boundary = Intersect(Range(start, start.End(firstDirection)), start.CurrentRegion)
+    If direction2 = -1 Then
+        Set RangeEnd_Boundary = Intersect(Range(start, start.End(direction)), start.CurrentRegion)
     Else
-        Set RangeEnd_Boundary = Intersect(Range(start, start.End(firstDirection).End(secondDirection)), start.CurrentRegion)
+        Set RangeEnd_Boundary = Intersect(Range(start, start.End(direction).End(direction2)), start.CurrentRegion)
     End If
 End Function
 
@@ -75,48 +75,48 @@ End Function
 '             http://en.allexperts.com/q/Visual-Basic-1048/string-manipulation.htm
 '---------------------------------------------------------------------------------------
 '
-Public Sub QuickSort(vArray As Variant, Optional incomingLB As Variant, Optional incomingUB As Variant)
+Public Sub QuickSort(vArray As Variant, Optional inLow As Variant, Optional inHi As Variant)
 
     Dim pivot As Variant
     Dim tmpSwap As Variant
-    Dim tempLB As Long
-    Dim tempUB As Long
+    Dim tmpLow As Long
+    Dim tmpHi As Long
 
-    If IsMissing(incomingLB) Then
-        incomingLB = LBound(vArray)
+    If IsMissing(inLow) Then
+        inLow = LBound(vArray)
     End If
 
-    If IsMissing(incomingUB) Then
-        incomingUB = UBound(vArray)
+    If IsMissing(inHi) Then
+        inHi = UBound(vArray)
     End If
 
-    tempLB = incomingLB
-    tempUB = incomingUB
+    tmpLow = inLow
+    tmpHi = inHi
 
-    pivot = vArray((incomingLB + incomingUB) \ 2)
+    pivot = vArray((inLow + inHi) \ 2)
 
-    While (tempLB <= tempUB)
+    While (tmpLow <= tmpHi)
 
-        While (UCase(vArray(tempLB)) < UCase(pivot) And tempLB < incomingUB)
-            tempLB = tempLB + 1
+        While (UCase(vArray(tmpLow)) < UCase(pivot) And tmpLow < inHi)
+            tmpLow = tmpLow + 1
         Wend
 
-        While (UCase(pivot) < UCase(vArray(tempUB)) And tempUB > incomingLB)
-            tempUB = tempUB - 1
+        While (UCase(pivot) < UCase(vArray(tmpHi)) And tmpHi > inLow)
+            tmpHi = tmpHi - 1
         Wend
 
-        If (tempLB <= tempUB) Then
-            tmpSwap = vArray(tempLB)
-            vArray(tempLB) = vArray(tempUB)
-            vArray(tempUB) = tmpSwap
-            tempLB = tempLB + 1
-            tempUB = tempUB - 1
+        If (tmpLow <= tmpHi) Then
+            tmpSwap = vArray(tmpLow)
+            vArray(tmpLow) = vArray(tmpHi)
+            vArray(tmpHi) = tmpSwap
+            tmpLow = tmpLow + 1
+            tmpHi = tmpHi - 1
         End If
 
     Wend
 
-    If (incomingLB < tempUB) Then QuickSort vArray, incomingLB, tempUB
-    If (tempLB < incomingUB) Then QuickSort vArray, tempLB, incomingUB
+    If (inLow < tmpHi) Then QuickSort vArray, inLow, tmpHi
+    If (tmpLow < inHi) Then QuickSort vArray, tmpLow, inHi
 
 End Sub
 

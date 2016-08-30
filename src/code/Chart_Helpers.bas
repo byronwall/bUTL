@@ -15,7 +15,7 @@ Option Explicit
 ' Purpose   : Returns a list of colors for styling chart series
 '---------------------------------------------------------------------------------------
 '
-Function Chart_GetColor(index As Variant) As Long
+Public Function Chart_GetColor(index As Variant) As Long
 
     Dim colors(1 To 10) As Variant
 
@@ -37,47 +37,53 @@ End Function
 '---------------------------------------------------------------------------------------
 ' Procedure : Chart_GetObjectsFromObject
 ' Author    : @byronwall
-' Date      : 2015 07 24
+' Date      : 2015 12 30
 ' Purpose   : Helper function which finds a valid ChartObject based on what is actually selected
 '             Returns a Collection (possibly empty) and should be handled with a For Each
 '---------------------------------------------------------------------------------------
 '
-Function Chart_GetObjectsFromObject(incomingObject As Object) As Variant
+Public Function Chart_GetObjectsFromObject(obj_in As Object) As Variant
 
-    Dim objectType As String
-    'TODO: these should be upgrade to TypeOf instead of strings
-    objectType = TypeName(incomingObject)
+    Dim coll As New Collection
 
-    Dim newCollection As New Collection
+    'NOTE that this function does not work well with Axis objects.  Excel does not return the correct Parent for them.
 
-    Dim newObject As Variant
-
-    If objectType = "DrawingObjects" Then
+    If TypeOf obj_in Is DrawingObjects Then
         'this means that multiple charts are selected
-        For Each newObject In incomingObject
-            If TypeName(newObject) = "ChartObject" Then
+        Dim obj As Variant
+        For Each obj In obj_in
+            If TypeName(obj) = "ChartObject" Then
                 'add it to the set
-                newCollection.Add newObject
+                coll.Add obj
             End If
-        Next newObject
+        Next obj
 
-    ElseIf objectType = "Chart" Then
-        newCollection.Add incomingObject.Parent
+    ElseIf TypeOf obj_in Is Chart Then
+        coll.Add obj_in.Parent
 
-    ElseIf objectType = "ChartArea" Or objectType = "PlotArea" Then
+    ElseIf TypeOf obj_in Is ChartArea _
+           Or TypeOf obj_in Is PlotArea _
+           Or TypeOf obj_in Is Legend _
+           Or TypeOf obj_in Is ChartTitle Then
         'parent is the chart, parent of that is the chart obj
-        newCollection.Add incomingObject.Parent.Parent
+        coll.Add obj_in.Parent.Parent
 
-    ElseIf objectType = "Series" Then
+    ElseIf TypeOf obj_in Is series Then
         'need to go up three levels
-        newCollection.Add incomingObject.Parent.Parent.Parent
+        coll.Add obj_in.Parent.Parent.Parent
+
+    ElseIf TypeOf obj_in Is Axis _
+           Or TypeOf obj_in Is Gridlines _
+           Or TypeOf obj_in Is AxisTitle Then
+        'these are the oddly unsupported objects
+        MsgBox "Axis/gridline selection not supported.  This is an Excel bug.  Select another element on the chart(s)."
 
     Else
-        MsgBox "Select an object that is supported."
+        MsgBox "Select a part of the chart(s), except an axis."
+
     End If
 
-    Set Chart_GetObjectsFromObject = newCollection
-
+    Set Chart_GetObjectsFromObject = coll
 End Function
 
 '---------------------------------------------------------------------------------------
@@ -87,12 +93,12 @@ End Function
 ' Purpose   : Helper Sub to delete all charts on ActiveSheet
 '---------------------------------------------------------------------------------------
 '
-Sub DeleteAllCharts()
+Public Sub DeleteAllCharts()
 
     If MsgBox("Delete all charts?", vbYesNo) = vbYes Then
         Application.ScreenUpdating = False
 
-        Dim iCounter As Long
+        Dim iCounter As Integer
         For iCounter = ActiveSheet.ChartObjects.count To 1 Step -1
 
             ActiveSheet.ChartObjects(iCounter).Delete

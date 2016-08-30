@@ -15,14 +15,14 @@ Option Explicit
 ' Purpose   : UDF that generates a sequence of random letters
 '---------------------------------------------------------------------------------------
 '
-Public Function RandLetters(numberOfLetters As Long) As String
+Public Function RandLetters(num As Integer) As String
 
-    Dim i As Long
+    Dim i As Integer
     
     Dim letters() As String
-    ReDim letters(1 To numberOfLetters)
+    ReDim letters(1 To num)
     
-    For i = 1 To numberOfLetters
+    For i = 1 To num
         letters(i) = Chr(Int(Rnd() * 26 + 65))
     Next
     
