@@ -20,3 +20,14 @@ If you want to contribute a feature to the add-in or improve the code in some ot
  - commit and submit a pull request
 
 Why? This workflow has been adopted because Excel/VBA files have severe limitations for version control.  An `xlam` file is a zipped folder with a number of binary files inside the zip.  There are a couple of useful add-ins which help manage this, but I would prefer to not dictate what add-ins are installed.  Given that, this workflow and build scripts allow for changes to the underlying VBA code and Ribbon interface to be properly tracked.
+
+##Structure of the repo
+The repo contains the source code, documentation, and several scripts used to generate the source from the xlam file.
+
+Folder structure:
+ 
+ - docs: contains Markdown files to explain the functions of the add-in
+ - scripts: contains the build scripts which are used to convert the xlam file to repo-ready source code and to convert the source code to a usable xlam file.
+ - src: this folders contains the actual source code including an unzipped version of the xlam file
+   - code: this folder contains .bas, .cls, and .frx files which represent the source of the VBA code
+   - package: this is an unzipped version of the xlam file which allows for the XML driving the add-in to be tracked correctly
