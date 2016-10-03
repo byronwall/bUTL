@@ -91,7 +91,7 @@ Sub Rand_PrintMultiple()
     'Another static folder
     Dim rng_tag As Range
     Dim str_path As String
-    str_path = "C:\Documents and Settings\wallbd\Application Data\PDF OUTPUT\"
+    str_path = InputBox("Provide a folder for output location")
     
     For Each rng_tag In Range("TAGS[TAG]").SpecialCells(xlCellTypeVisible)
         
@@ -126,7 +126,7 @@ Sub Rand_PrintMultiplePvVsOp()
     'Another static folder
     Dim rng_tag As Range
     Dim str_path As String
-    str_path = "C:\Documents and Settings\wallbd\Application Data\PDF OUTPUT\"
+    str_path = InputBox("Provide a folder for output location")
     
     For Each rng_tag In Range("tag_table[TAG]").SpecialCells(xlCellTypeVisible)
         
@@ -176,7 +176,7 @@ Sub Rand_DownloadFromSheet()
     
     Dim str_folder As Variant
     'Another static folder
-    str_folder = "C:\Documents and Settings\wallbd\Application Data\DSP Guide\"
+    str_folder = InputBox("Provide a folder location for output")
     
     For Each rng_addr In Range("B2:B35")
     

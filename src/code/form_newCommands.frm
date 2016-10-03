@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} form_newCommands 
    Caption         =   "Additional Features"
-   ClientHeight    =   9465
+   ClientHeight    =   10500
    ClientLeft      =   45
    ClientTop       =   435
    ClientWidth     =   6585
@@ -111,4 +111,9 @@ End Sub
 
 Private Sub CommandButton34_Click()
     Formula_CreateCountNameForArray
+End Sub
+
+Private Sub CommandButton35_Click()
+    TraceDependentsForAll
+    Unload Me
 End Sub

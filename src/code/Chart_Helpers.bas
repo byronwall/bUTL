@@ -47,15 +47,23 @@ Public Function Chart_GetObjectsFromObject(obj_in As Object) As Variant
     Dim coll As New Collection
 
     'NOTE that this function does not work well with Axis objects.  Excel does not return the correct Parent for them.
+    
+    Dim obj As Variant
+
 
     If TypeOf obj_in Is DrawingObjects Then
         'this means that multiple charts are selected
-        Dim obj As Variant
+        
         For Each obj In obj_in
             If TypeName(obj) = "ChartObject" Then
                 'add it to the set
                 coll.Add obj
             End If
+        Next obj
+        
+    ElseIf TypeOf obj_in Is Worksheet Then
+        For Each obj In obj_in.ChartObjects
+            coll.Add obj
         Next obj
 
     ElseIf TypeOf obj_in Is Chart Then

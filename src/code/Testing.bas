@@ -1,6 +1,89 @@
 Attribute VB_Name = "Testing"
 Option Explicit
 
+Public Sub ListAllPossiblePlacesForExternalReferences()
+
+    'search through chart formulas
+    Debug.Print "Checking chart series formulas..."
+    Dim cht_obj As ChartObject
+    For Each cht_obj In Chart_GetObjectsFromObject(ActiveSheet)
+        Dim ser As series
+        For Each ser In cht_obj.Chart.SeriesCollection
+            
+            Dim strForm As String
+            strForm = ser.Formula
+            
+            If InStr(strForm, "[") Then
+                Debug.Print strForm
+            End If
+        Next
+    Next
+    
+    'search in data validation
+    Dim sht As Worksheet
+    Dim rng As Range
+    Debug.Print "Checking data validation formulas..."
+    For Each sht In Worksheets
+        For Each rng In sht.UsedRange
+            Dim strVal As String
+            strVal = "!"
+            On Error Resume Next
+            strVal = rng.Validation.Formula1
+            On Error GoTo 0
+            
+            If strVal <> "!" Then
+                If InStr(strVal, "[") Then
+                    Debug.Print rng.Address(False, False, , True) & strVal
+                    'rng.Activate
+                End If
+            End If
+        Next
+    Next
+    
+    'search in conditional formatting
+    Debug.Print "Checking conditional formatting formulas..."
+    For Each sht In Worksheets
+        For Each rng In sht.UsedRange
+            Dim condFormat As FormatCondition
+            For Each condFormat In rng.FormatConditions
+                'get the formulas
+        
+                strVal = "!"
+                On Error Resume Next
+                strVal = condFormat.Formula1
+                On Error GoTo 0
+            
+                If strVal <> "!" Then
+                    If InStr(strVal, "[") Then
+                        Debug.Print rng.Address(False, False, , True) & strVal
+                        'rng.Activate
+                    End If
+                End If
+            Next
+        Next
+    Next
+End Sub
+
+Sub Formatting_IncreaseIndentLevel()
+
+    Dim rngCell As Range
+    
+    For Each rngCell In Selection
+        rngCell.IndentLevel = rngCell.IndentLevel + 2
+    Next
+
+End Sub
+
+Sub Formatting_DecreaseIndentLevel()
+
+    Dim rngCell As Range
+    
+    For Each rngCell In Selection
+        rngCell.IndentLevel = WorksheetFunction.Max(rngCell.IndentLevel - 2, 0)
+    Next
+
+End Sub
+
 Sub ShowOtherOpenInstanceOfExcel()
     Dim oXLApp As Object
 
@@ -29,7 +112,7 @@ End Sub
 Public Sub PushMergeFieldsIntoPowerPoint()
 
     Dim strPath As String
-    strPath = "E:\Desktop\technical proposal\SulfaTrapTechnicalClarification_03182016_mcc, for merge.pptx"
+    strPath = InputBox("Provide the filename pptx to check")
 
     Dim appPPT As New PowerPoint.Application
 
@@ -461,27 +544,27 @@ End Sub
 
 Private Sub Formatting_AddCondFormat(ByVal rng As Range)
 
-        rng.FormatConditions.AddColorScale ColorScaleType:=3
-        rng.FormatConditions(rng.FormatConditions.count).SetFirstPriority
-        rng.FormatConditions(1).ColorScaleCriteria(1).Type = _
-        xlConditionValueLowestValue
-        With rng.FormatConditions(1).ColorScaleCriteria(1).FormatColor
-            .Color = 7039480
-            .TintAndShade = 0
-        End With
-        rng.FormatConditions(1).ColorScaleCriteria(2).Type = _
-        xlConditionValuePercentile
-        rng.FormatConditions(1).ColorScaleCriteria(2).Value = 50
-        With rng.FormatConditions(1).ColorScaleCriteria(2).FormatColor
-            .Color = 8711167
-            .TintAndShade = 0
-        End With
-        rng.FormatConditions(1).ColorScaleCriteria(3).Type = _
-        xlConditionValueHighestValue
-        With Selection.FormatConditions(1).ColorScaleCriteria(3).FormatColor
-            .Color = 8109667
-            .TintAndShade = 0
-        End With
+    rng.FormatConditions.AddColorScale ColorScaleType:=3
+    rng.FormatConditions(rng.FormatConditions.count).SetFirstPriority
+    rng.FormatConditions(1).ColorScaleCriteria(1).Type = _
+                                                       xlConditionValueLowestValue
+    With rng.FormatConditions(1).ColorScaleCriteria(1).FormatColor
+        .Color = 7039480
+        .TintAndShade = 0
+    End With
+    rng.FormatConditions(1).ColorScaleCriteria(2).Type = _
+                                                       xlConditionValuePercentile
+    rng.FormatConditions(1).ColorScaleCriteria(2).Value = 50
+    With rng.FormatConditions(1).ColorScaleCriteria(2).FormatColor
+        .Color = 8711167
+        .TintAndShade = 0
+    End With
+    rng.FormatConditions(1).ColorScaleCriteria(3).Type = _
+                                                       xlConditionValueHighestValue
+    With Selection.FormatConditions(1).ColorScaleCriteria(3).FormatColor
+        .Color = 8109667
+        .TintAndShade = 0
+    End With
 End Sub
 
 
