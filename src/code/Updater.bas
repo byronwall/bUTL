@@ -42,7 +42,8 @@ Public Sub UpdateSelf()
     
     Dim promptResults As VbMsgBoxResult
     promptResults = MsgBox("This will: download the latest bUTL file, close Excel, " & _
-                           "create a VB script file to copy that file over the current one, and reopen Excel.  Continue?", _
+                           "create a VB script file to copy that file over the current one, and reopen Excel." & vbCrLf & vbCrLf & _
+                           "Continue?", _
                            vbYesNo, "Update bUTL?")
                            
     If promptResults = vbNo Then

@@ -217,6 +217,10 @@ Public Sub btn_updateScrollbars_onAction(control As IRibbonControl)
     UpdateScrollbars
 End Sub
 
+Public Sub btn_checkUpdates_onAction(control As IRibbonControl)
+    CheckForUpdates
+End Sub
+
 '---------------------------------------------------------------------------------------
 ' Procedure : RibbonOnLoad
 ' Author    : @byronwall
