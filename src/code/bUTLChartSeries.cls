@@ -19,21 +19,21 @@ Option Explicit
 Public Values As Range
 Public XValues As Range
 Public name As Range
-Public SeriesNumber As Integer
+Public SeriesNumber As Long
 Public ChartType As XlChartType
 Public series As series
 
 Private str_name As String
 
-'---------------------------------------------------------------------------------------
-' Procedure : AddSeriesToChart
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Adds the represented series to a chart
-'---------------------------------------------------------------------------------------
-'
-Function AddSeriesToChart(cht As Chart) As series
 
+Function AddSeriesToChart(cht As Chart) As series
+    '---------------------------------------------------------------------------------------
+    ' Procedure : AddSeriesToChart
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Adds the represented series to a chart
+    '---------------------------------------------------------------------------------------
+    '
     Dim ser As series
     Set ser = cht.SeriesCollection.NewSeries
     
@@ -48,15 +48,15 @@ Function AddSeriesToChart(cht As Chart) As series
 
 End Function
 
-'---------------------------------------------------------------------------------------
-' Procedure : FullAddress
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Gets the full address for a range
-'---------------------------------------------------------------------------------------
-'
-Private Function FullAddress(rng As Range) As Variant
 
+Private Function FullAddress(rng As Range) As Variant
+    '---------------------------------------------------------------------------------------
+    ' Procedure : FullAddress
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Gets the full address for a range
+    '---------------------------------------------------------------------------------------
+    '
     If rng Is Nothing Then
         FullAddress = ""
     Else
@@ -65,15 +65,15 @@ Private Function FullAddress(rng As Range) As Variant
 
 End Function
 
-'---------------------------------------------------------------------------------------
-' Procedure : SeriesFormula
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Returns a SERIES formula for the represented series
-'---------------------------------------------------------------------------------------
-'
-Public Property Get SeriesFormula() As String
 
+Public Property Get SeriesFormula() As String
+    '---------------------------------------------------------------------------------------
+    ' Procedure : SeriesFormula
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Returns a SERIES formula for the represented series
+    '---------------------------------------------------------------------------------------
+    '
     '2015 11 09 add a trap here to allow for a string only name
     If str_name <> "" Then
         SeriesFormula = "=SERIES(" & str_name & "," & _
@@ -88,26 +88,29 @@ Public Property Get SeriesFormula() As String
 
 End Property
 
-'---------------------------------------------------------------------------------------
-' Procedure : Class_Initialize
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Ensures the SERIES starts out first
-'---------------------------------------------------------------------------------------
-'
+
 Private Sub Class_Initialize()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : Class_Initialize
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Ensures the SERIES starts out first
+    '---------------------------------------------------------------------------------------
+    '
     Me.SeriesNumber = 1
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : UpdateFromChartSeries
-' Author    : @byronwall
-' Date      : 2015 11 09
-' Purpose   : Reads the series info from a Series and stores it in the class
-'---------------------------------------------------------------------------------------
-'
+
 Sub UpdateFromChartSeries(ser As series)
-'this will work for the simple case where all items are references
+    '---------------------------------------------------------------------------------------
+    ' Procedure : UpdateFromChartSeries
+    ' Author    : @byronwall
+    ' Date      : 2015 11 09
+    ' Purpose   : Reads the series info from a Series and stores it in the class
+    '---------------------------------------------------------------------------------------
+    '
+    
+    'this will work for the simple case where all items are references
 
     Set series = ser
 
@@ -161,15 +164,15 @@ Sub UpdateFromChartSeries(ser As series)
     Me.ChartType = ser.ChartType
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : UpdateSeriesWithNewValues
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Forces the stored Series to take on any changed values in the class
-'---------------------------------------------------------------------------------------
-'
-Sub UpdateSeriesWithNewValues()
 
+Sub UpdateSeriesWithNewValues()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : UpdateSeriesWithNewValues
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Forces the stored Series to take on any changed values in the class
+    '---------------------------------------------------------------------------------------
+    '
     Me.series.Formula = Me.SeriesFormula
 
 End Sub

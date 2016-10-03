@@ -5,10 +5,10 @@ Public Sub ListAllPossiblePlacesForExternalReferences()
 
     'search through chart formulas
     Debug.Print "Checking chart series formulas..."
-    Dim cht_obj As ChartObject
-    For Each cht_obj In Chart_GetObjectsFromObject(ActiveSheet)
+    Dim chtObj As ChartObject
+    For Each chtObj In Chart_GetObjectsFromObject(ActiveSheet)
         Dim ser As series
-        For Each ser In cht_obj.Chart.SeriesCollection
+        For Each ser In chtObj.Chart.SeriesCollection
             
             Dim strForm As String
             strForm = ser.Formula
@@ -257,7 +257,7 @@ Public Sub Formula_ConcatenateCells()
     Dim arr_addr As Variant
     ReDim arr_addr(1 To rng_joins.count)
 
-    Dim int_count As Integer
+    Dim int_count As Long
     int_count = 1
 
     Dim rng_join As Range
@@ -344,7 +344,7 @@ Public Sub CharacterCodesForSelection()
     Dim rng_val As Range
     Set rng_val = Selection
 
-    Dim i As Integer
+    Dim i As Long
     For i = 1 To Len(rng_val.Value)
         MsgBox Asc(Mid(rng_val.Value, i, 1))
     Next
@@ -384,8 +384,8 @@ Public Sub CopyDiscontinuousRangeValuesToClipboard()
     End If
 
     'get the counts for rows/columns
-    Dim int_row As Integer
-    Dim int_cols As Integer
+    Dim int_row As Long
+    Dim int_cols As Long
 
     Set rngCSV = Intersect(rngCSV, rngCSV.Parent.UsedRange)
 
@@ -493,7 +493,7 @@ Public Sub ComputeDistanceMatrix()
             Dim dbl_dist_sq As Double
             dbl_dist_sq = 0
 
-            Dim int_col As Integer
+            Dim int_col As Long
             For int_col = 1 To rng_row1.Cells.count
                 dbl_dist_sq = dbl_dist_sq + (rng_row1.Cells(1, int_col) - rng_row2.Cells(1, int_col)) ^ 2
             Next
@@ -523,13 +523,13 @@ End Sub
 
 Sub RemoveAllLegends()
 
-    Dim cht_obj As ChartObject
+    Dim chtObj As ChartObject
     
-    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
-        cht_obj.Chart.HasLegend = False
-        cht_obj.Chart.HasTitle = True
+    For Each chtObj In Chart_GetObjectsFromObject(Selection)
+        chtObj.Chart.HasLegend = False
+        chtObj.Chart.HasTitle = True
         
-        cht_obj.Chart.SeriesCollection(1).MarkerSize = 4
+        chtObj.Chart.SeriesCollection(1).MarkerSize = 4
     Next
 
 End Sub
@@ -569,15 +569,15 @@ End Sub
 
 
 
-'---------------------------------------------------------------------------------------
-' Procedure : TraceDependentsForAll
-' Author    : @byronwall
-' Date      : 2015 11 09
-' Purpose   : Quick Sub to iterate through Selection and Trace Dependents for all
-'---------------------------------------------------------------------------------------
-'
-Sub TraceDependentsForAll()
 
+Sub TraceDependentsForAll()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : TraceDependentsForAll
+    ' Author    : @byronwall
+    ' Date      : 2015 11 09
+    ' Purpose   : Quick Sub to iterate through Selection and Trace Dependents for all
+    '---------------------------------------------------------------------------------------
+    '
     Dim rng As Range
     
     For Each rng In Intersect(Selection, Selection.Parent.UsedRange)

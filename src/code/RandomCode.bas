@@ -1,20 +1,10 @@
 Attribute VB_Name = "RandomCode"
 Option Explicit
 
-'---------------------------------------------------------------------------------------
-' Module    : RandomCode
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Contains a lot of junk code that was stored.  Most is too specific to be useful.
-'---------------------------------------------------------------------------------------
 
-
-
-
-'''this one goes through a data source and alphabetizes it.
-'''keeping mainly for the select case and find/findnext
 Sub AlphabetizeAndReportWithDupes()
-
+    '''this one goes through a data source and alphabetizes it.
+    '''keeping mainly for the select case and find/findnext
     Dim rng_data As Range
     Set rng_data = Range("B2:B28")
 
@@ -26,16 +16,16 @@ Sub AlphabetizeAndReportWithDupes()
     QuickSort arr
     'arr is now sorted
 
-    Dim i As Integer
+    Dim i As Long
     For i = LBound(arr) To UBound(arr)
         
         'if duplicate, use FindNext, else just Find
         Dim rng_search As Range
         Select Case True
-            Case i = LBound(arr), UCase(arr(i)) <> UCase(arr(i - 1))
-                Set rng_search = rng_data.Find(arr(i))
-            Case Else
-                Set rng_search = rng_data.FindNext(rng_search)
+        Case i = LBound(arr), UCase(arr(i)) <> UCase(arr(i - 1))
+            Set rng_search = rng_data.Find(arr(i))
+        Case Else
+            Set rng_search = rng_data.FindNext(rng_search)
         End Select
 
         ''''do your report stuff in here for each row
@@ -145,15 +135,15 @@ Function DownloadFileAsString(ByVal vWebFile As String) As String
 
     'You can also set a ref. to Microsoft XML, and Dim oXMLHTTP as MSXML2.XMLHTTP
     Set oXMLHTTP = CreateObject("MSXML2.ServerXMLHTTP.6.0")
-    oXMLHTTP.Open "GET", vWebFile, False    'Open socket to get the website
-    oXMLHTTP.Send    'send request
+    oXMLHTTP.Open "GET", vWebFile, False         'Open socket to get the website
+    oXMLHTTP.Send                                'send request
 
     'Wait for request to finish
     Do While oXMLHTTP.readyState <> 4
         DoEvents
     Loop
 
-    DownloadFileAsString = oXMLHTTP.responseText    'Returns the results as a byte array
+    DownloadFileAsString = oXMLHTTP.responseText 'Returns the results as a byte array
 
     'Clear memory
     Set oXMLHTTP = Nothing
@@ -164,15 +154,15 @@ Function Download_File(ByVal vWebFile As String, ByVal vLocalFile As String) As 
 
     'You can also set a ref. to Microsoft XML, and Dim oXMLHTTP as MSXML2.XMLHTTP
     Set oXMLHTTP = CreateObject("MSXML2.ServerXMLHTTP.6.0")
-    oXMLHTTP.Open "GET", vWebFile, False    'Open socket to get the website
-    oXMLHTTP.Send    'send request
+    oXMLHTTP.Open "GET", vWebFile, False         'Open socket to get the website
+    oXMLHTTP.Send                                'send request
 
     'Wait for request to finish
     Do While oXMLHTTP.readyState <> 4
         DoEvents
     Loop
 
-    oResp = oXMLHTTP.responseBody    'Returns the results as a byte array
+    oResp = oXMLHTTP.responseBody                'Returns the results as a byte array
 
     'Create local file and save results to it
     Dim oStream As Object
@@ -181,7 +171,7 @@ Function Download_File(ByVal vWebFile As String, ByVal vLocalFile As String) As 
         oStream.Open
         oStream.Type = 1
         oStream.Write oXMLHTTP.responseBody
-        oStream.SaveToFile vLocalFile, 2    ' 1 = no overwrite, 2 = overwrite
+        oStream.SaveToFile vLocalFile, 2         ' 1 = no overwrite, 2 = overwrite
         oStream.Close
     End If
 
@@ -207,62 +197,62 @@ End Sub
 
 Sub Rand_CommonPrintSettings()
 
-Application.ScreenUpdating = False
-Dim sht As Worksheet
+    Application.ScreenUpdating = False
+    Dim sht As Worksheet
 
-For Each sht In Sheets
-    sht.PageSetup.PrintArea = ""
-    sht.ResetAllPageBreaks
-    sht.PageSetup.PrintArea = ""
+    For Each sht In Sheets
+        sht.PageSetup.PrintArea = ""
+        sht.ResetAllPageBreaks
+        sht.PageSetup.PrintArea = ""
     
-    With sht.PageSetup
-        .LeftHeader = ""
-        .CenterHeader = ""
-        .RightHeader = ""
-        .LeftFooter = ""
-        .CenterFooter = ""
-        .RightFooter = ""
-        .LeftMargin = Application.InchesToPoints(0.75)
-        .RightMargin = Application.InchesToPoints(0.75)
-        .TopMargin = Application.InchesToPoints(1)
-        .BottomMargin = Application.InchesToPoints(1)
-        .HeaderMargin = Application.InchesToPoints(0.5)
-        .FooterMargin = Application.InchesToPoints(0.5)
-        .PrintHeadings = False
-        .PrintGridlines = False
-        .PrintComments = xlPrintNoComments
-        .PrintQuality = 600
-        .CenterHorizontally = False
-        .CenterVertically = False
-        .Orientation = xlLandscape
-        .Draft = False
-        .PaperSize = xlPaperLetter
-        .FirstPageNumber = xlAutomatic
-        .Order = xlDownThenOver
-        .BlackAndWhite = False
-        .Zoom = False
-        .FitToPagesWide = 1
-        .FitToPagesTall = False
-        .PrintErrors = xlPrintErrorsDisplayed
-        .OddAndEvenPagesHeaderFooter = False
-        .DifferentFirstPageHeaderFooter = False
-        .ScaleWithDocHeaderFooter = True
-        .AlignMarginsHeaderFooter = False
-        .EvenPage.LeftHeader.Text = ""
-        .EvenPage.CenterHeader.Text = ""
-        .EvenPage.RightHeader.Text = ""
-        .EvenPage.LeftFooter.Text = ""
-        .EvenPage.CenterFooter.Text = ""
-        .EvenPage.RightFooter.Text = ""
-        .FirstPage.LeftHeader.Text = ""
-        .FirstPage.CenterHeader.Text = ""
-        .FirstPage.RightHeader.Text = ""
-        .FirstPage.LeftFooter.Text = ""
-        .FirstPage.CenterFooter.Text = ""
-        .FirstPage.RightFooter.Text = ""
-        .PrintTitleRows = ""
-        .PrintTitleColumns = ""
-    End With
+        With sht.PageSetup
+            .LeftHeader = ""
+            .CenterHeader = ""
+            .RightHeader = ""
+            .LeftFooter = ""
+            .CenterFooter = ""
+            .RightFooter = ""
+            .LeftMargin = Application.InchesToPoints(0.75)
+            .RightMargin = Application.InchesToPoints(0.75)
+            .TopMargin = Application.InchesToPoints(1)
+            .BottomMargin = Application.InchesToPoints(1)
+            .HeaderMargin = Application.InchesToPoints(0.5)
+            .FooterMargin = Application.InchesToPoints(0.5)
+            .PrintHeadings = False
+            .PrintGridlines = False
+            .PrintComments = xlPrintNoComments
+            .PrintQuality = 600
+            .CenterHorizontally = False
+            .CenterVertically = False
+            .Orientation = xlLandscape
+            .Draft = False
+            .PaperSize = xlPaperLetter
+            .FirstPageNumber = xlAutomatic
+            .Order = xlDownThenOver
+            .BlackAndWhite = False
+            .Zoom = False
+            .FitToPagesWide = 1
+            .FitToPagesTall = False
+            .PrintErrors = xlPrintErrorsDisplayed
+            .OddAndEvenPagesHeaderFooter = False
+            .DifferentFirstPageHeaderFooter = False
+            .ScaleWithDocHeaderFooter = True
+            .AlignMarginsHeaderFooter = False
+            .EvenPage.LeftHeader.Text = ""
+            .EvenPage.CenterHeader.Text = ""
+            .EvenPage.RightHeader.Text = ""
+            .EvenPage.LeftFooter.Text = ""
+            .EvenPage.CenterFooter.Text = ""
+            .EvenPage.RightFooter.Text = ""
+            .FirstPage.LeftHeader.Text = ""
+            .FirstPage.CenterHeader.Text = ""
+            .FirstPage.RightHeader.Text = ""
+            .FirstPage.LeftFooter.Text = ""
+            .FirstPage.CenterFooter.Text = ""
+            .FirstPage.RightFooter.Text = ""
+            .PrintTitleRows = ""
+            .PrintTitleColumns = ""
+        End With
     Next sht
     
     Application.ScreenUpdating = True
@@ -287,7 +277,7 @@ Sub Rand_DumpTextFromAllSheets()
     Set w = Application.Workbooks.Add
     Set sw = w.Sheets.Add
     
-    Dim Row As Integer
+    Dim Row As Long
     Row = 0
     For Each s In main.Sheets
         For Each c In s.UsedRange.SpecialCells(xlCellTypeConstants)
@@ -317,9 +307,9 @@ Sub Rand_ApplyHeadersAndFootersToAll()
 
 End Sub
 
-'Takes a table of values and flattens it.
-Sub Rand_Matrix()
 
+Sub Rand_Matrix()
+    'Takes a table of values and flattens it.
     Dim rng_left As Range
     Dim rng_top As Range
     Dim rng_body As Range
@@ -327,17 +317,17 @@ Sub Rand_Matrix()
     Set rng_left = Application.InputBox("Select left column", Type:=8)
     Set rng_top = Application.InputBox("Select top column", Type:=8)
     
-    Dim int_left As Integer, int_top As Integer
+    Dim int_left As Long, int_top As Long
     
     Set rng_body = Range(Cells(rng_left.Row, rng_top.Column), _
-                            Cells(rng_left.Rows(rng_left.Rows.count).Row, rng_top.Columns(rng_top.Columns.count).Column))
+                         Cells(rng_left.Rows(rng_left.Rows.count).Row, rng_top.Columns(rng_top.Columns.count).Column))
                             
     Dim sht_out As Worksheet
     Set sht_out = Application.Worksheets.Add()
     
     Dim rng_cell As Range
     
-    Dim int_row As Integer
+    Dim int_row As Long
     int_row = 1
     
     For Each rng_cell In rng_body.SpecialCells(xlCellTypeConstants)

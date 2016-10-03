@@ -1,22 +1,15 @@
 Attribute VB_Name = "SelectionMgr"
-'---------------------------------------------------------------------------------------
-' Module    : SelectionMgr
-' Author    : @byronwall
-' Date      : 2015 08 05
-' Purpose   : This module contains code related to changing the Selection with kbd shortcuts
-'---------------------------------------------------------------------------------------
-
 Option Explicit
 
-'---------------------------------------------------------------------------------------
-' Procedure : OffsetSelectionByRowsAndColumns
-' Author    : @byronwall
-' Date      : 2015 08 05
-' Purpose   : Offsets and selects the Selection a given number of rows/columns
-'---------------------------------------------------------------------------------------
-'
-Sub OffsetSelectionByRowsAndColumns(iRowsOff As Integer, iColsOff As Integer)
 
+Sub OffsetSelectionByRowsAndColumns(iRowsOff As Long, iColsOff As Long)
+    '---------------------------------------------------------------------------------------
+    ' Procedure : OffsetSelectionByRowsAndColumns
+    ' Author    : @byronwall
+    ' Date      : 2015 08 05
+    ' Purpose   : Offsets and selects the Selection a given number of rows/columns
+    '---------------------------------------------------------------------------------------
+    '
     If TypeOf Selection Is Range Then
 
         'this error should only get called if the new range is outside the sheet boundaries
@@ -31,67 +24,68 @@ OffsetSelectionByRowsAndColumns_Exit:
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : SelectionOffsetDown
-' Author    : @byronwall
-' Date      : 2015 08 05
-' Purpose   : Moves Selection down one row
-'---------------------------------------------------------------------------------------
-'
-Sub SelectionOffsetDown()
 
+Sub SelectionOffsetDown()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : SelectionOffsetDown
+    ' Author    : @byronwall
+    ' Date      : 2015 08 05
+    ' Purpose   : Moves Selection down one row
+    '---------------------------------------------------------------------------------------
+    '
     Call OffsetSelectionByRowsAndColumns(1, 0)
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : SelectionOffsetLeft
-' Author    : @byronwall
-' Date      : 2015 08 05
-' Purpose   : Moves Selection left one column
-'---------------------------------------------------------------------------------------
-'
-Sub SelectionOffsetLeft()
 
+Sub SelectionOffsetLeft()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : SelectionOffsetLeft
+    ' Author    : @byronwall
+    ' Date      : 2015 08 05
+    ' Purpose   : Moves Selection left one column
+    '---------------------------------------------------------------------------------------
+    '
     Call OffsetSelectionByRowsAndColumns(0, -1)
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : SelectionOffsetRight
-' Author    : @byronwall
-' Date      : 2015 08 05
-' Purpose   : Moves selection right one column
-'---------------------------------------------------------------------------------------
-'
-Sub SelectionOffsetRight()
 
+Sub SelectionOffsetRight()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : SelectionOffsetRight
+    ' Author    : @byronwall
+    ' Date      : 2015 08 05
+    ' Purpose   : Moves selection right one column
+    '---------------------------------------------------------------------------------------
+    '
     Call OffsetSelectionByRowsAndColumns(0, 1)
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : SelectionOffsetUp
-' Author    : @byronwall
-' Date      : 2015 08 05
-' Purpose   : Moves Selection up one row
-'---------------------------------------------------------------------------------------
-'
-Sub SelectionOffsetUp()
 
+Sub SelectionOffsetUp()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : SelectionOffsetUp
+    ' Author    : @byronwall
+    ' Date      : 2015 08 05
+    ' Purpose   : Moves Selection up one row
+    '---------------------------------------------------------------------------------------
+    '
     Call OffsetSelectionByRowsAndColumns(-1, 0)
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : SetUpKeyboardHooksForSelection
-' Author    : @byronwall
-' Date      : 2016 09 29
-' Purpose   : Creates hotkey events for the selection events
-'---------------------------------------------------------------------------------------
-'
-Sub SetUpKeyboardHooksForSelection()
 
+Sub SetUpKeyboardHooksForSelection()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : SetUpKeyboardHooksForSelection
+    ' Author    : @byronwall
+    ' Date      : 2016 09 29
+    ' Purpose   : Creates hotkey events for the selection events
+    '---------------------------------------------------------------------------------------
+    '
+    
     'SHIFT =    +
     'CTRL =     ^
     'ALT =      %

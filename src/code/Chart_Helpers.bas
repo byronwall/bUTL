@@ -1,22 +1,15 @@
 Attribute VB_Name = "Chart_Helpers"
 Option Explicit
 
-'---------------------------------------------------------------------------------------
-' Module    : Chart_Helpers
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Contains code that helps other chart related features
-'---------------------------------------------------------------------------------------
 
-'---------------------------------------------------------------------------------------
-' Procedure : Chart_GetColor
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Returns a list of colors for styling chart series
-'---------------------------------------------------------------------------------------
-'
 Public Function Chart_GetColor(index As Variant) As Long
-
+    '---------------------------------------------------------------------------------------
+    ' Procedure : Chart_GetColor
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Returns a list of colors for styling chart series
+    '---------------------------------------------------------------------------------------
+    '
     Dim colors(1 To 10) As Variant
 
     colors(6) = RGB(166, 206, 227)
@@ -34,16 +27,16 @@ Public Function Chart_GetColor(index As Variant) As Long
 
 End Function
 
-'---------------------------------------------------------------------------------------
-' Procedure : Chart_GetObjectsFromObject
-' Author    : @byronwall
-' Date      : 2015 12 30
-' Purpose   : Helper function which finds a valid ChartObject based on what is actually selected
-'             Returns a Collection (possibly empty) and should be handled with a For Each
-'---------------------------------------------------------------------------------------
-'
-Public Function Chart_GetObjectsFromObject(obj_in As Object) As Variant
 
+Public Function Chart_GetObjectsFromObject(obj_in As Object) As Variant
+    '---------------------------------------------------------------------------------------
+    ' Procedure : Chart_GetObjectsFromObject
+    ' Author    : @byronwall
+    ' Date      : 2015 12 30
+    ' Purpose   : Helper function which finds a valid ChartObject based on what is actually selected
+    '             Returns a Collection (possibly empty) and should be handled with a For Each
+    '---------------------------------------------------------------------------------------
+    '
     Dim coll As New Collection
 
     'NOTE that this function does not work well with Axis objects.  Excel does not return the correct Parent for them.
@@ -94,19 +87,19 @@ Public Function Chart_GetObjectsFromObject(obj_in As Object) As Variant
     Set Chart_GetObjectsFromObject = coll
 End Function
 
-'---------------------------------------------------------------------------------------
-' Procedure : DeleteAllCharts
-' Author    : @byronwall
-' Date      : 2015 08 11
-' Purpose   : Helper Sub to delete all charts on ActiveSheet
-'---------------------------------------------------------------------------------------
-'
-Public Sub DeleteAllCharts()
 
+Public Sub DeleteAllCharts()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : DeleteAllCharts
+    ' Author    : @byronwall
+    ' Date      : 2015 08 11
+    ' Purpose   : Helper Sub to delete all charts on ActiveSheet
+    '---------------------------------------------------------------------------------------
+    '
     If MsgBox("Delete all charts?", vbYesNo) = vbYes Then
         Application.ScreenUpdating = False
 
-        Dim iCounter As Integer
+        Dim iCounter As Long
         For iCounter = ActiveSheet.ChartObjects.count To 1 Step -1
 
             ActiveSheet.ChartObjects(iCounter).Delete

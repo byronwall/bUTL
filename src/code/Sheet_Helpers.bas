@@ -1,22 +1,15 @@
 Attribute VB_Name = "Sheet_Helpers"
 Option Explicit
 
-'---------------------------------------------------------------------------------------
-' Module    : Sheet_Helpers
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Contains code related to sheets and sheet processing
-'---------------------------------------------------------------------------------------
 
-'---------------------------------------------------------------------------------------
-' Procedure : LockAllSheets
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Locks all sheets with the same password
-'---------------------------------------------------------------------------------------
-'
 Sub LockAllSheets()
-
+    '---------------------------------------------------------------------------------------
+    ' Procedure : LockAllSheets
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Locks all sheets with the same password
+    '---------------------------------------------------------------------------------------
+    '
     Dim pass As Variant
     pass = Application.InputBox("Password to lock")
 
@@ -37,15 +30,15 @@ Sub LockAllSheets()
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : OutputSheets
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Creates a new worksheet with a list and link to each sheet
-'---------------------------------------------------------------------------------------
-'
-Sub OutputSheets()
 
+Sub OutputSheets()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : OutputSheets
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Creates a new worksheet with a list and link to each sheet
+    '---------------------------------------------------------------------------------------
+    '
     Dim wsOut As Worksheet
     Set wsOut = Worksheets.Add(Before:=Worksheets(1))
     wsOut.Activate
@@ -53,7 +46,7 @@ Sub OutputSheets()
     Dim rngOut As Range
     Set rngOut = wsOut.Range("B2")
 
-    Dim iRow As Integer
+    Dim iRow As Long
     iRow = 0
 
     Dim sht As Worksheet
@@ -62,9 +55,9 @@ Sub OutputSheets()
         If sht.name <> wsOut.name Then
 
             sht.Hyperlinks.Add _
-                    rngOut.Offset(iRow), "", _
-                    "'" & sht.name & "'!A1", , _
-                        sht.name
+        rngOut.Offset(iRow), "", _
+        "'" & sht.name & "'!A1", , _
+            sht.name
             iRow = iRow + 1
 
         End If
@@ -72,19 +65,19 @@ Sub OutputSheets()
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : UnlockAllSheets
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Unlocks all sheets with the same password
-'---------------------------------------------------------------------------------------
-'
-Sub UnlockAllSheets()
 
+Sub UnlockAllSheets()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : UnlockAllSheets
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Unlocks all sheets with the same password
+    '---------------------------------------------------------------------------------------
+    '
     Dim pass As Variant
     pass = Application.InputBox("Password to unlock")
     
-    Dim iErr As Integer
+    Dim iErr As Long
     iErr = 0
     
     If pass = False Then
@@ -105,66 +98,68 @@ Sub UnlockAllSheets()
         Application.ScreenUpdating = True
     End If
     If iErr <> 0 Then
-    MsgBox (iErr & " sheets could not be unlocked due to bad password.")
+        MsgBox (iErr & " sheets could not be unlocked due to bad password.")
     End If
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : AscendSheets
-' Author    : @raymondwise
-' Date      : 2015 08 07
-' Purpose   : Places worksheets in ascending alphabetical order.
-'---------------------------------------------------------------------------------------
+
 Sub AscendSheets()
-Application.ScreenUpdating = False
-Dim wb As Workbook
-Set wb = ActiveWorkbook
+    '---------------------------------------------------------------------------------------
+    ' Procedure : AscendSheets
+    ' Author    : @raymondwise
+    ' Date      : 2015 08 07
+    ' Purpose   : Places worksheets in ascending alphabetical order.
+    '---------------------------------------------------------------------------------------
+    Application.ScreenUpdating = False
+    Dim wb As Workbook
+    Set wb = ActiveWorkbook
 
-Dim intSheets As Integer
-intSheets = wb.Sheets.count
+    Dim intSheets As Long
+    intSheets = wb.Sheets.count
 
-Dim i As Integer
-Dim j As Integer
+    Dim i As Long
+    Dim j As Long
 
-With wb
-    For j = 1 To intSheets
-        For i = 1 To intSheets - 1
-            If UCase(.Sheets(i).name) > UCase(.Sheets(i + 1).name) Then
-                .Sheets(i).Move after:=.Sheets(i + 1)
-            End If
-        Next i
-    Next j
-End With
+    With wb
+        For j = 1 To intSheets
+            For i = 1 To intSheets - 1
+                If UCase(.Sheets(i).name) > UCase(.Sheets(i + 1).name) Then
+                    .Sheets(i).Move after:=.Sheets(i + 1)
+                End If
+            Next i
+        Next j
+    End With
 
-Application.ScreenUpdating = True
+    Application.ScreenUpdating = True
 End Sub
-'---------------------------------------------------------------------------------------
-' Procedure : DescendSheets
-' Author    : @raymondwise
-' Date      : 2015 08 07
-' Purpose   : Places worksheets in descending alphabetical order.
-'---------------------------------------------------------------------------------------
+
 Sub DescendSheets()
-Application.ScreenUpdating = False
-Dim wb As Workbook
-Set wb = ActiveWorkbook
+    '---------------------------------------------------------------------------------------
+    ' Procedure : DescendSheets
+    ' Author    : @raymondwise
+    ' Date      : 2015 08 07
+    ' Purpose   : Places worksheets in descending alphabetical order.
+    '---------------------------------------------------------------------------------------
+    Application.ScreenUpdating = False
+    Dim wb As Workbook
+    Set wb = ActiveWorkbook
 
-Dim intSheets As Integer
-intSheets = wb.Sheets.count
+    Dim intSheets As Long
+    intSheets = wb.Sheets.count
 
-Dim i As Integer
-Dim j As Integer
+    Dim i As Long
+    Dim j As Long
 
-With wb
-    For j = 1 To intSheets
-        For i = 1 To intSheets - 1
-            If UCase(.Sheets(i).name) < UCase(.Sheets(i + 1).name) Then
-                .Sheets(i).Move after:=.Sheets(i + 1)
-            End If
-        Next i
-    Next j
-End With
+    With wb
+        For j = 1 To intSheets
+            For i = 1 To intSheets - 1
+                If UCase(.Sheets(i).name) < UCase(.Sheets(i + 1).name) Then
+                    .Sheets(i).Move after:=.Sheets(i + 1)
+                End If
+            Next i
+        Next j
+    End With
 
-Application.ScreenUpdating = True
+    Application.ScreenUpdating = True
 End Sub
 

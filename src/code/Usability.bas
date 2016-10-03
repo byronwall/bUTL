@@ -1,14 +1,6 @@
 Attribute VB_Name = "Usability"
 Option Explicit
 
-'---------------------------------------------------------------------------------------
-' Module    : Usability
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Contains an assortment of code that automates some task
-'---------------------------------------------------------------------------------------
-
-
 Sub CreatePdfOfEachXlsxFileInFolder()
     
     'pick a folder
@@ -55,12 +47,12 @@ Sub MakeSeveralBoxesWithNumbers()
 
     Set sht = ActiveSheet
 
-    Dim int_counter As Integer
+    Dim int_counter As Long
 
     For int_counter = 1 To InputBox("How many?")
 
         Set shp = sht.Shapes.AddTextbox(msoShapeRectangle, rng_loc.left, _
-            rng_loc.top + 20 * int_counter, 20, 20)
+                                        rng_loc.top + 20 * int_counter, 20, 20)
 
         shp.Title = int_counter
 
@@ -80,16 +72,16 @@ Sub MakeSeveralBoxesWithNumbers()
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : ColorInputs
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Finds cells with no value and colors them based on having a formula?
-' Flag      : new-feature
-'---------------------------------------------------------------------------------------
-'
-Sub ColorInputs()
 
+Sub ColorInputs()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : ColorInputs
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Finds cells with no value and colors them based on having a formula?
+    ' Flag      : new-feature
+    '---------------------------------------------------------------------------------------
+    '
     Dim c As Range
     'This is finding cells that aren't blank, but the description says it should be cells with no values..
     For Each c In Selection
@@ -104,17 +96,17 @@ Sub ColorInputs()
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : CombineAllSheetsData
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Combines all sheets, resuing columns where the same
-' Flag      : not-used
-'---------------------------------------------------------------------------------------
-'
-Sub CombineAllSheetsData()
 
-'create the new wkbk and sheet
+Sub CombineAllSheetsData()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : CombineAllSheetsData
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Combines all sheets, resuing columns where the same
+    ' Flag      : not-used
+    '---------------------------------------------------------------------------------------
+    '
+    'create the new wkbk and sheet
     Dim wbCombo As Workbook
     Dim wbData As Workbook
 
@@ -127,7 +119,7 @@ Sub CombineAllSheetsData()
     Dim boolFirst As Boolean
     boolFirst = True
 
-    Dim iComboRow As Integer
+    Dim iComboRow As Long
     iComboRow = 1
 
     Dim wsData As Worksheet
@@ -159,11 +151,11 @@ Sub CombineAllSheetsData()
             End If
 
             'find the PnPID column for combo
-            Dim int_colId As Integer
+            Dim int_colId As Long
             int_colId = Application.Match("PnPID", wsCombined.Rows(1), 0)
 
             'find the PnPID column for data
-            Dim iColIDData As Integer
+            Dim iColIDData As Long
             iColIDData = Application.Match("PnPID", wsData.Rows(1), 0)
 
             'add the data, row by row
@@ -185,7 +177,7 @@ Sub CombineAllSheetsData()
                     End If
 
                     'get column
-                    Dim iCol As Integer
+                    Dim iCol As Long
                     iCol = Application.Match(wsData.Cells(1, c.Column), wsCombined.Rows(1), 0)
 
                     'update combo data
@@ -197,16 +189,16 @@ Sub CombineAllSheetsData()
     Next wsData
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : ConvertSelectionToCsv
-' Author    : @byronwall
-' Date      : 2015 08 11
-' Purpose   : Crude CSV output from the current selection, works with numbers
-' Flag      : new-feature
-'---------------------------------------------------------------------------------------
-'
-Sub ConvertSelectionToCsv()
 
+Sub ConvertSelectionToCsv()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : ConvertSelectionToCsv
+    ' Author    : @byronwall
+    ' Date      : 2015 08 11
+    ' Purpose   : Crude CSV output from the current selection, works with numbers
+    ' Flag      : new-feature
+    '---------------------------------------------------------------------------------------
+    '
     Dim rngCSV As Range
     Set rngCSV = GetInputOrSelection("Choose range for converting to CSV")
 
@@ -237,15 +229,15 @@ Sub ConvertSelectionToCsv()
 End Sub
 
 Public Sub CopyCellAddress()
-'---------------------------------------------------------------------------------------
-' Procedure : CopyCellAddress
-' Author    : @byronwall
-' Date      : 2015 12 03
-' Purpose   : Copies the current cell address to the clipboard for paste use in a formula
-'---------------------------------------------------------------------------------------
-'
+    '---------------------------------------------------------------------------------------
+    ' Procedure : CopyCellAddress
+    ' Author    : @byronwall
+    ' Date      : 2015 12 03
+    ' Purpose   : Copies the current cell address to the clipboard for paste use in a formula
+    '---------------------------------------------------------------------------------------
+    '
 
-'TODO: this need to get a button or a keyboard shortcut for easy use
+    'TODO: this need to get a button or a keyboard shortcut for easy use
     Dim clipboard As MSForms.DataObject
     Set clipboard = New MSForms.DataObject
 
@@ -257,13 +249,7 @@ Public Sub CopyCellAddress()
 End Sub
 
 
-'---------------------------------------------------------------------------------------
-' Procedure : CopyClear
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Copies the cells and clears the source Range
-'---------------------------------------------------------------------------------------
-'
+
 Sub Sheet_DeleteHiddenRows()
     'These rows are unrecoverable
     Dim x As VbMsgBoxResult
@@ -278,10 +264,10 @@ Sub Sheet_DeleteHiddenRows()
     'collect a range to delete at end, using UNION-DELETE
     Dim rng_toDelete As Range
     
-    Dim iCount As Integer
+    Dim iCount As Long
     iCount = 0
     With ActiveSheet
-        Dim i As Integer
+        Dim i As Long
         For i = .UsedRange.Rows.count To 1 Step -1
             If .Rows(i).Hidden Then
                 If rng_toDelete Is Nothing Then
@@ -301,17 +287,17 @@ Sub Sheet_DeleteHiddenRows()
     MsgBox (iCount & " rows were deleted")
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : CutPasteTranspose
-' Author    : @byronwall, @RaymondWise
-' Date      : 2015 07 31
-' Purpose   : Does a cut/transpose by cutting each cell individually
-'---------------------------------------------------------------------------------------
-'
 
-'########Still Needs to address Issue#23#############
 Sub CutPasteTranspose()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : CutPasteTranspose
+    ' Author    : @byronwall, @RaymondWise
+    ' Date      : 2015 07 31
+    ' Purpose   : Does a cut/transpose by cutting each cell individually
+    '---------------------------------------------------------------------------------------
+    '
 
+    '########Still Needs to address Issue#23#############
     On Error GoTo errHandler
     Dim rngSelect As Range
     'TODO #Should use new inputbox function
@@ -329,13 +315,13 @@ Sub CutPasteTranspose()
     Dim rCorner As Range
     Set rCorner = rngSelect.Cells(1, 1)
 
-    Dim iCRow As Integer
+    Dim iCRow As Long
     iCRow = rCorner.Row
-    Dim iCCol As Integer
+    Dim iCCol As Long
     iCCol = rCorner.Column
 
-    Dim iORow As Integer
-    Dim iOCol As Integer
+    Dim iORow As Long
+    Dim iOCol As Long
     iORow = rngOut.Row
     iOCol = rngOut.Column
 
@@ -365,17 +351,17 @@ Sub CutPasteTranspose()
 errHandler:
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : EvaluateArrayFormulaOnNewSheet
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Wacky thing to force an array formula to return as an array
-' Flag      : not-used
-'---------------------------------------------------------------------------------------
-'
-Sub EvaluateArrayFormulaOnNewSheet()
 
-'cut cell with formula
+Sub EvaluateArrayFormulaOnNewSheet()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : EvaluateArrayFormulaOnNewSheet
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Wacky thing to force an array formula to return as an array
+    ' Flag      : not-used
+    '---------------------------------------------------------------------------------------
+    '
+    'cut cell with formula
     Dim StrAddress As String
     Dim rngStart As Range
     Set rngStart = Sheet1.Range("J2")
@@ -421,15 +407,16 @@ Sub EvaluateArrayFormulaOnNewSheet()
 End Sub
 
 
-'---------------------------------------------------------------------------------------
-' Procedure : ExportFilesFromFolder
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Goes through a folder and process all workbooks therein
-' Flag      : new-feature
-'---------------------------------------------------------------------------------------
-'
+
 Sub ExportFilesFromFolder()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : ExportFilesFromFolder
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Goes through a folder and process all workbooks therein
+    ' Flag      : new-feature
+    '---------------------------------------------------------------------------------------
+    '
     '###Needs error handling
     'TODO: consider deleting this Sub since it is quite specific
     Application.ScreenUpdating = False
@@ -470,15 +457,15 @@ Sub ExportFilesFromFolder()
 End Sub
 
 
-'---------------------------------------------------------------------------------------
-' Procedure : FillValueDown
-' Author    : @byronwall
-' Date      : 2015 08 11
-' Purpose   : Does a fill of blank values from the cell above with a value
-'---------------------------------------------------------------------------------------
-'
-Sub FillValueDown()
 
+Sub FillValueDown()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : FillValueDown
+    ' Author    : @byronwall
+    ' Date      : 2015 08 11
+    ' Purpose   : Does a fill of blank values from the cell above with a value
+    '---------------------------------------------------------------------------------------
+    '
     Dim rngInput As Range
     Set rngInput = GetInputOrSelection("Select range for waterfall")
 
@@ -493,32 +480,32 @@ Sub FillValueDown()
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : ForceRecalc
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Provides a button to do a full recalc
-'---------------------------------------------------------------------------------------
-'
-Sub ForceRecalc()
 
+Sub ForceRecalc()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : ForceRecalc
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Provides a button to do a full recalc
+    '---------------------------------------------------------------------------------------
+    '
     Application.CalculateFullRebuild
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : GenerateRandomData
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Generates a block of random data for testing questions on SO
-'---------------------------------------------------------------------------------------
-'
-Sub GenerateRandomData()
 
+Sub GenerateRandomData()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : GenerateRandomData
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Generates a block of random data for testing questions on SO
+    '---------------------------------------------------------------------------------------
+    '
     Dim c As Range
     Set c = Range("B2")
 
-    Dim i As Integer
+    Dim i As Long
 
     For i = 0 To 3
         c.Offset(, i) = Chr(65 + i)
@@ -539,15 +526,15 @@ Sub GenerateRandomData()
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : OpenContainingFolder
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Open the folder that contains the ActiveWorkbook
-'---------------------------------------------------------------------------------------
-'
-Sub OpenContainingFolder()
 
+Sub OpenContainingFolder()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : OpenContainingFolder
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Open the folder that contains the ActiveWorkbook
+    '---------------------------------------------------------------------------------------
+    '
     Dim wb As Workbook
     Set wb = ActiveWorkbook
 
@@ -559,16 +546,16 @@ Sub OpenContainingFolder()
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : PivotSetAllFields
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Sets all fields in a PivotTable to use a certain calculation type
-' Flag      : new-feature
-'---------------------------------------------------------------------------------------
-'
-Sub PivotSetAllFields()
 
+Sub PivotSetAllFields()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : PivotSetAllFields
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Sets all fields in a PivotTable to use a certain calculation type
+    ' Flag      : new-feature
+    '---------------------------------------------------------------------------------------
+    '
     Dim pTable As PivotTable
     Dim ws As Worksheet
 
@@ -587,15 +574,15 @@ Sub PivotSetAllFields()
 End Sub
 
 
-'---------------------------------------------------------------------------------------
-' Procedure : SeriesSplit
-' Author    : @byronwall
-' Date      : 2015 08 11
-' Purpose   : Takes a category columns and splits the values out into new columns for each unique entry
-'---------------------------------------------------------------------------------------
-'
-Sub SeriesSplit()
 
+Sub SeriesSplit()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : SeriesSplit
+    ' Author    : @byronwall
+    ' Date      : 2015 08 11
+    ' Purpose   : Takes a category columns and splits the values out into new columns for each unique entry
+    '---------------------------------------------------------------------------------------
+    '
     On Error GoTo ErrorNoSelection
 
     Dim rngSelection As Range
@@ -632,7 +619,7 @@ Sub SeriesSplit()
     'head the columns with the values
 
     Dim varValues As Variant
-    Dim iCount As Integer
+    Dim iCount As Long
     iCount = 1
     For Each varValues In dictCategories
         rngValues.Cells(1).Offset(, iCount) = varValues
@@ -658,15 +645,15 @@ ErrorNoSelection:
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : SeriesSplitIntoBins
-' Author    : @byronwall
-' Date      : 2015 11 03
-' Purpose   : Code will break a column of continuous data into bins for plotting
-'---------------------------------------------------------------------------------------
-'
-Sub SeriesSplitIntoBins()
 
+Sub SeriesSplitIntoBins()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : SeriesSplitIntoBins
+    ' Author    : @byronwall
+    ' Date      : 2015 11 03
+    ' Purpose   : Code will break a column of continuous data into bins for plotting
+    '---------------------------------------------------------------------------------------
+    '
     On Error GoTo ErrorNoSelection
 
     Dim rngSelection As Range
@@ -674,7 +661,7 @@ Sub SeriesSplitIntoBins()
                                             Type:=8)
     Set rngSelection = Intersect(rngSelection, _
                                  rngSelection.Parent.UsedRange).SpecialCells(xlCellTypeVisible, xlLogical + _
-                                                                                                xlNumbers + xlTextValues)
+                                                                                               xlNumbers + xlTextValues)
 
     Dim rngValues As Range
     Set rngValues = Application.InputBox("Select values range with heading", _
@@ -682,7 +669,7 @@ Sub SeriesSplitIntoBins()
     Set rngValues = Intersect(rngValues, rngValues.Parent.UsedRange)
 
     ''need to prompt for max/min/bins
-    Dim dbl_max As Double, dbl_min As Double, int_bins As Integer
+    Dim dbl_max As Double, dbl_min As Double, int_bins As Long
 
     dbl_min = Application.InputBox("Minimum value.", "Min", _
                                    WorksheetFunction.Min(rngSelection), Type:=1)
@@ -711,7 +698,7 @@ Sub SeriesSplitIntoBins()
 
     ''TODO add a For loop to go through the bins
 
-    Dim int_binNo As Integer
+    Dim int_binNo As Long
     For int_binNo = 0 To int_bins
         rngValues.Cells(1).Offset(, int_binNo + 1) = dbl_min + (dbl_max - _
                                                                 dbl_min) * int_binNo / int_bins
@@ -762,9 +749,9 @@ Sub SeriesSplitIntoBins()
 
     'set the number formats
     rngFormula.Offset(-1).Rows(1).Resize(1, int_bins + 1).NumberFormat = _
-    "<= General"
+                                                                       "<= General"
     rngFormula.Offset(-1).Rows(1).Offset(, int_bins + 1).NumberFormat = _
-    "> General"
+                                                                      "> General"
 
     Exit Sub
 
@@ -774,30 +761,30 @@ ErrorNoSelection:
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : UnhideAllRowsAndColumns
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Unhides everything in a Worksheet
-' Flag      : new-feature
-'---------------------------------------------------------------------------------------
-'
-Sub UnhideAllRowsAndColumns()
 
+Sub UnhideAllRowsAndColumns()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : UnhideAllRowsAndColumns
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Unhides everything in a Worksheet
+    ' Flag      : new-feature
+    '---------------------------------------------------------------------------------------
+    '
     ActiveSheet.Cells.EntireRow.Hidden = False
     ActiveSheet.Cells.EntireColumn.Hidden = False
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : UpdateScrollbars
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Cheap trick that forces Excel to update the scroll bars after a large deletion
-'---------------------------------------------------------------------------------------
-'
-Sub UpdateScrollbars()
 
+Sub UpdateScrollbars()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : UpdateScrollbars
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Cheap trick that forces Excel to update the scroll bars after a large deletion
+    '---------------------------------------------------------------------------------------
+    '
     Dim rng As Variant
     rng = ActiveSheet.UsedRange.Address
 
