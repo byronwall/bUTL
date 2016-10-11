@@ -169,13 +169,13 @@ End Sub
 
 
 Sub Chart_GridOfCharts( _
-    Optional int_cols As Long = 3, _
-    Optional cht_wid As Double = 400, _
-    Optional cht_height As Double = 300, _
-    Optional v_off As Double = 80, _
-    Optional h_off As Double = 40, _
-    Optional chk_down As Boolean = False, _
-    Optional bool_zoom As Boolean = False)
+    Optional columnCount As Long = 3, _
+    Optional chtWidth As Double = 400, _
+    Optional chtHeight As Double = 300, _
+    Optional offsetVertical As Double = 80, _
+    Optional offsetHorizontal As Double = 40, _
+    Optional shouldFillDownFirst As Boolean = False, _
+    Optional shouldZoomOnGrid As Boolean = False)
     '---------------------------------------------------------------------------------------
     ' Procedure : Chart_GridOfCharts
     ' Author    : @byronwall
@@ -190,38 +190,38 @@ Sub Chart_GridOfCharts( _
 
     Application.ScreenUpdating = False
 
-    Dim count As Long
-    count = 0
+    Dim chtCount As Long
+    chtCount = 0
 
     For Each chtObj In sht.ChartObjects
         Dim left As Double, top As Double
 
-        If chk_down Then
-            left = (count \ int_cols) * cht_wid + h_off
-            top = (count Mod int_cols) * cht_height + v_off
+        If shouldFillDownFirst Then
+            left = (chtCount \ columnCount) * chtWidth + offsetHorizontal
+            top = (chtCount Mod columnCount) * chtHeight + offsetVertical
         Else
-            left = (count Mod int_cols) * cht_wid + h_off
-            top = (count \ int_cols) * cht_height + v_off
+            left = (chtCount Mod columnCount) * chtWidth + offsetHorizontal
+            top = (chtCount \ columnCount) * chtHeight + offsetVertical
         End If
 
         chtObj.top = top
         chtObj.left = left
-        chtObj.Width = cht_wid
-        chtObj.Height = cht_height
+        chtObj.Width = chtWidth
+        chtObj.Height = chtHeight
 
-        count = count + 1
+        chtCount = chtCount + 1
 
     Next chtObj
 
     'loop through columsn to find how far to zoom
-    If bool_zoom Then
-        Dim col_zoom As Long
-        col_zoom = 1
-        Do While sht.Cells(1, col_zoom).left < int_cols * cht_wid
-            col_zoom = col_zoom + 1
+    If shouldZoomOnGrid Then
+        Dim columnToZoomTo As Long
+        columnToZoomTo = 1
+        Do While sht.Cells(1, columnToZoomTo).left < columnCount * chtWidth
+            columnToZoomTo = columnToZoomTo + 1
         Loop
 
-        sht.Range("A:A", sht.Cells(1, col_zoom - 1).EntireColumn).Select
+        sht.Range("A:A", sht.Cells(1, columnToZoomTo - 1).EntireColumn).Select
         ActiveWindow.Zoom = True
         sht.Range("A1").Select
     End If
@@ -262,31 +262,31 @@ Sub ChartCreateXYGrid()
 
     'rng_data will contain the block of data with titles included
 
-    Dim rng_data As Range
-    Set rng_data = Application.InputBox("Select data with titles", Type:=8)
+    Dim rngData As Range
+    Set rngData = Application.InputBox("Select data with titles", Type:=8)
 
     Application.ScreenUpdating = False
 
-    Dim iRow As Long, iCol As Long
-    iRow = 0
+    Dim rowIndex As Long, columnIndex As Long
+    rowIndex = 0
 
-    Dim dHeight As Double, dWidth As Double
-    dHeight = 300
-    dWidth = 400
+    Dim chtHeight As Double, chtWidth As Double
+    chtHeight = 300
+    chtWidth = 400
 
     Dim rngColXData As Range, rngColYData As Range
-    For Each rngColYData In rng_data.Columns
-        iCol = 0
+    For Each rngColYData In rngData.Columns
+        columnIndex = 0
 
-        For Each rngColXData In rng_data.Columns
-            If iRow <> iCol Then
+        For Each rngColXData In rngData.Columns
+            If rowIndex <> columnIndex Then
                 Dim cht As Chart
-                Set cht = ActiveSheet.ChartObjects.Add(iCol * dWidth, _
-                                                       iRow * dHeight + 100, _
-                                                       dWidth, _
-                                                       dHeight).Chart
+                Set cht = ActiveSheet.ChartObjects.Add(columnIndex * chtWidth, _
+                                                       rowIndex * chtHeight + 100, _
+                                                       chtWidth, _
+                                                       chtHeight).Chart
 
-                Dim ser As series
+                Dim chtSeries As series
                 Dim butlSeries As New bUTLChartSeries
 
                 'offset allows for the title to be excluded
@@ -295,23 +295,23 @@ Sub ChartCreateXYGrid()
                 Set butlSeries.name = rngColYData.Cells(1)
                 butlSeries.ChartType = xlXYScatter
 
-                Set ser = butlSeries.AddSeriesToChart(cht)
+                Set chtSeries = butlSeries.AddSeriesToChart(cht)
 
-                ser.MarkerSize = 3
-                ser.MarkerStyle = xlMarkerStyleCircle
+                chtSeries.MarkerSize = 3
+                chtSeries.MarkerStyle = xlMarkerStyleCircle
 
-                Dim ax As Axis
-                Set ax = cht.Axes(xlCategory)
-                ax.HasTitle = True
-                ax.AxisTitle.Text = rngColXData.Cells(1)
-                ax.MajorGridlines.Border.Color = RGB(200, 200, 200)
-                ax.MinorGridlines.Border.Color = RGB(220, 220, 220)
+                Dim chtAxis As Axis
+                Set chtAxis = cht.Axes(xlCategory)
+                chtAxis.HasTitle = True
+                chtAxis.AxisTitle.Text = rngColXData.Cells(1)
+                chtAxis.MajorGridlines.Border.Color = RGB(200, 200, 200)
+                chtAxis.MinorGridlines.Border.Color = RGB(220, 220, 220)
 
-                Set ax = cht.Axes(xlValue)
-                ax.HasTitle = True
-                ax.AxisTitle.Text = rngColYData.Cells(1)
-                ax.MajorGridlines.Border.Color = RGB(200, 200, 200)
-                ax.MinorGridlines.Border.Color = RGB(220, 220, 220)
+                Set chtAxis = cht.Axes(xlValue)
+                chtAxis.HasTitle = True
+                chtAxis.AxisTitle.Text = rngColYData.Cells(1)
+                chtAxis.MajorGridlines.Border.Color = RGB(200, 200, 200)
+                chtAxis.MinorGridlines.Border.Color = RGB(220, 220, 220)
 
                 cht.HasTitle = True
                 cht.ChartTitle.Text = rngColYData.Cells(1) & " vs. " & rngColXData.Cells(1)
@@ -319,15 +319,15 @@ Sub ChartCreateXYGrid()
                 cht.Legend.Delete
             End If
 
-            iCol = iCol + 1
+            columnIndex = columnIndex + 1
         Next
 
-        iRow = iRow + 1
+        rowIndex = rowIndex + 1
     Next
 
     Application.ScreenUpdating = True
 
-    rng_data.Cells(1, 1).Activate
+    rngData.Cells(1, 1).Activate
 
     On Error GoTo 0
     Exit Sub

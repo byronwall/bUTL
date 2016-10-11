@@ -34,17 +34,16 @@ Function AddSeriesToChart(cht As Chart) As series
     ' Purpose   : Adds the represented series to a chart
     '---------------------------------------------------------------------------------------
     '
-    Dim ser As series
-    Set ser = cht.SeriesCollection.NewSeries
+    Dim chtSeries As series
+    Set chtSeries = cht.SeriesCollection.NewSeries
     
-    ser.Formula = Me.SeriesFormula
+    chtSeries.Formula = Me.SeriesFormula
     
     If Me.ChartType <> 0 Then
-        ser.ChartType = Me.ChartType
+        chtSeries.ChartType = Me.ChartType
     End If
     
-    
-    Set AddSeriesToChart = ser
+    Set AddSeriesToChart = chtSeries
 
 End Function
 

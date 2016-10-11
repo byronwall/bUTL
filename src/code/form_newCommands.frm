@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} form_newCommands 
    Caption         =   "Additional Features"
-   ClientHeight    =   9675
+   ClientHeight    =   10290
    ClientLeft      =   45
    ClientTop       =   435
    ClientWidth     =   6585
@@ -14,6 +14,8 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+
 
 
 
@@ -116,4 +118,9 @@ End Sub
 Private Sub CommandButton35_Click()
     TraceDependentsForAll
     Unload Me
+End Sub
+
+Private Sub CommandButton37_Click()
+    Unload Me
+    PadWithSpaces
 End Sub

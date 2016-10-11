@@ -1,6 +1,178 @@
 Attribute VB_Name = "RandomCode"
 Option Explicit
 
+Sub ExportFilesFromFolder()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : ExportFilesFromFolder
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Goes through a folder and process all workbooks therein
+    ' Flag      : new-feature
+    '---------------------------------------------------------------------------------------
+    '
+    '###Needs error handling
+    'TODO: consider deleting this Sub since it is quite specific
+    Application.ScreenUpdating = False
+
+    Dim file As Variant
+    Dim path As String
+    path = InputBox("What path?")
+
+    file = Dir(path)
+    While (file <> "")
+
+        Debug.Print path & file
+
+        Dim FileName As String
+
+        FileName = path & file
+
+        Dim wbActive As Workbook
+        Set wbActive = Workbooks.Open(FileName)
+
+        Dim wsActive As Worksheet
+        Set wsActive = wbActive.Sheets("Case Summary")
+
+        With ActiveSheet.PageSetup
+            .TopMargin = Application.InchesToPoints(0.4)
+            .BottomMargin = Application.InchesToPoints(0.4)
+        End With
+
+        wsActive.ExportAsFixedFormat xlTypePDF, path & "PDFs\" & file & ".pdf"
+
+        wbActive.Close False
+
+        file = Dir
+    Wend
+
+    Application.ScreenUpdating = True
+
+End Sub
+
+Sub EvaluateArrayFormulaOnNewSheet()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : EvaluateArrayFormulaOnNewSheet
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Wacky thing to force an array formula to return as an array
+    ' Flag      : not-used
+    '---------------------------------------------------------------------------------------
+    '
+    'cut cell with formula
+    Dim StrAddress As String
+    Dim rngStart As Range
+    Set rngStart = Sheet1.Range("J2")
+    StrAddress = rngStart.Address
+
+    rngStart.Cut
+
+    'create new sheet
+    Dim sht As Worksheet
+    Set sht = Worksheets.Add
+
+    'paste cell onto sheet
+    Dim rngArr As Range
+    Set rngArr = sht.Range("A1")
+    sht.Paste rngArr
+
+    'expand array formula size.. resize to whatever size is needed
+    rngArr.Resize(3).FormulaArray = rngArr.FormulaArray
+
+    'get your result
+    Dim VarArr As Variant
+    VarArr = Application.Evaluate(rngArr.CurrentArray.Address)
+
+    ''''do something with your result here... it is an array
+
+
+    'shrink the formula back to one cell
+    Dim strFormula As String
+    strFormula = rngArr.FormulaArray
+
+    rngArr.CurrentArray.ClearContents
+    rngArr.FormulaArray = strFormula
+
+    'cut and paste back to original spot
+    rngArr.Cut
+
+    Sheet1.Paste Sheet1.Range(StrAddress)
+
+    Application.DisplayAlerts = False
+    sht.Delete
+    Application.DisplayAlerts = True
+
+End Sub
+
+Sub MakeSeveralBoxesWithNumbers()
+
+    Dim shp As Shape
+    Dim sht As Worksheet
+
+    Dim rng_loc As Range
+    Set rng_loc = Application.InputBox("select range", Type:=8)
+
+    Set sht = ActiveSheet
+
+    Dim int_counter As Long
+
+    For int_counter = 1 To InputBox("How many?")
+
+        Set shp = sht.Shapes.AddTextbox(msoShapeRectangle, rng_loc.left, _
+                                        rng_loc.top + 20 * int_counter, 20, 20)
+
+        shp.Title = int_counter
+
+        shp.Fill.Visible = msoFalse
+        shp.Line.Visible = msoFalse
+
+        shp.TextFrame2.TextRange.Characters.Text = int_counter
+
+        With shp.TextFrame2.TextRange.Font.Fill
+            .Visible = msoTrue
+            .ForeColor.RGB = RGB(0, 0, 0)
+            .Transparency = 0
+            .Solid
+        End With
+
+    Next
+
+End Sub
+
+Sub CreatePdfOfEachXlsxFileInFolder()
+    
+    'pick a folder
+    Dim folderDialog As FileDialog
+    Set folderDialog = Application.FileDialog(msoFileDialogFolderPicker)
+    
+    folderDialog.Show
+    
+    Dim folderPath As String
+    folderPath = folderDialog.SelectedItems(1) & "\"
+    
+    'find all files in the folder
+    Dim filePath As String
+    filePath = Dir(folderPath & "*.xlsx")
+
+    Do While filePath <> ""
+
+        Dim wkbkFile As Workbook
+        Set wkbkFile = Workbooks.Open(folderPath & filePath, , True)
+        
+        Dim sht As Worksheet
+        
+        For Each sht In wkbkFile.Worksheets
+            sht.Range("A16").EntireRow.RowHeight = 15.75
+            sht.Range("A17").EntireRow.RowHeight = 15.75
+            sht.Range("A22").EntireRow.RowHeight = 15.75
+            sht.Range("A23").EntireRow.RowHeight = 15.75
+        Next
+
+        wkbkFile.ExportAsFixedFormat xlTypePDF, folderPath & filePath & ".pdf"
+        wkbkFile.Close False
+
+        filePath = Dir
+    Loop
+End Sub
 
 Sub AlphabetizeAndReportWithDupes()
     '''this one goes through a data source and alphabetizes it.

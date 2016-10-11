@@ -1,78 +1,6 @@
 Attribute VB_Name = "Usability"
 Option Explicit
 
-Sub CreatePdfOfEachXlsxFileInFolder()
-    
-    'pick a folder
-    Dim diag_folder As FileDialog
-    Set diag_folder = Application.FileDialog(msoFileDialogFolderPicker)
-    
-    diag_folder.Show
-    
-    Dim str_path As String
-    str_path = diag_folder.SelectedItems(1) & "\"
-    
-    'find all files in the folder
-    Dim str_file As String
-    str_file = Dir(str_path & "*.xlsx")
-
-    Do While str_file <> ""
-
-        Dim wkbk_file As Workbook
-        Set wkbk_file = Workbooks.Open(str_path & str_file, , True)
-        
-        Dim sht As Worksheet
-        
-        For Each sht In wkbk_file.Worksheets
-            sht.Range("A16").EntireRow.RowHeight = 15.75
-            sht.Range("A17").EntireRow.RowHeight = 15.75
-            sht.Range("A22").EntireRow.RowHeight = 15.75
-            sht.Range("A23").EntireRow.RowHeight = 15.75
-        Next
-
-        wkbk_file.ExportAsFixedFormat xlTypePDF, str_path & str_file & ".pdf"
-        wkbk_file.Close False
-
-        str_file = Dir
-    Loop
-End Sub
-
-Sub MakeSeveralBoxesWithNumbers()
-
-    Dim shp As Shape
-    Dim sht As Worksheet
-
-    Dim rng_loc As Range
-    Set rng_loc = Application.InputBox("select range", Type:=8)
-
-    Set sht = ActiveSheet
-
-    Dim int_counter As Long
-
-    For int_counter = 1 To InputBox("How many?")
-
-        Set shp = sht.Shapes.AddTextbox(msoShapeRectangle, rng_loc.left, _
-                                        rng_loc.top + 20 * int_counter, 20, 20)
-
-        shp.Title = int_counter
-
-        shp.Fill.Visible = msoFalse
-        shp.Line.Visible = msoFalse
-
-        shp.TextFrame2.TextRange.Characters.Text = int_counter
-
-        With shp.TextFrame2.TextRange.Font.Fill
-            .Visible = msoTrue
-            .ForeColor.RGB = RGB(0, 0, 0)
-            .Transparency = 0
-            .Solid
-        End With
-
-    Next
-
-End Sub
-
-
 Sub ColorInputs()
     '---------------------------------------------------------------------------------------
     ' Procedure : ColorInputs
@@ -248,39 +176,37 @@ Public Sub CopyCellAddress()
     clipboard.PutInClipboard
 End Sub
 
-
-
 Sub Sheet_DeleteHiddenRows()
     'These rows are unrecoverable
-    Dim x As VbMsgBoxResult
-    x = MsgBox("This will permanently delete hidden rows. They cannot be recovered. Are you sure?", vbYesNo)
+    Dim shouldDeleteHiddenRows As VbMsgBoxResult
+    shouldDeleteHiddenRows = MsgBox("This will permanently delete hidden rows. They cannot be recovered. Are you sure?", vbYesNo)
     
-    If Not x = vbYes Then
+    If Not shouldDeleteHiddenRows = vbYes Then
         Exit Sub
     End If
         
     Application.ScreenUpdating = False
     
     'collect a range to delete at end, using UNION-DELETE
-    Dim rng_toDelete As Range
+    Dim rngToDelete As Range
     
     Dim iCount As Long
     iCount = 0
     With ActiveSheet
-        Dim i As Long
-        For i = .UsedRange.Rows.count To 1 Step -1
-            If .Rows(i).Hidden Then
-                If rng_toDelete Is Nothing Then
-                    Set rng_toDelete = .Rows(i)
+        Dim rowIndex As Long
+        For rowIndex = .UsedRange.Rows.count To 1 Step -1
+            If .Rows(rowIndex).Hidden Then
+                If rngToDelete Is Nothing Then
+                    Set rngToDelete = .Rows(rowIndex)
                 Else
-                    Set rng_toDelete = Union(rng_toDelete, .Rows(i))
+                    Set rngToDelete = Union(rngToDelete, .Rows(rowIndex))
                 End If
                 iCount = iCount + 1
             End If
-        Next i
+        Next rowIndex
     End With
     
-    rng_toDelete.Delete
+    rngToDelete.Delete
     
     Application.ScreenUpdating = True
     
@@ -350,113 +276,6 @@ Sub CutPasteTranspose()
     Application.Calculate
 errHandler:
 End Sub
-
-
-Sub EvaluateArrayFormulaOnNewSheet()
-    '---------------------------------------------------------------------------------------
-    ' Procedure : EvaluateArrayFormulaOnNewSheet
-    ' Author    : @byronwall
-    ' Date      : 2015 07 24
-    ' Purpose   : Wacky thing to force an array formula to return as an array
-    ' Flag      : not-used
-    '---------------------------------------------------------------------------------------
-    '
-    'cut cell with formula
-    Dim StrAddress As String
-    Dim rngStart As Range
-    Set rngStart = Sheet1.Range("J2")
-    StrAddress = rngStart.Address
-
-    rngStart.Cut
-
-    'create new sheet
-    Dim sht As Worksheet
-    Set sht = Worksheets.Add
-
-    'paste cell onto sheet
-    Dim rngArr As Range
-    Set rngArr = sht.Range("A1")
-    sht.Paste rngArr
-
-    'expand array formula size.. resize to whatever size is needed
-    rngArr.Resize(3).FormulaArray = rngArr.FormulaArray
-
-    'get your result
-    Dim VarArr As Variant
-    VarArr = Application.Evaluate(rngArr.CurrentArray.Address)
-
-    ''''do something with your result here... it is an array
-
-
-    'shrink the formula back to one cell
-    Dim strFormula As String
-    strFormula = rngArr.FormulaArray
-
-    rngArr.CurrentArray.ClearContents
-    rngArr.FormulaArray = strFormula
-
-    'cut and paste back to original spot
-    rngArr.Cut
-
-    Sheet1.Paste Sheet1.Range(StrAddress)
-
-    Application.DisplayAlerts = False
-    sht.Delete
-    Application.DisplayAlerts = True
-
-End Sub
-
-
-
-Sub ExportFilesFromFolder()
-    '---------------------------------------------------------------------------------------
-    ' Procedure : ExportFilesFromFolder
-    ' Author    : @byronwall
-    ' Date      : 2015 07 24
-    ' Purpose   : Goes through a folder and process all workbooks therein
-    ' Flag      : new-feature
-    '---------------------------------------------------------------------------------------
-    '
-    '###Needs error handling
-    'TODO: consider deleting this Sub since it is quite specific
-    Application.ScreenUpdating = False
-
-    Dim file As Variant
-    Dim path As String
-    path = InputBox("What path?")
-
-    file = Dir(path)
-    While (file <> "")
-
-        Debug.Print path & file
-
-        Dim FileName As String
-
-        FileName = path & file
-
-        Dim wbActive As Workbook
-        Set wbActive = Workbooks.Open(FileName)
-
-        Dim wsActive As Worksheet
-        Set wsActive = wbActive.Sheets("Case Summary")
-
-        With ActiveSheet.PageSetup
-            .TopMargin = Application.InchesToPoints(0.4)
-            .BottomMargin = Application.InchesToPoints(0.4)
-        End With
-
-        wsActive.ExportAsFixedFormat xlTypePDF, path & "PDFs\" & file & ".pdf"
-
-        wbActive.Close False
-
-        file = Dir
-    Wend
-
-    Application.ScreenUpdating = True
-
-End Sub
-
-
 
 Sub FillValueDown()
     '---------------------------------------------------------------------------------------
@@ -573,8 +392,6 @@ Sub PivotSetAllFields()
 
 End Sub
 
-
-
 Sub SeriesSplit()
     '---------------------------------------------------------------------------------------
     ' Procedure : SeriesSplit
@@ -673,8 +490,10 @@ Sub SeriesSplitIntoBins()
 
     dbl_min = Application.InputBox("Minimum value.", "Min", _
                                    WorksheetFunction.Min(rngSelection), Type:=1)
+                                   
     dbl_max = Application.InputBox("Maximum value.", "Max", _
                                    WorksheetFunction.Max(rngSelection), Type:=1)
+                                   
     int_bins = Application.InputBox("Number of groups.", "Bins", _
                                     WorksheetFunction.RoundDown(Math.Sqr(WorksheetFunction.count(rngSelection)), _
                                                                 0), Type:=1)

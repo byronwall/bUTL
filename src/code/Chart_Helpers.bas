@@ -37,7 +37,7 @@ Public Function Chart_GetObjectsFromObject(obj_in As Object) As Variant
     '             Returns a Collection (possibly empty) and should be handled with a For Each
     '---------------------------------------------------------------------------------------
     '
-    Dim coll As New Collection
+    Dim chtObjCollection As New Collection
 
     'NOTE that this function does not work well with Axis objects.  Excel does not return the correct Parent for them.
     
@@ -50,28 +50,28 @@ Public Function Chart_GetObjectsFromObject(obj_in As Object) As Variant
         For Each obj In obj_in
             If TypeName(obj) = "ChartObject" Then
                 'add it to the set
-                coll.Add obj
+                chtObjCollection.Add obj
             End If
         Next obj
         
     ElseIf TypeOf obj_in Is Worksheet Then
         For Each obj In obj_in.ChartObjects
-            coll.Add obj
+            chtObjCollection.Add obj
         Next obj
 
     ElseIf TypeOf obj_in Is Chart Then
-        coll.Add obj_in.Parent
+        chtObjCollection.Add obj_in.Parent
 
     ElseIf TypeOf obj_in Is ChartArea _
            Or TypeOf obj_in Is PlotArea _
            Or TypeOf obj_in Is Legend _
            Or TypeOf obj_in Is ChartTitle Then
         'parent is the chart, parent of that is the chart obj
-        coll.Add obj_in.Parent.Parent
+        chtObjCollection.Add obj_in.Parent.Parent
 
     ElseIf TypeOf obj_in Is series Then
         'need to go up three levels
-        coll.Add obj_in.Parent.Parent.Parent
+        chtObjCollection.Add obj_in.Parent.Parent.Parent
 
     ElseIf TypeOf obj_in Is Axis _
            Or TypeOf obj_in Is Gridlines _
@@ -84,7 +84,7 @@ Public Function Chart_GetObjectsFromObject(obj_in As Object) As Variant
 
     End If
 
-    Set Chart_GetObjectsFromObject = coll
+    Set Chart_GetObjectsFromObject = chtObjCollection
 End Function
 
 
@@ -99,12 +99,12 @@ Public Sub DeleteAllCharts()
     If MsgBox("Delete all charts?", vbYesNo) = vbYes Then
         Application.ScreenUpdating = False
 
-        Dim iCounter As Long
-        For iCounter = ActiveSheet.ChartObjects.count To 1 Step -1
+        Dim chtObjIndex As Long
+        For chtObjIndex = ActiveSheet.ChartObjects.count To 1 Step -1
 
-            ActiveSheet.ChartObjects(iCounter).Delete
+            ActiveSheet.ChartObjects(chtObjIndex).Delete
 
-        Next iCounter
+        Next chtObjIndex
 
         Application.ScreenUpdating = True
 
