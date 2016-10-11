@@ -1,28 +1,21 @@
 Attribute VB_Name = "SelectionMgr"
-'---------------------------------------------------------------------------------------
-' Module    : SelectionMgr
-' Author    : @byronwall
-' Date      : 2015 08 05
-' Purpose   : This module contains code related to changing the Selection with kbd shortcuts
-'---------------------------------------------------------------------------------------
-
 Option Explicit
 
-'---------------------------------------------------------------------------------------
-' Procedure : OffsetSelectionByRowsAndColumns
-' Author    : @byronwall
-' Date      : 2015 08 05
-' Purpose   : Offsets and selects the Selection a given number of rows/columns
-'---------------------------------------------------------------------------------------
-'
-Sub OffsetSelectionByRowsAndColumns(rowsOff As Long, columnsOff As Long)
 
+Sub OffsetSelectionByRowsAndColumns(iRowsOff As Long, iColsOff As Long)
+    '---------------------------------------------------------------------------------------
+    ' Procedure : OffsetSelectionByRowsAndColumns
+    ' Author    : @byronwall
+    ' Date      : 2015 08 05
+    ' Purpose   : Offsets and selects the Selection a given number of rows/columns
+    '---------------------------------------------------------------------------------------
+    '
     If TypeOf Selection Is Range Then
 
         'this error should only get called if the new range is outside the sheet boundaries
         On Error GoTo OffsetSelectionByRowsAndColumns_Exit
 
-        Selection.Offset(rowsOff, columnsOff).Select
+        Selection.Offset(iRowsOff, iColsOff).Select
 
         On Error GoTo 0
     End If
@@ -31,71 +24,81 @@ OffsetSelectionByRowsAndColumns_Exit:
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : SelectionOffsetDown
-' Author    : @byronwall
-' Date      : 2015 08 05
-' Purpose   : Moves Selection down one row
-'---------------------------------------------------------------------------------------
-'
-Sub SelectionOffsetDown()
 
+Sub SelectionOffsetDown()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : SelectionOffsetDown
+    ' Author    : @byronwall
+    ' Date      : 2015 08 05
+    ' Purpose   : Moves Selection down one row
+    '---------------------------------------------------------------------------------------
+    '
     Call OffsetSelectionByRowsAndColumns(1, 0)
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : SelectionOffsetLeft
-' Author    : @byronwall
-' Date      : 2015 08 05
-' Purpose   : Moves Selection left one column
-'---------------------------------------------------------------------------------------
-'
-Sub SelectionOffsetLeft()
 
+Sub SelectionOffsetLeft()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : SelectionOffsetLeft
+    ' Author    : @byronwall
+    ' Date      : 2015 08 05
+    ' Purpose   : Moves Selection left one column
+    '---------------------------------------------------------------------------------------
+    '
     Call OffsetSelectionByRowsAndColumns(0, -1)
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : SelectionOffsetRight
-' Author    : @byronwall
-' Date      : 2015 08 05
-' Purpose   : Moves selection right one column
-'---------------------------------------------------------------------------------------
-'
-Sub SelectionOffsetRight()
 
+Sub SelectionOffsetRight()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : SelectionOffsetRight
+    ' Author    : @byronwall
+    ' Date      : 2015 08 05
+    ' Purpose   : Moves selection right one column
+    '---------------------------------------------------------------------------------------
+    '
     Call OffsetSelectionByRowsAndColumns(0, 1)
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : SelectionOffsetUp
-' Author    : @byronwall
-' Date      : 2015 08 05
-' Purpose   : Moves Selection up one row
-'---------------------------------------------------------------------------------------
-'
-Sub SelectionOffsetUp()
 
+Sub SelectionOffsetUp()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : SelectionOffsetUp
+    ' Author    : @byronwall
+    ' Date      : 2015 08 05
+    ' Purpose   : Moves Selection up one row
+    '---------------------------------------------------------------------------------------
+    '
     Call OffsetSelectionByRowsAndColumns(-1, 0)
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : SetUpKeyboardHooksForSelection
-' Author    : @byronwall
-' Date      : 2015 08 05
-' Purpose   : Creates hotkey events for the selection events
-'---------------------------------------------------------------------------------------
-'
-Sub SetUpKeyboardHooksForSelection()
 
+Sub SetUpKeyboardHooksForSelection()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : SetUpKeyboardHooksForSelection
+    ' Author    : @byronwall
+    ' Date      : 2016 09 29
+    ' Purpose   : Creates hotkey events for the selection events
+    '---------------------------------------------------------------------------------------
+    '
+    
+    'SHIFT =    +
+    'CTRL =     ^
+    'ALT =      %
+
+    'set up the keys for the selection mover
     Application.OnKey "^%{RIGHT}", "SelectionOffsetRight"
     Application.OnKey "^%{LEFT}", "SelectionOffsetLeft"
     Application.OnKey "^%{UP}", "SelectionOffsetUp"
     Application.OnKey "^%{DOWN}", "SelectionOffsetDown"
+    
+    'set up the keys for the indent level
+    Application.OnKey "+^%{RIGHT}", "Formatting_IncreaseIndentLevel"
+    Application.OnKey "+^%{LEFT}", "Formatting_DecreaseIndentLevel"
 
 End Sub
 

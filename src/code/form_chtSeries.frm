@@ -17,6 +17,7 @@ Attribute VB_Exposed = False
 
 
 
+
 Option Explicit
 
 '---------------------------------------------------------------------------------------
@@ -34,7 +35,7 @@ Private Sub btn_setXRange_Click()
 
 'get the selected series
 
-    Dim i As Integer
+    Dim i As Long
     For i = 0 To list_series.ListCount - 1
 
         If list_series.Selected(i) Then
@@ -65,7 +66,7 @@ Private Sub btn_ydown_Click()
 End Sub
 
 Private Sub btn_yrange_Click()
-    Dim i As Integer
+    Dim i As Long
     For i = 0 To list_series.ListCount - 1
 
         If list_series.Selected(i) Then
@@ -111,17 +112,17 @@ Private Sub UpdateSeries()
 'clean up the mess
     ser_coll.RemoveAll
 
-    Dim i As Integer
+    Dim i As Long
     For i = list_series.ListCount - 1 To 0 Step -1
         list_series.RemoveItem (i)
     Next i
 
-    Dim cht_obj As ChartObject
+    Dim chtObj As ChartObject
 
     Dim ser As series
 
-    For Each cht_obj In Chart_GetObjectsFromObject(Selection)
-        For Each ser In cht_obj.Chart.SeriesCollection
+    For Each chtObj In Chart_GetObjectsFromObject(Selection)
+        For Each ser In chtObj.Chart.SeriesCollection
 
             Dim b_ser As bUTLChartSeries
             Set b_ser = New bUTLChartSeries
@@ -132,7 +133,13 @@ Private Sub UpdateSeries()
             ser_name = IIf(Not b_ser.name Is Nothing, b_ser.name, "")
 
             list_series.AddItem
+            If IsArray(ser_name) Then
+                ser_name = ser_name(1, 1)
+            End If
+
             list_series.List(list_series.ListCount - 1, 0) = ser_name
+
+
             list_series.List(list_series.ListCount - 1, 1) = b_ser.XValues.Address
             list_series.List(list_series.ListCount - 1, 2) = b_ser.Values.Address
 
@@ -141,7 +148,7 @@ Private Sub UpdateSeries()
             ser_coll.Add list_series.ListCount - 1 & ser_name, b_ser
 
         Next ser
-    Next cht_obj
+    Next chtObj
 End Sub
 
 Private Sub UserForm_Activate()

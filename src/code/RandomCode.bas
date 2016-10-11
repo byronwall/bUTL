@@ -1,20 +1,182 @@
 Attribute VB_Name = "RandomCode"
 Option Explicit
 
-'---------------------------------------------------------------------------------------
-' Module    : RandomCode
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Contains a lot of junk code that was stored.  Most is too specific to be useful.
-'---------------------------------------------------------------------------------------
+Sub ExportFilesFromFolder()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : ExportFilesFromFolder
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Goes through a folder and process all workbooks therein
+    ' Flag      : new-feature
+    '---------------------------------------------------------------------------------------
+    '
+    '###Needs error handling
+    'TODO: consider deleting this Sub since it is quite specific
+    Application.ScreenUpdating = False
+
+    Dim file As Variant
+    Dim path As String
+    path = InputBox("What path?")
+
+    file = Dir(path)
+    While (file <> "")
+
+        Debug.Print path & file
+
+        Dim FileName As String
+
+        FileName = path & file
+
+        Dim wbActive As Workbook
+        Set wbActive = Workbooks.Open(FileName)
+
+        Dim wsActive As Worksheet
+        Set wsActive = wbActive.Sheets("Case Summary")
+
+        With ActiveSheet.PageSetup
+            .TopMargin = Application.InchesToPoints(0.4)
+            .BottomMargin = Application.InchesToPoints(0.4)
+        End With
+
+        wsActive.ExportAsFixedFormat xlTypePDF, path & "PDFs\" & file & ".pdf"
+
+        wbActive.Close False
+
+        file = Dir
+    Wend
+
+    Application.ScreenUpdating = True
+
+End Sub
+
+Sub EvaluateArrayFormulaOnNewSheet()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : EvaluateArrayFormulaOnNewSheet
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Wacky thing to force an array formula to return as an array
+    ' Flag      : not-used
+    '---------------------------------------------------------------------------------------
+    '
+    'cut cell with formula
+    Dim StrAddress As String
+    Dim rngStart As Range
+    Set rngStart = Sheet1.Range("J2")
+    StrAddress = rngStart.Address
+
+    rngStart.Cut
+
+    'create new sheet
+    Dim sht As Worksheet
+    Set sht = Worksheets.Add
+
+    'paste cell onto sheet
+    Dim rngArr As Range
+    Set rngArr = sht.Range("A1")
+    sht.Paste rngArr
+
+    'expand array formula size.. resize to whatever size is needed
+    rngArr.Resize(3).FormulaArray = rngArr.FormulaArray
+
+    'get your result
+    Dim VarArr As Variant
+    VarArr = Application.Evaluate(rngArr.CurrentArray.Address)
+
+    ''''do something with your result here... it is an array
 
 
+    'shrink the formula back to one cell
+    Dim strFormula As String
+    strFormula = rngArr.FormulaArray
 
+    rngArr.CurrentArray.ClearContents
+    rngArr.FormulaArray = strFormula
 
-'''this one goes through a data source and alphabetizes it.
-'''keeping mainly for the select case and find/findnext
+    'cut and paste back to original spot
+    rngArr.Cut
+
+    Sheet1.Paste Sheet1.Range(StrAddress)
+
+    Application.DisplayAlerts = False
+    sht.Delete
+    Application.DisplayAlerts = True
+
+End Sub
+
+Sub MakeSeveralBoxesWithNumbers()
+
+    Dim shp As Shape
+    Dim sht As Worksheet
+
+    Dim rng_loc As Range
+    Set rng_loc = Application.InputBox("select range", Type:=8)
+
+    Set sht = ActiveSheet
+
+    Dim int_counter As Long
+
+    For int_counter = 1 To InputBox("How many?")
+
+        Set shp = sht.Shapes.AddTextbox(msoShapeRectangle, rng_loc.left, _
+                                        rng_loc.top + 20 * int_counter, 20, 20)
+
+        shp.Title = int_counter
+
+        shp.Fill.Visible = msoFalse
+        shp.Line.Visible = msoFalse
+
+        shp.TextFrame2.TextRange.Characters.Text = int_counter
+
+        With shp.TextFrame2.TextRange.Font.Fill
+            .Visible = msoTrue
+            .ForeColor.RGB = RGB(0, 0, 0)
+            .Transparency = 0
+            .Solid
+        End With
+
+    Next
+
+End Sub
+
+Sub CreatePdfOfEachXlsxFileInFolder()
+    
+    'pick a folder
+    Dim folderDialog As FileDialog
+    Set folderDialog = Application.FileDialog(msoFileDialogFolderPicker)
+    
+    folderDialog.Show
+    
+    Dim folderPath As String
+    folderPath = folderDialog.SelectedItems(1) & "\"
+    
+    'find all files in the folder
+    Dim filePath As String
+    filePath = Dir(folderPath & "*.xlsx")
+
+    Do While filePath <> ""
+
+        Dim wkbkFile As Workbook
+        Set wkbkFile = Workbooks.Open(folderPath & filePath, , True)
+        
+        Dim sht As Worksheet
+        
+        For Each sht In wkbkFile.Worksheets
+            sht.Range("A16").EntireRow.RowHeight = 15.75
+            sht.Range("A17").EntireRow.RowHeight = 15.75
+            sht.Range("A22").EntireRow.RowHeight = 15.75
+            sht.Range("A23").EntireRow.RowHeight = 15.75
+        Next
+
+        wkbkFile.ExportAsFixedFormat xlTypePDF, folderPath & filePath & ".pdf"
+        wkbkFile.Close False
+
+        filePath = Dir
+    Loop
+End Sub
+
 Sub AlphabetizeAndReportWithDupes()
-
+    '''this one goes through a data source and alphabetizes it.
+    '''keeping mainly for the select case and find/findnext
     Dim rng_data As Range
     Set rng_data = Range("B2:B28")
 
@@ -32,10 +194,10 @@ Sub AlphabetizeAndReportWithDupes()
         'if duplicate, use FindNext, else just Find
         Dim rng_search As Range
         Select Case True
-            Case i = LBound(arr), UCase(arr(i)) <> UCase(arr(i - 1))
-                Set rng_search = rng_data.Find(arr(i))
-            Case Else
-                Set rng_search = rng_data.FindNext(rng_search)
+        Case i = LBound(arr), UCase(arr(i)) <> UCase(arr(i - 1))
+            Set rng_search = rng_data.Find(arr(i))
+        Case Else
+            Set rng_search = rng_data.FindNext(rng_search)
         End Select
 
         ''''do your report stuff in here for each row
@@ -91,7 +253,7 @@ Sub Rand_PrintMultiple()
     'Another static folder
     Dim rng_tag As Range
     Dim str_path As String
-    str_path = "C:\Documents and Settings\wallbd\Application Data\PDF OUTPUT\"
+    str_path = InputBox("Provide a folder for output location")
     
     For Each rng_tag In Range("TAGS[TAG]").SpecialCells(xlCellTypeVisible)
         
@@ -126,7 +288,7 @@ Sub Rand_PrintMultiplePvVsOp()
     'Another static folder
     Dim rng_tag As Range
     Dim str_path As String
-    str_path = "C:\Documents and Settings\wallbd\Application Data\PDF OUTPUT\"
+    str_path = InputBox("Provide a folder for output location")
     
     For Each rng_tag In Range("tag_table[TAG]").SpecialCells(xlCellTypeVisible)
         
@@ -140,27 +302,50 @@ Sub Rand_PrintMultiplePvVsOp()
 
 End Sub
 
+Function DownloadFileAsString(ByVal vWebFile As String) As String
+    Dim oXMLHTTP As Object, i As Long, vFF As Long, oResp() As Byte
+
+    'You can also set a ref. to Microsoft XML, and Dim oXMLHTTP as MSXML2.XMLHTTP
+    Set oXMLHTTP = CreateObject("MSXML2.ServerXMLHTTP.6.0")
+    oXMLHTTP.Open "GET", vWebFile, False         'Open socket to get the website
+    oXMLHTTP.Send                                'send request
+
+    'Wait for request to finish
+    Do While oXMLHTTP.readyState <> 4
+        DoEvents
+    Loop
+
+    DownloadFileAsString = oXMLHTTP.responseText 'Returns the results as a byte array
+
+    'Clear memory
+    Set oXMLHTTP = Nothing
+End Function
+
 Function Download_File(ByVal vWebFile As String, ByVal vLocalFile As String) As Boolean
     Dim oXMLHTTP As Object, i As Long, vFF As Long, oResp() As Byte
 
     'You can also set a ref. to Microsoft XML, and Dim oXMLHTTP as MSXML2.XMLHTTP
-    Set oXMLHTTP = CreateObject("MSXML2.XMLHTTP")
-    oXMLHTTP.Open "GET", vWebFile, False 'Open socket to get the website
-    oXMLHTTP.Send 'send request
+    Set oXMLHTTP = CreateObject("MSXML2.ServerXMLHTTP.6.0")
+    oXMLHTTP.Open "GET", vWebFile, False         'Open socket to get the website
+    oXMLHTTP.Send                                'send request
 
     'Wait for request to finish
     Do While oXMLHTTP.readyState <> 4
-    DoEvents
+        DoEvents
     Loop
 
-    oResp = oXMLHTTP.responseBody 'Returns the results as a byte array
+    oResp = oXMLHTTP.responseBody                'Returns the results as a byte array
 
     'Create local file and save results to it
-    vFF = FreeFile
-    If Dir(vLocalFile) <> "" Then Kill vLocalFile
-    Open vLocalFile For Binary As #vFF
-    Put #vFF, , oResp
-    Close #vFF
+    Dim oStream As Object
+    If oXMLHTTP.Status = 200 Then
+        Set oStream = CreateObject("ADODB.Stream")
+        oStream.Open
+        oStream.Type = 1
+        oStream.Write oXMLHTTP.responseBody
+        oStream.SaveToFile vLocalFile, 2         ' 1 = no overwrite, 2 = overwrite
+        oStream.Close
+    End If
 
     'Clear memory
     Set oXMLHTTP = Nothing
@@ -172,7 +357,7 @@ Sub Rand_DownloadFromSheet()
     
     Dim str_folder As Variant
     'Another static folder
-    str_folder = "C:\Documents and Settings\wallbd\Application Data\DSP Guide\"
+    str_folder = InputBox("Provide a folder location for output")
     
     For Each rng_addr In Range("B2:B35")
     
@@ -184,62 +369,62 @@ End Sub
 
 Sub Rand_CommonPrintSettings()
 
-Application.ScreenUpdating = False
-Dim sht As Worksheet
+    Application.ScreenUpdating = False
+    Dim sht As Worksheet
 
-For Each sht In Sheets
-    sht.PageSetup.PrintArea = ""
-    sht.ResetAllPageBreaks
-    sht.PageSetup.PrintArea = ""
+    For Each sht In Sheets
+        sht.PageSetup.PrintArea = ""
+        sht.ResetAllPageBreaks
+        sht.PageSetup.PrintArea = ""
     
-    With sht.PageSetup
-        .LeftHeader = ""
-        .CenterHeader = ""
-        .RightHeader = ""
-        .LeftFooter = ""
-        .CenterFooter = ""
-        .RightFooter = ""
-        .LeftMargin = Application.InchesToPoints(0.75)
-        .RightMargin = Application.InchesToPoints(0.75)
-        .TopMargin = Application.InchesToPoints(1)
-        .BottomMargin = Application.InchesToPoints(1)
-        .HeaderMargin = Application.InchesToPoints(0.5)
-        .FooterMargin = Application.InchesToPoints(0.5)
-        .PrintHeadings = False
-        .PrintGridlines = False
-        .PrintComments = xlPrintNoComments
-        .PrintQuality = 600
-        .CenterHorizontally = False
-        .CenterVertically = False
-        .Orientation = xlLandscape
-        .Draft = False
-        .PaperSize = xlPaperLetter
-        .FirstPageNumber = xlAutomatic
-        .Order = xlDownThenOver
-        .BlackAndWhite = False
-        .Zoom = False
-        .FitToPagesWide = 1
-        .FitToPagesTall = False
-        .PrintErrors = xlPrintErrorsDisplayed
-        .OddAndEvenPagesHeaderFooter = False
-        .DifferentFirstPageHeaderFooter = False
-        .ScaleWithDocHeaderFooter = True
-        .AlignMarginsHeaderFooter = False
-        .EvenPage.LeftHeader.Text = ""
-        .EvenPage.CenterHeader.Text = ""
-        .EvenPage.RightHeader.Text = ""
-        .EvenPage.LeftFooter.Text = ""
-        .EvenPage.CenterFooter.Text = ""
-        .EvenPage.RightFooter.Text = ""
-        .FirstPage.LeftHeader.Text = ""
-        .FirstPage.CenterHeader.Text = ""
-        .FirstPage.RightHeader.Text = ""
-        .FirstPage.LeftFooter.Text = ""
-        .FirstPage.CenterFooter.Text = ""
-        .FirstPage.RightFooter.Text = ""
-        .PrintTitleRows = ""
-        .PrintTitleColumns = ""
-    End With
+        With sht.PageSetup
+            .LeftHeader = ""
+            .CenterHeader = ""
+            .RightHeader = ""
+            .LeftFooter = ""
+            .CenterFooter = ""
+            .RightFooter = ""
+            .LeftMargin = Application.InchesToPoints(0.75)
+            .RightMargin = Application.InchesToPoints(0.75)
+            .TopMargin = Application.InchesToPoints(1)
+            .BottomMargin = Application.InchesToPoints(1)
+            .HeaderMargin = Application.InchesToPoints(0.5)
+            .FooterMargin = Application.InchesToPoints(0.5)
+            .PrintHeadings = False
+            .PrintGridlines = False
+            .PrintComments = xlPrintNoComments
+            .PrintQuality = 600
+            .CenterHorizontally = False
+            .CenterVertically = False
+            .Orientation = xlLandscape
+            .Draft = False
+            .PaperSize = xlPaperLetter
+            .FirstPageNumber = xlAutomatic
+            .Order = xlDownThenOver
+            .BlackAndWhite = False
+            .Zoom = False
+            .FitToPagesWide = 1
+            .FitToPagesTall = False
+            .PrintErrors = xlPrintErrorsDisplayed
+            .OddAndEvenPagesHeaderFooter = False
+            .DifferentFirstPageHeaderFooter = False
+            .ScaleWithDocHeaderFooter = True
+            .AlignMarginsHeaderFooter = False
+            .EvenPage.LeftHeader.Text = ""
+            .EvenPage.CenterHeader.Text = ""
+            .EvenPage.RightHeader.Text = ""
+            .EvenPage.LeftFooter.Text = ""
+            .EvenPage.CenterFooter.Text = ""
+            .EvenPage.RightFooter.Text = ""
+            .FirstPage.LeftHeader.Text = ""
+            .FirstPage.CenterHeader.Text = ""
+            .FirstPage.RightHeader.Text = ""
+            .FirstPage.LeftFooter.Text = ""
+            .FirstPage.CenterFooter.Text = ""
+            .FirstPage.RightFooter.Text = ""
+            .PrintTitleRows = ""
+            .PrintTitleColumns = ""
+        End With
     Next sht
     
     Application.ScreenUpdating = True
@@ -264,12 +449,12 @@ Sub Rand_DumpTextFromAllSheets()
     Set w = Application.Workbooks.Add
     Set sw = w.Sheets.Add
     
-    Dim row As Long
-    row = 0
+    Dim Row As Long
+    Row = 0
     For Each s In main.Sheets
         For Each c In s.UsedRange.SpecialCells(xlCellTypeConstants)
-            sw.Range("A1").Offset(row) = c
-            row = row + 1
+            sw.Range("A1").Offset(Row) = c
+            Row = Row + 1
         Next c
     Next s
 
@@ -294,9 +479,9 @@ Sub Rand_ApplyHeadersAndFootersToAll()
 
 End Sub
 
-'Takes a table of values and flattens it.
-Sub Rand_Matrix()
 
+Sub Rand_Matrix()
+    'Takes a table of values and flattens it.
     Dim rng_left As Range
     Dim rng_top As Range
     Dim rng_body As Range
@@ -306,8 +491,8 @@ Sub Rand_Matrix()
     
     Dim int_left As Long, int_top As Long
     
-    Set rng_body = Range(Cells(rng_left.row, rng_top.Column), _
-                            Cells(rng_left.Rows(rng_left.Rows.count).row, rng_top.Columns(rng_top.Columns.count).Column))
+    Set rng_body = Range(Cells(rng_left.Row, rng_top.Column), _
+                         Cells(rng_left.Rows(rng_left.Rows.count).Row, rng_top.Columns(rng_top.Columns.count).Column))
                             
     Dim sht_out As Worksheet
     Set sht_out = Application.Worksheets.Add()
@@ -318,7 +503,7 @@ Sub Rand_Matrix()
     int_row = 1
     
     For Each rng_cell In rng_body.SpecialCells(xlCellTypeConstants)
-        sht_out.Range("A1").Offset(int_row) = rng_left.Cells(rng_cell.row - rng_left.row + 1, 1)
+        sht_out.Range("A1").Offset(int_row) = rng_left.Cells(rng_cell.Row - rng_left.Row + 1, 1)
         sht_out.Range("B1").Offset(int_row) = rng_top.Cells(1, rng_cell.Column - rng_top.Column + 1)
         sht_out.Range("C1").Offset(int_row) = rng_cell
         

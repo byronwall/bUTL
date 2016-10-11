@@ -1,18 +1,11 @@
 Attribute VB_Name = "Ribbon_Callbacks"
 Option Explicit
 
-'---------------------------------------------------------------------------------------
-' Module    : Ribbon_Callbacks
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Contains all of the callbacks used by the Ribbon XML file
-'---------------------------------------------------------------------------------------
-
 Dim frm_chartGrid As New form_chtGrid
 
 Public Sub btn_aboutForm_onAction(control As IRibbonControl)
 
-'catch the rare case where the add-in is opened directly
+    'catch the rare case where the add-in is opened directly
     If ActiveWorkbook Is Nothing Then
         Application.Workbooks.Add
     End If
@@ -171,11 +164,10 @@ Public Sub btn_seriesSplit_onAction(control As IRibbonControl)
     SeriesSplit
 End Sub
 
-'
 Sub btn_sheetDeleteHiddenRows_onAction(control As IRibbonControl)
     Sheet_DeleteHiddenRows
 End Sub
-'
+
 
 Public Sub btn_sheetNamesOutput_onAction(control As IRibbonControl)
     OutputSheets
@@ -217,15 +209,19 @@ Public Sub btn_updateScrollbars_onAction(control As IRibbonControl)
     UpdateScrollbars
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : RibbonOnLoad
-' Author    : @byronwall
-' Date      : 2015 08 05
-' Purpose   : OnLoad entry point for the add-in
-'---------------------------------------------------------------------------------------
-'
-Public Sub RibbonOnLoad(ribbon As IRibbonUI)
+Public Sub btn_checkUpdates_onAction(control As IRibbonControl)
+    CheckForUpdates
+End Sub
 
+
+Public Sub RibbonOnLoad(ribbon As IRibbonUI)
+    '---------------------------------------------------------------------------------------
+    ' Procedure : RibbonOnLoad
+    ' Author    : @byronwall
+    ' Date      : 2015 08 05
+    ' Purpose   : OnLoad entry point for the add-in
+    '---------------------------------------------------------------------------------------
+    '
     SetUpKeyboardHooksForSelection
 
 End Sub

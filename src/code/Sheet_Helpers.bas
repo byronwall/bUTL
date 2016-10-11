@@ -1,22 +1,15 @@
 Attribute VB_Name = "Sheet_Helpers"
 Option Explicit
 
-'---------------------------------------------------------------------------------------
-' Module    : Sheet_Helpers
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Contains code related to sheets and sheet processing
-'---------------------------------------------------------------------------------------
 
-'---------------------------------------------------------------------------------------
-' Procedure : LockAllSheets
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Locks all sheets with the same password
-'---------------------------------------------------------------------------------------
-'
 Sub LockAllSheets()
-
+    '---------------------------------------------------------------------------------------
+    ' Procedure : LockAllSheets
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Locks all sheets with the same password
+    '---------------------------------------------------------------------------------------
+    '
     Dim pass As Variant
     pass = Application.InputBox("Password to lock")
 
@@ -37,50 +30,50 @@ Sub LockAllSheets()
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : OutputSheets
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Creates a new worksheet with a list and link to each sheet
-'---------------------------------------------------------------------------------------
-'
+
 Sub OutputSheets()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : OutputSheets
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Creates a new worksheet with a list and link to each sheet
+    '---------------------------------------------------------------------------------------
+    '
+    Dim wsOut As Worksheet
+    Set wsOut = Worksheets.Add(Before:=Worksheets(1))
+    wsOut.Activate
 
-    Dim newSheet As Worksheet
-    Set newSheet = Worksheets.Add(Before:=Worksheets(1))
-    newSheet.Activate
+    Dim rngOut As Range
+    Set rngOut = wsOut.Range("B2")
 
-    Dim newRange As Range
-    Set newRange = newSheet.Range("B2")
+    Dim iRow As Long
+    iRow = 0
 
-    Dim row As Long
-    row = 0
+    Dim sht As Worksheet
+    For Each sht In Worksheets
 
-    Dim mySheet As Worksheet
-    For Each mySheet In Worksheets
+        If sht.name <> wsOut.name Then
 
-        If mySheet.name <> newSheet.name Then
-
-            mySheet.Hyperlinks.Add _
-                    newRange.Offset(row), "", _
-                    "'" & mySheet.name & "'!A1", , _
-                        mySheet.name
-            row = row + 1
+            sht.Hyperlinks.Add _
+        rngOut.Offset(iRow), "", _
+        "'" & sht.name & "'!A1", , _
+            sht.name
+            iRow = iRow + 1
 
         End If
-    Next mySheet
+    Next sht
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : UnlockAllSheets
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Unlocks all sheets with the same password
-'---------------------------------------------------------------------------------------
-'
-Sub UnlockAllSheets()
 
+Sub UnlockAllSheets()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : UnlockAllSheets
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Unlocks all sheets with the same password
+    '---------------------------------------------------------------------------------------
+    '
     Dim pass As Variant
     pass = Application.InputBox("Password to unlock")
     
@@ -92,79 +85,81 @@ Sub UnlockAllSheets()
     Else
         Application.ScreenUpdating = False
         'Changed to activeworkbook so if add-in is not installed, it will target the active book rather than the xlam
-        Dim mySheet As Worksheet
-        For Each mySheet In ActiveWorkbook.Sheets
+        Dim sht As Worksheet
+        For Each sht In ActiveWorkbook.Sheets
             'Let's keep track of the errors to inform the user
             If Err.Number <> 0 Then iErr = iErr + 1
             Err.Clear
             On Error Resume Next
-            mySheet.Unprotect (pass)
+            sht.Unprotect (pass)
 
-        Next mySheet
+        Next sht
         If Err.Number <> 0 Then iErr = iErr + 1
         Application.ScreenUpdating = True
     End If
     If iErr <> 0 Then
-    MsgBox (iErr & " sheets could not be unlocked due to bad password.")
+        MsgBox (iErr & " sheets could not be unlocked due to bad password.")
     End If
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : AscendSheets
-' Author    : @raymondwise
-' Date      : 2015 08 07
-' Purpose   : Places worksheets in ascending alphabetical order.
-'---------------------------------------------------------------------------------------
+
 Sub AscendSheets()
-Application.ScreenUpdating = False
-Dim myBook As Workbook
-Set myBook = ActiveWorkbook
+    '---------------------------------------------------------------------------------------
+    ' Procedure : AscendSheets
+    ' Author    : @raymondwise
+    ' Date      : 2015 08 07
+    ' Purpose   : Places worksheets in ascending alphabetical order.
+    '---------------------------------------------------------------------------------------
+    Application.ScreenUpdating = False
+    Dim wb As Workbook
+    Set wb = ActiveWorkbook
 
-Dim numberOfSheets As Long
-numberOfSheets = myBook.Sheets.count
+    Dim intSheets As Long
+    intSheets = wb.Sheets.count
 
-Dim i As Long
-Dim j As Long
+    Dim i As Long
+    Dim j As Long
 
-With myBook
-    For j = 1 To numberOfSheets
-        For i = 1 To numberOfSheets - 1
-            If UCase(.Sheets(i).name) > UCase(.Sheets(i + 1).name) Then
-                .Sheets(i).Move after:=.Sheets(i + 1)
-            End If
-        Next i
-    Next j
-End With
+    With wb
+        For j = 1 To intSheets
+            For i = 1 To intSheets - 1
+                If UCase(.Sheets(i).name) > UCase(.Sheets(i + 1).name) Then
+                    .Sheets(i).Move after:=.Sheets(i + 1)
+                End If
+            Next i
+        Next j
+    End With
 
-Application.ScreenUpdating = True
+    Application.ScreenUpdating = True
 End Sub
-'---------------------------------------------------------------------------------------
-' Procedure : DescendSheets
-' Author    : @raymondwise
-' Date      : 2015 08 07
-' Purpose   : Places worksheets in descending alphabetical order.
-'---------------------------------------------------------------------------------------
+
 Sub DescendSheets()
-Application.ScreenUpdating = False
-Dim myBook As Workbook
-Set myBook = ActiveWorkbook
+    '---------------------------------------------------------------------------------------
+    ' Procedure : DescendSheets
+    ' Author    : @raymondwise
+    ' Date      : 2015 08 07
+    ' Purpose   : Places worksheets in descending alphabetical order.
+    '---------------------------------------------------------------------------------------
+    Application.ScreenUpdating = False
+    Dim wb As Workbook
+    Set wb = ActiveWorkbook
 
-Dim numberOfSheets As Long
-numberOfSheets = myBook.Sheets.count
+    Dim intSheets As Long
+    intSheets = wb.Sheets.count
 
-Dim i As Long
-Dim j As Long
+    Dim i As Long
+    Dim j As Long
 
-With myBook
-    For j = 1 To numberOfSheets
-        For i = 1 To numberOfSheets - 1
-            If UCase(.Sheets(i).name) < UCase(.Sheets(i + 1).name) Then
-                .Sheets(i).Move after:=.Sheets(i + 1)
-            End If
-        Next i
-    Next j
-End With
+    With wb
+        For j = 1 To intSheets
+            For i = 1 To intSheets - 1
+                If UCase(.Sheets(i).name) < UCase(.Sheets(i + 1).name) Then
+                    .Sheets(i).Move after:=.Sheets(i + 1)
+                End If
+            Next i
+        Next j
+    End With
 
-Application.ScreenUpdating = True
+    Application.ScreenUpdating = True
 End Sub
 

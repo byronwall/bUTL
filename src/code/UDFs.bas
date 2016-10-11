@@ -1,29 +1,22 @@
 Attribute VB_Name = "UDFs"
-'---------------------------------------------------------------------------------------
-' Module    : UDFs
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Contains all code that is intended to be used as a UDF
-'---------------------------------------------------------------------------------------
-
 Option Explicit
 
-'---------------------------------------------------------------------------------------
-' Procedure : RandLetters
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : UDF that generates a sequence of random letters
-'---------------------------------------------------------------------------------------
-'
-Public Function RandLetters(numberOfLetters As Long) As String
 
-    Dim i As Long
+Public Function RandLetters(letterCount As Long) As String
+    '---------------------------------------------------------------------------------------
+    ' Procedure : RandLetters
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : UDF that generates a sequence of random letters
+    '---------------------------------------------------------------------------------------
+    '
+    Dim letterIndex As Long
     
     Dim letters() As String
-    ReDim letters(1 To numberOfLetters)
+    ReDim letters(1 To letterCount)
     
-    For i = 1 To numberOfLetters
-        letters(i) = Chr(Int(Rnd() * 26 + 65))
+    For letterIndex = 1 To letterCount
+        letters(letterIndex) = Chr(Int(Rnd() * 26 + 65))
     Next
     
     RandLetters = Join(letters(), "")

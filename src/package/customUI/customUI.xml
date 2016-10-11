@@ -358,6 +358,11 @@
 						label="about"
 						supertip="This will open the GitHub page for bUTL."
 						onAction="btn_aboutForm_onAction"/>
+					<button
+						id="btn_checkUpdates"
+						label="check for updates"
+						supertip="This will check GitHub for updates."
+						onAction="btn_checkUpdates_onAction"/>
 				</group >
 			</tab >
 		</tabs >

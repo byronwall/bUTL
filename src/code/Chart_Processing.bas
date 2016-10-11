@@ -1,195 +1,192 @@
 Attribute VB_Name = "Chart_Processing"
-'---------------------------------------------------------------------------------------
-' Module    : Chart_Processing
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Contains some of the heavy lifting processing code for charts
-'---------------------------------------------------------------------------------------
-
 Option Explicit
 
 Public Sub Chart_CreateChartWithSeriesForEachColumn()
-'will create a chart that includes a series with no x value for each column
+    'will create a chart that includes a series with no x value for each column
 
-    Dim dataRange As Range
-    Set dataRange = GetInputOrSelection("Select chart data")
+    Dim rngData As Range
+    Set rngData = GetInputOrSelection("Select chart data")
 
     'create a chart
-    Dim myChart As ChartObject
-    Set myChart = ActiveSheet.ChartObjects.Add(0, 0, 300, 300)
+    Dim chtObj As ChartObject
+    Set chtObj = ActiveSheet.ChartObjects.Add(0, 0, 300, 300)
     
-    myChart.Chart.ChartType = xlXYScatter
+    chtObj.Chart.ChartType = xlXYScatter
 
-    Dim rangeColumn As Range
-    For Each rangeColumn In dataRange.Columns
+    Dim rngColumn As Range
+    For Each rngColumn In rngData.Columns
 
-        Dim chartRange As Range
-        Set chartRange = RangeEnd(rangeColumn.Cells(1, 1), xlDown)
+        Dim rngChartData As Range
+        Set rngChartData = RangeEnd(rngColumn.Cells(1, 1), xlDown)
         
-        Dim ButlSeries As New bUTLChartSeries
-        Set ButlSeries.Values = chartRange
+        Dim butlSeries As New bUTLChartSeries
+        Set butlSeries.Values = rngChartData
         
-        ButlSeries.AddSeriesToChart myChart.Chart
+        butlSeries.AddSeriesToChart chtObj.Chart
     Next
 
 End Sub
 
 Public Sub Chart_CopyToSheet()
 
-    Dim myChart As ChartObject
+    Dim chtObj As ChartObject
     
-    Dim allObjects As Object
-    Set allObjects = Selection
+    Dim objSelection As Object
+    Set objSelection = Selection
     
-    Dim wantNewSheet As VbMsgBoxResult
-    wantNewSheet = MsgBox("New sheet?", vbYesNo, "New sheet?")
+    Dim newSheetResult As VbMsgBoxResult
+    newSheetResult = MsgBox("New sheet?", vbYesNo, "New sheet?")
     
-    Dim newSheet As Worksheet
-    If wantNewSheet = vbYes Then
-        Set newSheet = Worksheets.Add()
+    Dim shtOutput As Worksheet
+    If newSheetResult = vbYes Then
+        Set shtOutput = Worksheets.Add()
     Else
-        Set newSheet = Application.InputBox("Pick a cell on a sheet", "Pick sheet", Type:=8).Parent
+        Set shtOutput = Application.InputBox("Pick a cell on a sheet", "Pick sheet", Type:=8).Parent
     End If
     
-    For Each myChart In Chart_GetObjectsFromObject(allObjects)
-        myChart.Copy
+    For Each chtObj In Chart_GetObjectsFromObject(objSelection)
+        chtObj.Copy
         
-        newSheet.Paste
+        shtOutput.Paste
     Next
     
-    newSheet.Activate
+    shtOutput.Activate
 End Sub
 
 Sub Chart_SortSeriesByName()
-'this will sort series by names
-    Dim myChart As ChartObject
-    For Each myChart In Chart_GetObjectsFromObject(Selection)
+    'this will sort series by names
+    Dim chtObj As ChartObject
+    For Each chtObj In Chart_GetObjectsFromObject(Selection)
 
         'uses a simple bubble sort but it works... shouldn't have 1000 series anyways
-        Dim firstChart As Long
-        Dim secondChart As Long
-        For firstChart = 1 To myChart.Chart.SeriesCollection.count
-            For secondChart = (firstChart + 1) To myChart.Chart.SeriesCollection.count
+        Dim chtIndex1 As Long
+        Dim chtIndex2 As Long
+        For chtIndex1 = 1 To chtObj.Chart.SeriesCollection.count
+            For chtIndex2 = (chtIndex1 + 1) To chtObj.Chart.SeriesCollection.count
 
-                Dim FirstButlSeries As New bUTLChartSeries
-                Dim SecondButlSeries As New bUTLChartSeries
+                Dim butlSeries1 As New bUTLChartSeries
+                Dim butlSeries2 As New bUTLChartSeries
 
-                FirstButlSeries.UpdateFromChartSeries myChart.Chart.SeriesCollection(firstChart)
-                SecondButlSeries.UpdateFromChartSeries myChart.Chart.SeriesCollection(secondChart)
+                butlSeries1.UpdateFromChartSeries chtObj.Chart.SeriesCollection(chtIndex1)
+                butlSeries2.UpdateFromChartSeries chtObj.Chart.SeriesCollection(chtIndex2)
 
-                If FirstButlSeries.name.Value > SecondButlSeries.name.Value Then
-                    Dim numberSeries As Long
-                    numberSeries = SecondButlSeries.SeriesNumber
-                    SecondButlSeries.SeriesNumber = FirstButlSeries.SeriesNumber
-                    FirstButlSeries.SeriesNumber = numberSeries
+                If butlSeries1.name.Value > butlSeries2.name.Value Then
+                    Dim indexSeriesSwap As Long
+                    indexSeriesSwap = butlSeries2.SeriesNumber
+                    butlSeries2.SeriesNumber = butlSeries1.SeriesNumber
+                    butlSeries1.SeriesNumber = indexSeriesSwap
 
-                    SecondButlSeries.UpdateSeriesWithNewValues
-                    FirstButlSeries.UpdateSeriesWithNewValues
+                    butlSeries2.UpdateSeriesWithNewValues
+                    butlSeries1.UpdateSeriesWithNewValues
                 End If
             Next
         Next
     Next
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : Chart_TimeSeries
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Helper Sub to create a set of charts with the same x axis and varying y
-'---------------------------------------------------------------------------------------
-'
-Sub Chart_TimeSeries(dateRange As Range, dataRange As Range, titles As Range)
 
-    Dim counter As Long
-    counter = 1
+Sub Chart_TimeSeries(rngDates As Range, rngData As Range, rngTitles As Range)
+    '---------------------------------------------------------------------------------------
+    ' Procedure : Chart_TimeSeries
+    ' Author    : @byronwall
+    ' Date      : 2015 12 30
+    ' Purpose   : Helper Sub to create a set of charts with the same x axis and varying y
+    '---------------------------------------------------------------------------------------
+    '
+    Application.ScreenUpdating = False
 
-    Dim title As Range
-    Dim rangeColumn As Range
+    Dim chartIndex As Long
+    chartIndex = 1
 
-    For Each title In titles
+    Dim rngTitle As Range
+    Dim rngColumn As Range
 
-        Dim myChartObject As ChartObject
-        Set myChartObject = ActiveSheet.ChartObjects.Add(counter * 300, 0, 300, 300)
+    For Each rngTitle In rngTitles
 
-        Dim myChart As Chart
-        Set myChart = myChartObject.Chart
-        myChart.ChartType = xlXYScatterLines
-        myChart.HasTitle = True
-        myChart.Legend.Delete
+        Dim chtObj As ChartObject
+        Set chtObj = ActiveSheet.ChartObjects.Add(chartIndex * 300, 0, 300, 300)
 
-        Dim myAxis As Axis
-        Set myAxis = myChart.Axes(xlValue)
-        myAxis.MajorGridlines.Border.Color = RGB(200, 200, 200)
+        Dim cht As Chart
+        Set cht = chtObj.Chart
+        cht.ChartType = xlXYScatterLines
+        cht.HasTitle = True
+        cht.Legend.Delete
 
-        Dim mySeries As series
-        Dim ButlSeries As New bUTLChartSeries
+        Dim chtAxis As Axis
+        Set chtAxis = cht.Axes(xlValue)
+        chtAxis.MajorGridlines.Border.Color = RGB(200, 200, 200)
 
-        Set ButlSeries.XValues = dateRange
-        Set ButlSeries.Values = dataRange.Columns(counter)
-        Set ButlSeries.name = title
+        Dim chtSeries As series
+        Dim butlSeries As New bUTLChartSeries
 
-        Set mySeries = ButlSeries.AddSeriesToChart(myChart)
+        Set butlSeries.XValues = rngDates
+        Set butlSeries.Values = rngData.Columns(chartIndex)
+        Set butlSeries.name = rngTitle
 
-        mySeries.MarkerSize = 3
-        mySeries.MarkerStyle = xlMarkerStyleCircle
+        Set chtSeries = butlSeries.AddSeriesToChart(cht)
 
-        counter = counter + 1
+        chtSeries.MarkerSize = 3
+        chtSeries.MarkerStyle = xlMarkerStyleCircle
 
-    Next title
+        chartIndex = chartIndex + 1
+
+    Next rngTitle
+
+    Application.ScreenUpdating = True
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : Chart_TimeSeries_FastCreation
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : this will create a fast set of charts from a block of data
-' Flag      : not-used
-'---------------------------------------------------------------------------------------
-'
-Sub Chart_TimeSeries_FastCreation()
 
-    Dim dateRange As Range
-    Dim dataRange As Range
-    Dim titles As Range
+Sub Chart_TimeSeries_FastCreation()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : Chart_TimeSeries_FastCreation
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : this will create a fast set of charts from a block of data
+    ' Flag      : not-used
+    '---------------------------------------------------------------------------------------
+    '
+    Dim rngDates As Range
+    Dim rngData As Range
+    Dim rngTitles As Range
 
     'dates are in B4 and down
-    Set dateRange = RangeEnd_Boundary(Range("B4"), xlDown)
+    Set rngDates = RangeEnd_Boundary(Range("B4"), xlDown)
 
     'data starts in C4, down and over
-    Set dataRange = RangeEnd_Boundary(Range("C4"), xlDown, xlToRight)
+    Set rngData = RangeEnd_Boundary(Range("C4"), xlDown, xlToRight)
 
     'titels are C2 and over
-    Set titles = RangeEnd_Boundary(Range("C2"), xlToRight)
+    Set rngTitles = RangeEnd_Boundary(Range("C2"), xlToRight)
 
-    Chart_TimeSeries dateRange, dataRange, titles
+    Chart_TimeSeries rngDates, rngData, rngTitles
     ChartDefaultFormat
     Chart_GridOfCharts
 
 End Sub
 
 
-'---------------------------------------------------------------------------------------
-' Procedure : CreateMultipleTimeSeries
-' Author    : @byronwall
-' Date      : 2015 08 11
-' Purpose   : Entry point from Ribbon to create a set of time series charts
-'---------------------------------------------------------------------------------------
-'
-Sub CreateMultipleTimeSeries()
 
-    Dim dateRange As Range
-    Dim dataRange As Range
-    Dim titles As Range
+Sub CreateMultipleTimeSeries()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : CreateMultipleTimeSeries
+    ' Author    : @byronwall
+    ' Date      : 2015 08 11
+    ' Purpose   : Entry point from Ribbon to create a set of time series charts
+    '---------------------------------------------------------------------------------------
+    '
+    Dim rngDates As Range
+    Dim rngData As Range
+    Dim rngTitles As Range
 
     On Error GoTo CreateMultipleTimeSeries_Error
 
     DeleteAllCharts
 
-    Set dateRange = Application.InputBox("Select date range", Type:=8)
-    Set dataRange = Application.InputBox("Select data", Type:=8)
-    Set titles = Application.InputBox("Select titles", Type:=8)
+    Set rngDates = Application.InputBox("Select date range", Type:=8)
+    Set rngData = Application.InputBox("Select data", Type:=8)
+    Set rngTitles = Application.InputBox("Select titles", Type:=8)
 
-    Chart_TimeSeries dateRange, dataRange, titles
+    Chart_TimeSeries rngDates, rngData, rngTitles
 
     On Error GoTo 0
     Exit Sub
@@ -200,40 +197,40 @@ CreateMultipleTimeSeries_Error:
 
 End Sub
 
-'---------------------------------------------------------------------------------------
-' Procedure : RemoveZeroValueDataLabel
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Code deletes data labels that have 0 value
-' Flag      : not-used
-'---------------------------------------------------------------------------------------
-'
+
 Sub RemoveZeroValueDataLabel()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : RemoveZeroValueDataLabel
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Code deletes data labels that have 0 value
+    ' Flag      : not-used
+    '---------------------------------------------------------------------------------------
+    '
+    'uses the ActiveChart, be sure a chart is selected
+    Dim cht As Chart
+    Set cht = ActiveChart
 
-'uses the ActiveChart, be sure a chart is selected
-    Dim myChart As Chart
-    Set myChart = ActiveChart
+    Dim chtSeries As series
+    For Each chtSeries In cht.SeriesCollection
 
-    Dim mySeries As series
-    For Each mySeries In myChart.SeriesCollection
-
-        Dim myValues As Variant
-        myValues = mySeries.Values
+        Dim chtValues As Variant
+        chtValues = chtSeries.Values
 
         'include this line if you want to reestablish labels before deleting
-        mySeries.ApplyDataLabels xlDataLabelsShowLabel, , , , True, False, False, False, False
+        chtSeries.ApplyDataLabels xlDataLabelsShowLabel, , , , True, False, False, False, False
 
         'loop through values and delete 0-value labels
-        Dim i As Long
-        For i = LBound(myValues) To UBound(myValues)
-            If myValues(i) = 0 Then
-                With mySeries.Points(i)
+        Dim pointIndex As Long
+        For pointIndex = LBound(chtValues) To UBound(chtValues)
+            If chtValues(pointIndex) = 0 Then
+                With chtSeries.Points(pointIndex)
                     If .HasDataLabel Then
                         .DataLabel.Delete
                     End If
                 End With
             End If
-        Next i
-    Next mySeries
+        Next pointIndex
+    Next chtSeries
 End Sub
 

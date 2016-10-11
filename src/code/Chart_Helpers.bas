@@ -1,22 +1,15 @@
 Attribute VB_Name = "Chart_Helpers"
 Option Explicit
 
-'---------------------------------------------------------------------------------------
-' Module    : Chart_Helpers
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Contains code that helps other chart related features
-'---------------------------------------------------------------------------------------
 
-'---------------------------------------------------------------------------------------
-' Procedure : Chart_GetColor
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Returns a list of colors for styling chart series
-'---------------------------------------------------------------------------------------
-'
-Function Chart_GetColor(index As Variant) As Long
-
+Public Function Chart_GetColor(index As Variant) As Long
+    '---------------------------------------------------------------------------------------
+    ' Procedure : Chart_GetColor
+    ' Author    : @byronwall
+    ' Date      : 2015 07 24
+    ' Purpose   : Returns a list of colors for styling chart series
+    '---------------------------------------------------------------------------------------
+    '
     Dim colors(1 To 10) As Variant
 
     colors(6) = RGB(166, 206, 227)
@@ -34,70 +27,84 @@ Function Chart_GetColor(index As Variant) As Long
 
 End Function
 
-'---------------------------------------------------------------------------------------
-' Procedure : Chart_GetObjectsFromObject
-' Author    : @byronwall
-' Date      : 2015 07 24
-' Purpose   : Helper function which finds a valid ChartObject based on what is actually selected
-'             Returns a Collection (possibly empty) and should be handled with a For Each
-'---------------------------------------------------------------------------------------
-'
-Function Chart_GetObjectsFromObject(incomingObject As Object) As Variant
 
-    Dim objectType As String
-    'TODO: these should be upgrade to TypeOf instead of strings
-    objectType = TypeName(incomingObject)
+Public Function Chart_GetObjectsFromObject(obj_in As Object) As Variant
+    '---------------------------------------------------------------------------------------
+    ' Procedure : Chart_GetObjectsFromObject
+    ' Author    : @byronwall
+    ' Date      : 2015 12 30
+    ' Purpose   : Helper function which finds a valid ChartObject based on what is actually selected
+    '             Returns a Collection (possibly empty) and should be handled with a For Each
+    '---------------------------------------------------------------------------------------
+    '
+    Dim chtObjCollection As New Collection
 
-    Dim newCollection As New Collection
+    'NOTE that this function does not work well with Axis objects.  Excel does not return the correct Parent for them.
+    
+    Dim obj As Variant
 
-    Dim newObject As Variant
 
-    If objectType = "DrawingObjects" Then
+    If TypeOf obj_in Is DrawingObjects Then
         'this means that multiple charts are selected
-        For Each newObject In incomingObject
-            If TypeName(newObject) = "ChartObject" Then
+        
+        For Each obj In obj_in
+            If TypeName(obj) = "ChartObject" Then
                 'add it to the set
-                newCollection.Add newObject
+                chtObjCollection.Add obj
             End If
-        Next newObject
+        Next obj
+        
+    ElseIf TypeOf obj_in Is Worksheet Then
+        For Each obj In obj_in.ChartObjects
+            chtObjCollection.Add obj
+        Next obj
 
-    ElseIf objectType = "Chart" Then
-        newCollection.Add incomingObject.Parent
+    ElseIf TypeOf obj_in Is Chart Then
+        chtObjCollection.Add obj_in.Parent
 
-    ElseIf objectType = "ChartArea" Or objectType = "PlotArea" Then
+    ElseIf TypeOf obj_in Is ChartArea _
+           Or TypeOf obj_in Is PlotArea _
+           Or TypeOf obj_in Is Legend _
+           Or TypeOf obj_in Is ChartTitle Then
         'parent is the chart, parent of that is the chart obj
-        newCollection.Add incomingObject.Parent.Parent
+        chtObjCollection.Add obj_in.Parent.Parent
 
-    ElseIf objectType = "Series" Then
+    ElseIf TypeOf obj_in Is series Then
         'need to go up three levels
-        newCollection.Add incomingObject.Parent.Parent.Parent
+        chtObjCollection.Add obj_in.Parent.Parent.Parent
+
+    ElseIf TypeOf obj_in Is Axis _
+           Or TypeOf obj_in Is Gridlines _
+           Or TypeOf obj_in Is AxisTitle Then
+        'these are the oddly unsupported objects
+        MsgBox "Axis/gridline selection not supported.  This is an Excel bug.  Select another element on the chart(s)."
 
     Else
-        MsgBox "Select an object that is supported."
+        MsgBox "Select a part of the chart(s), except an axis."
+
     End If
 
-    Set Chart_GetObjectsFromObject = newCollection
-
+    Set Chart_GetObjectsFromObject = chtObjCollection
 End Function
 
-'---------------------------------------------------------------------------------------
-' Procedure : DeleteAllCharts
-' Author    : @byronwall
-' Date      : 2015 08 11
-' Purpose   : Helper Sub to delete all charts on ActiveSheet
-'---------------------------------------------------------------------------------------
-'
-Sub DeleteAllCharts()
 
+Public Sub DeleteAllCharts()
+    '---------------------------------------------------------------------------------------
+    ' Procedure : DeleteAllCharts
+    ' Author    : @byronwall
+    ' Date      : 2015 08 11
+    ' Purpose   : Helper Sub to delete all charts on ActiveSheet
+    '---------------------------------------------------------------------------------------
+    '
     If MsgBox("Delete all charts?", vbYesNo) = vbYes Then
         Application.ScreenUpdating = False
 
-        Dim iCounter As Long
-        For iCounter = ActiveSheet.ChartObjects.count To 1 Step -1
+        Dim chtObjIndex As Long
+        For chtObjIndex = ActiveSheet.ChartObjects.count To 1 Step -1
 
-            ActiveSheet.ChartObjects(iCounter).Delete
+            ActiveSheet.ChartObjects(chtObjIndex).Delete
 
-        Next iCounter
+        Next chtObjIndex
 
         Application.ScreenUpdating = True
 
