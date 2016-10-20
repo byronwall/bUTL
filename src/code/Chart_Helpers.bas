@@ -2,7 +2,7 @@ Attribute VB_Name = "Chart_Helpers"
 Option Explicit
 
 
-Public Function Chart_GetColor(index As Variant) As Long
+Public Function Chart_GetColor(ByVal index As Variant) As Long
     '---------------------------------------------------------------------------------------
     ' Procedure : Chart_GetColor
     ' Author    : @byronwall
@@ -12,23 +12,23 @@ Public Function Chart_GetColor(index As Variant) As Long
     '
     Dim colors(1 To 10) As Variant
 
-    colors(6) = RGB(166, 206, 227)
     colors(1) = RGB(31, 120, 180)
-    colors(7) = RGB(178, 223, 138)
-    colors(3) = RGB(51, 160, 44)
-    colors(8) = RGB(251, 154, 153)
     colors(2) = RGB(227, 26, 28)
-    colors(9) = RGB(253, 191, 111)
+    colors(3) = RGB(51, 160, 44)
     colors(4) = RGB(255, 127, 0)
-    colors(10) = RGB(202, 178, 214)
     colors(5) = RGB(106, 61, 154)
+    colors(6) = RGB(166, 206, 227)
+    colors(7) = RGB(178, 223, 138)
+    colors(8) = RGB(251, 154, 153)
+    colors(9) = RGB(253, 191, 111)
+    colors(10) = RGB(202, 178, 214)
 
     Chart_GetColor = colors(index)
 
 End Function
 
 
-Public Function Chart_GetObjectsFromObject(obj_in As Object) As Variant
+Public Function Chart_GetObjectsFromObject(ByVal inputObject As Object) As Variant
     '---------------------------------------------------------------------------------------
     ' Procedure : Chart_GetObjectsFromObject
     ' Author    : @byronwall
@@ -37,54 +37,51 @@ Public Function Chart_GetObjectsFromObject(obj_in As Object) As Variant
     '             Returns a Collection (possibly empty) and should be handled with a For Each
     '---------------------------------------------------------------------------------------
     '
-    Dim chtObjCollection As New Collection
+    Dim chartObjectCollection As New Collection
 
     'NOTE that this function does not work well with Axis objects.  Excel does not return the correct Parent for them.
     
-    Dim obj As Variant
+    Dim targetObject As Variant
+    Dim inputObjectType As String
+    inputObjectType = TypeName(inputObject)
 
+    Select Case inputObjectType
+    
+        Case "DrawingObjects"
+            'this means that multiple charts are selected
+            For Each targetObject In inputObject
+                If TypeName(targetObject) = "ChartObject" Then
+                    'add it to the set
+                    chartObjectCollection.Add targetObject
+                End If
+            Next targetObject
+            
+        Case "Worksheet"
+            For Each targetObject In inputObject.ChartObjects
+                chartObjectCollection.Add targetObject
+            Next targetObject
+            
+        Case "Chart"
+            chartObjectCollection.Add inputObject.Parent
+            
+        Case "ChartArea", "PlotArea", "Legend", "ChartTitle"
+            'parent is the chart, parent of that is the chart targetObject
+            chartObjectCollection.Add inputObject.Parent.Parent
+            
+        Case "series"
+            'need to go up three levels
+            chartObjectCollection.Add inputObject.Parent.Parent.Parent
+            
+        Case "Axis", "Gridlines", "AxisTitle"
+            'these are the oddly unsupported objects
+            MsgBox "Axis/gridline selection not supported.  This is an Excel bug.  Select another element on the chart(s)."
+    
+        Case Else
+            MsgBox "Select a part of the chart(s), except an axis."
+    
+    End Select
 
-    If TypeOf obj_in Is DrawingObjects Then
-        'this means that multiple charts are selected
-        
-        For Each obj In obj_in
-            If TypeName(obj) = "ChartObject" Then
-                'add it to the set
-                chtObjCollection.Add obj
-            End If
-        Next obj
-        
-    ElseIf TypeOf obj_in Is Worksheet Then
-        For Each obj In obj_in.ChartObjects
-            chtObjCollection.Add obj
-        Next obj
-
-    ElseIf TypeOf obj_in Is Chart Then
-        chtObjCollection.Add obj_in.Parent
-
-    ElseIf TypeOf obj_in Is ChartArea _
-           Or TypeOf obj_in Is PlotArea _
-           Or TypeOf obj_in Is Legend _
-           Or TypeOf obj_in Is ChartTitle Then
-        'parent is the chart, parent of that is the chart obj
-        chtObjCollection.Add obj_in.Parent.Parent
-
-    ElseIf TypeOf obj_in Is series Then
-        'need to go up three levels
-        chtObjCollection.Add obj_in.Parent.Parent.Parent
-
-    ElseIf TypeOf obj_in Is Axis _
-           Or TypeOf obj_in Is Gridlines _
-           Or TypeOf obj_in Is AxisTitle Then
-        'these are the oddly unsupported objects
-        MsgBox "Axis/gridline selection not supported.  This is an Excel bug.  Select another element on the chart(s)."
-
-    Else
-        MsgBox "Select a part of the chart(s), except an axis."
-
-    End If
-
-    Set Chart_GetObjectsFromObject = chtObjCollection
+    Set Chart_GetObjectsFromObject = chartObjectCollection
 End Function
 
 
@@ -99,12 +96,12 @@ Public Sub DeleteAllCharts()
     If MsgBox("Delete all charts?", vbYesNo) = vbYes Then
         Application.ScreenUpdating = False
 
-        Dim chtObjIndex As Long
-        For chtObjIndex = ActiveSheet.ChartObjects.count To 1 Step -1
+        Dim chartObjectIndex As Long
+        For chartObjectIndex = ActiveSheet.ChartObjects.count To 1 Step -1
 
-            ActiveSheet.ChartObjects(chtObjIndex).Delete
+            ActiveSheet.ChartObjects(chartObjectIndex).Delete
 
-        Next chtObjIndex
+        Next chartObjectIndex
 
         Application.ScreenUpdating = True
 

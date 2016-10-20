@@ -2,7 +2,7 @@ Attribute VB_Name = "SubsFuncs_Helpers"
 Option Explicit
 
 
-Function GetInputOrSelection(msg As String) As Range
+Public Function GetInputOrSelection(ByVal userPrompt As String) As Range
     '---------------------------------------------------------------------------------------
     ' Procedure : GetInputOrSelection
     ' Author    : @byronwall
@@ -10,14 +10,14 @@ Function GetInputOrSelection(msg As String) As Range
     ' Purpose   : Provides a single Function to get the Selection or Input with error handling
     '---------------------------------------------------------------------------------------
     '
-    Dim strDefault As String
+    Dim defaultString As String
     
     If TypeOf Selection Is Range Then
-        strDefault = Selection.Address
+        defaultString = Selection.Address
     End If
     
     On Error GoTo ErrorNoSelection
-    Set GetInputOrSelection = Application.InputBox(msg, Type:=8, Default:=strDefault)
+    Set GetInputOrSelection = Application.InputBox(userPrompt, Type:=8, Default:=defaultString)
     
     Exit Function
     
@@ -28,23 +28,23 @@ End Function
 
 
 
-Function RangeEnd(start As Range, direction As XlDirection, Optional direction2 As XlDirection = -1) As Range
+Public Function RangeEnd(ByVal rangeBegin As Range, ByVal firstDirection As XlDirection, Optional ByVal secondDirection As XlDirection = -1) As Range
     '---------------------------------------------------------------------------------------
     ' Procedure : RangeEnd
     ' Author    : @byronwall
     ' Date      : 2015 07 24
-    ' Purpose   : Helper function to return a block of cells using a starting Range and an End direction
+    ' Purpose   : Helper function to return a block of cells using a starting Range and an End firstDirection
     '---------------------------------------------------------------------------------------
     '
-    If direction2 = -1 Then
-        Set RangeEnd = Range(start, start.End(direction))
+    If secondDirection = -1 Then
+        Set RangeEnd = Range(rangeBegin, rangeBegin.End(firstDirection))
     Else
-        Set RangeEnd = Range(start, start.End(direction).End(direction2))
+        Set RangeEnd = Range(rangeBegin, rangeBegin.End(firstDirection).End(secondDirection))
     End If
 End Function
 
 
-Function RangeEnd_Boundary(start As Range, direction As XlDirection, Optional direction2 As XlDirection = -1) As Range
+Public Function RangeEnd_Boundary(ByVal rangeBegin As Range, ByVal firstDirection As XlDirection, Optional ByVal secondDirection As XlDirection = -1) As Range
     '---------------------------------------------------------------------------------------
     ' Procedure : RangeEnd_Boundary
     ' Author    : @byronwall
@@ -52,15 +52,15 @@ Function RangeEnd_Boundary(start As Range, direction As XlDirection, Optional di
     ' Purpose   : Helper function to return a range limited by the starting cell's CurrentRegion
     '---------------------------------------------------------------------------------------
     '
-    If direction2 = -1 Then
-        Set RangeEnd_Boundary = Intersect(Range(start, start.End(direction)), start.CurrentRegion)
+    If secondDirection = -1 Then
+        Set RangeEnd_Boundary = Intersect(Range(rangeBegin, rangeBegin.End(firstDirection)), rangeBegin.CurrentRegion)
     Else
-        Set RangeEnd_Boundary = Intersect(Range(start, start.End(direction).End(direction2)), start.CurrentRegion)
+        Set RangeEnd_Boundary = Intersect(Range(rangeBegin, rangeBegin.End(firstDirection).End(secondDirection)), rangeBegin.CurrentRegion)
     End If
 End Function
 
 
-Public Sub QuickSort(vArray As Variant, Optional inLow As Variant, Optional inHi As Variant)
+Public Sub QuickSort(ByVal arrayToSort As Variant, Optional ByVal lowBound As Variant, Optional ByVal highBound As Variant)
     '---------------------------------------------------------------------------------------
     ' Procedure : QuickSort
     ' Author    : @byronwall
@@ -70,46 +70,41 @@ Public Sub QuickSort(vArray As Variant, Optional inLow As Variant, Optional inHi
     '             http://en.allexperts.com/q/Visual-Basic-1048/string-manipulation.htm
     '---------------------------------------------------------------------------------------
     '
-    Dim pivot As Variant
-    Dim tmpSwap As Variant
-    Dim tmpLow As Long
-    Dim tmpHi As Long
+    Dim sortingVariant As Variant
+    Dim swapHolder As Variant
+    Dim temporaryLowBound As Long
+    Dim temporaryHighBound As Long
 
-    If IsMissing(inLow) Then
-        inLow = LBound(vArray)
-    End If
+    If IsMissing(lowBound) Then lowBound = LBound(arrayToSort)
+    If IsMissing(highBound) Then highBound = UBound(arrayToSort)
 
-    If IsMissing(inHi) Then
-        inHi = UBound(vArray)
-    End If
+    temporaryLowBound = lowBound
+    temporaryHighBound = highBound
 
-    tmpLow = inLow
-    tmpHi = inHi
+    sortingVariant = arrayToSort((lowBound + highBound) \ 2)
 
-    pivot = vArray((inLow + inHi) \ 2)
+    While (temporaryLowBound <= temporaryHighBound)
 
-    While (tmpLow <= tmpHi)
-
-        While (UCase(vArray(tmpLow)) < UCase(pivot) And tmpLow < inHi)
-            tmpLow = tmpLow + 1
+        While (UCase(arrayToSort(temporaryLowBound)) < UCase(sortingVariant) And temporaryLowBound < highBound)
+            temporaryLowBound = temporaryLowBound + 1
         Wend
 
-        While (UCase(pivot) < UCase(vArray(tmpHi)) And tmpHi > inLow)
-            tmpHi = tmpHi - 1
+        While (UCase(sortingVariant) < UCase(arrayToSort(temporaryHighBound)) And temporaryHighBound > lowBound)
+            temporaryHighBound = temporaryHighBound - 1
         Wend
 
-        If (tmpLow <= tmpHi) Then
-            tmpSwap = vArray(tmpLow)
-            vArray(tmpLow) = vArray(tmpHi)
-            vArray(tmpHi) = tmpSwap
-            tmpLow = tmpLow + 1
-            tmpHi = tmpHi - 1
+        If (temporaryLowBound <= temporaryHighBound) Then
+            swapHolder = arrayToSort(temporaryLowBound)
+            arrayToSort(temporaryLowBound) = arrayToSort(temporaryHighBound)
+            arrayToSort(temporaryHighBound) = swapHolder
+            temporaryLowBound = temporaryLowBound + 1
+            temporaryHighBound = temporaryHighBound - 1
         End If
 
     Wend
 
-    If (inLow < tmpHi) Then QuickSort vArray, inLow, tmpHi
-    If (tmpLow < inHi) Then QuickSort vArray, tmpLow, inHi
+    If (lowBound < temporaryHighBound) Then QuickSort arrayToSort, lowBound, temporaryHighBound
+    If (temporaryLowBound < highBound) Then QuickSort arrayToSort, temporaryLowBound, highBound
 
 End Sub
 

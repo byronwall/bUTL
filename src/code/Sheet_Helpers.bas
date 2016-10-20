@@ -2,7 +2,7 @@ Attribute VB_Name = "Sheet_Helpers"
 Option Explicit
 
 
-Sub LockAllSheets()
+Public Sub LockAllSheets()
     '---------------------------------------------------------------------------------------
     ' Procedure : LockAllSheets
     ' Author    : @byronwall
@@ -10,19 +10,19 @@ Sub LockAllSheets()
     ' Purpose   : Locks all sheets with the same password
     '---------------------------------------------------------------------------------------
     '
-    Dim pass As Variant
-    pass = Application.InputBox("Password to lock")
+    Dim userPassword As Variant
+    userPassword = Application.InputBox("Password to lock")
 
-    If pass = False Then
+    If Not userPassword Then
         MsgBox "Cancelled."
     Else
         Application.ScreenUpdating = False
 
         'Changed to activeworkbook so if add-in is not installed, it will target the active book rather than the xlam
-        Dim sheet As Worksheet
-        For Each sheet In ActiveWorkbook.Sheets
+        Dim targetSheet As Worksheet
+        For Each targetSheet In ActiveWorkbook.Sheets
             On Error Resume Next
-            sheet.Protect (pass)
+            targetSheet.Protect (userPassword)
         Next
 
         Application.ScreenUpdating = True
@@ -31,7 +31,7 @@ Sub LockAllSheets()
 End Sub
 
 
-Sub OutputSheets()
+Public Sub OutputSheets()
     '---------------------------------------------------------------------------------------
     ' Procedure : OutputSheets
     ' Author    : @byronwall
@@ -39,34 +39,34 @@ Sub OutputSheets()
     ' Purpose   : Creates a new worksheet with a list and link to each sheet
     '---------------------------------------------------------------------------------------
     '
-    Dim wsOut As Worksheet
-    Set wsOut = Worksheets.Add(Before:=Worksheets(1))
-    wsOut.Activate
+    Dim outputSheet As Worksheet
+    Set outputSheet = Worksheets.Add(Before:=Worksheets(1))
+    outputSheet.Activate
 
-    Dim rngOut As Range
-    Set rngOut = wsOut.Range("B2")
+    Dim outputRange As Range
+    Set outputRange = outputSheet.Range("B2")
 
-    Dim iRow As Long
-    iRow = 0
+    Dim targetRow As Long
+    targetRow = 0
 
-    Dim sht As Worksheet
-    For Each sht In Worksheets
+    Dim targetSheet As Worksheet
+    For Each targetSheet In Worksheets
 
-        If sht.name <> wsOut.name Then
+        If targetSheet.name <> outputSheet.name Then
 
-            sht.Hyperlinks.Add _
-        rngOut.Offset(iRow), "", _
-        "'" & sht.name & "'!A1", , _
-            sht.name
-            iRow = iRow + 1
+            targetSheet.Hyperlinks.Add _
+                outputRange.Offset(targetRow), "", _
+                "'" & targetSheet.name & "'!A1", , _
+                targetSheet.name
+            targetRow = targetRow + 1
 
         End If
-    Next sht
+    Next targetSheet
 
 End Sub
 
 
-Sub UnlockAllSheets()
+Public Sub UnlockAllSheets()
     '---------------------------------------------------------------------------------------
     ' Procedure : UnlockAllSheets
     ' Author    : @byronwall
@@ -74,36 +74,36 @@ Sub UnlockAllSheets()
     ' Purpose   : Unlocks all sheets with the same password
     '---------------------------------------------------------------------------------------
     '
-    Dim pass As Variant
-    pass = Application.InputBox("Password to unlock")
+    Dim userPassword As Variant
+    userPassword = Application.InputBox("Password to unlock")
     
-    Dim iErr As Long
-    iErr = 0
+    Dim errorCount As Long
+    errorCount = 0
     
-    If pass = False Then
+    If Not userPassword Then
         MsgBox "Cancelled."
     Else
         Application.ScreenUpdating = False
         'Changed to activeworkbook so if add-in is not installed, it will target the active book rather than the xlam
-        Dim sht As Worksheet
-        For Each sht In ActiveWorkbook.Sheets
+        Dim targetSheet As Worksheet
+        For Each targetSheet In ActiveWorkbook.Sheets
             'Let's keep track of the errors to inform the user
-            If Err.Number <> 0 Then iErr = iErr + 1
+            If Err.Number <> 0 Then errorCount = errorCount + 1
             Err.Clear
             On Error Resume Next
-            sht.Unprotect (pass)
+            targetSheet.Unprotect (userPassword)
 
-        Next sht
-        If Err.Number <> 0 Then iErr = iErr + 1
+        Next targetSheet
+        If Err.Number <> 0 Then errorCount = errorCount + 1
         Application.ScreenUpdating = True
     End If
-    If iErr <> 0 Then
-        MsgBox (iErr & " sheets could not be unlocked due to bad password.")
+    If errorCount <> 0 Then
+        MsgBox (errorCount & " sheets could not be unlocked due to bad password.")
     End If
 End Sub
 
 
-Sub AscendSheets()
+Public Sub AscendSheets()
     '---------------------------------------------------------------------------------------
     ' Procedure : AscendSheets
     ' Author    : @raymondwise
@@ -111,21 +111,19 @@ Sub AscendSheets()
     ' Purpose   : Places worksheets in ascending alphabetical order.
     '---------------------------------------------------------------------------------------
     Application.ScreenUpdating = False
-    Dim wb As Workbook
-    Set wb = ActiveWorkbook
+    Dim targetWorkbook As Workbook
+    Set targetWorkbook = ActiveWorkbook
 
-    Dim intSheets As Long
-    intSheets = wb.Sheets.count
+    Dim countOfSheets As Long
+    countOfSheets = targetWorkbook.Sheets.count
 
     Dim i As Long
     Dim j As Long
 
-    With wb
-        For j = 1 To intSheets
-            For i = 1 To intSheets - 1
-                If UCase(.Sheets(i).name) > UCase(.Sheets(i + 1).name) Then
-                    .Sheets(i).Move after:=.Sheets(i + 1)
-                End If
+    With targetWorkbook
+        For j = 1 To countOfSheets
+            For i = 1 To countOfSheets - 1
+                If UCase(.Sheets(i).name) > UCase(.Sheets(i + 1).name) Then .Sheets(i).Move after:=.Sheets(i + 1)
             Next i
         Next j
     End With
@@ -133,7 +131,7 @@ Sub AscendSheets()
     Application.ScreenUpdating = True
 End Sub
 
-Sub DescendSheets()
+Public Sub DescendSheets()
     '---------------------------------------------------------------------------------------
     ' Procedure : DescendSheets
     ' Author    : @raymondwise
@@ -141,21 +139,19 @@ Sub DescendSheets()
     ' Purpose   : Places worksheets in descending alphabetical order.
     '---------------------------------------------------------------------------------------
     Application.ScreenUpdating = False
-    Dim wb As Workbook
-    Set wb = ActiveWorkbook
+    Dim targetWorkbook As Workbook
+    Set targetWorkbook = ActiveWorkbook
 
-    Dim intSheets As Long
-    intSheets = wb.Sheets.count
+    Dim countOfSheets As Long
+    countOfSheets = targetWorkbook.Sheets.count
 
     Dim i As Long
     Dim j As Long
 
-    With wb
-        For j = 1 To intSheets
-            For i = 1 To intSheets - 1
-                If UCase(.Sheets(i).name) < UCase(.Sheets(i + 1).name) Then
-                    .Sheets(i).Move after:=.Sheets(i + 1)
-                End If
+    With targetWorkbook
+        For j = 1 To countOfSheets
+            For i = 1 To countOfSheets - 1
+                If UCase(.Sheets(i).name) < UCase(.Sheets(i + 1).name) Then .Sheets(i).Move after:=.Sheets(i + 1)
             Next i
         Next j
     End With
