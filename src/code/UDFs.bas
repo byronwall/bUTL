@@ -2,7 +2,7 @@ Attribute VB_Name = "UDFs"
 Option Explicit
 
 
-Public Function RandLetters(letterCount As Long) As String
+Public Function RandLetters(ByVal letterCount As Long) As String
     '---------------------------------------------------------------------------------------
     ' Procedure : RandLetters
     ' Author    : @byronwall

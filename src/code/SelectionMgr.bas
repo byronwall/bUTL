@@ -2,7 +2,7 @@ Attribute VB_Name = "SelectionMgr"
 Option Explicit
 
 
-Sub OffsetSelectionByRowsAndColumns(iRowsOff As Long, iColsOff As Long)
+Public Sub OffsetSelectionByRowsAndColumns(ByVal numberOfRows As Long, ByVal numberOfColumns As Long)
     '---------------------------------------------------------------------------------------
     ' Procedure : OffsetSelectionByRowsAndColumns
     ' Author    : @byronwall
@@ -15,7 +15,7 @@ Sub OffsetSelectionByRowsAndColumns(iRowsOff As Long, iColsOff As Long)
         'this error should only get called if the new range is outside the sheet boundaries
         On Error GoTo OffsetSelectionByRowsAndColumns_Exit
 
-        Selection.Offset(iRowsOff, iColsOff).Select
+        Selection.Offset(numberOfRows, numberOfColumns).Select
 
         On Error GoTo 0
     End If
@@ -25,7 +25,7 @@ OffsetSelectionByRowsAndColumns_Exit:
 End Sub
 
 
-Sub SelectionOffsetDown()
+Public Sub SelectionOffsetDown()
     '---------------------------------------------------------------------------------------
     ' Procedure : SelectionOffsetDown
     ' Author    : @byronwall
@@ -33,12 +33,12 @@ Sub SelectionOffsetDown()
     ' Purpose   : Moves Selection down one row
     '---------------------------------------------------------------------------------------
     '
-    Call OffsetSelectionByRowsAndColumns(1, 0)
+     OffsetSelectionByRowsAndColumns 1, 0
 
 End Sub
 
 
-Sub SelectionOffsetLeft()
+Public Sub SelectionOffsetLeft()
     '---------------------------------------------------------------------------------------
     ' Procedure : SelectionOffsetLeft
     ' Author    : @byronwall
@@ -46,12 +46,12 @@ Sub SelectionOffsetLeft()
     ' Purpose   : Moves Selection left one column
     '---------------------------------------------------------------------------------------
     '
-    Call OffsetSelectionByRowsAndColumns(0, -1)
+     OffsetSelectionByRowsAndColumns 0, -1
 
 End Sub
 
 
-Sub SelectionOffsetRight()
+Public Sub SelectionOffsetRight()
     '---------------------------------------------------------------------------------------
     ' Procedure : SelectionOffsetRight
     ' Author    : @byronwall
@@ -59,12 +59,12 @@ Sub SelectionOffsetRight()
     ' Purpose   : Moves selection right one column
     '---------------------------------------------------------------------------------------
     '
-    Call OffsetSelectionByRowsAndColumns(0, 1)
+    OffsetSelectionByRowsAndColumns 0, 1
 
 End Sub
 
 
-Sub SelectionOffsetUp()
+Public Sub SelectionOffsetUp()
     '---------------------------------------------------------------------------------------
     ' Procedure : SelectionOffsetUp
     ' Author    : @byronwall
@@ -72,12 +72,12 @@ Sub SelectionOffsetUp()
     ' Purpose   : Moves Selection up one row
     '---------------------------------------------------------------------------------------
     '
-    Call OffsetSelectionByRowsAndColumns(-1, 0)
+     OffsetSelectionByRowsAndColumns -1, 0
 
 End Sub
 
 
-Sub SetUpKeyboardHooksForSelection()
+Public Sub SetUpKeyboardHooksForSelection()
     '---------------------------------------------------------------------------------------
     ' Procedure : SetUpKeyboardHooksForSelection
     ' Author    : @byronwall

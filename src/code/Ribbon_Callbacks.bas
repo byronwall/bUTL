@@ -1,14 +1,12 @@
 Attribute VB_Name = "Ribbon_Callbacks"
 Option Explicit
 
-Dim frm_chartGrid As New form_chtGrid
+Dim targetForm_chartGrid As New form_chtGrid
 
 Public Sub btn_aboutForm_onAction(control As IRibbonControl)
 
     'catch the rare case where the add-in is opened directly
-    If ActiveWorkbook Is Nothing Then
-        Application.Workbooks.Add
-    End If
+    If ActiveWorkbook Is Nothing Then Application.Workbooks.Add
 
     ActiveWorkbook.FollowHyperlink "https://github.com/byronwall/bUTL"
 
@@ -92,7 +90,7 @@ Public Sub btn_chartYAxis_onAction(control As IRibbonControl)
 End Sub
 
 Public Sub btn_chtGrid_onAction(control As IRibbonControl)
-    frm_chartGrid.Show
+    targetForm_chartGrid.Show
 End Sub
 
 Public Sub btn_colorCategory_onAction(control As IRibbonControl)
@@ -140,8 +138,8 @@ Public Sub btn_joinCells_onAction(control As IRibbonControl)
 End Sub
 
 Public Sub btn_openNewFeatures_onAction(control As IRibbonControl)
-    Dim frm As New form_newCommands
-    frm.Show
+    Dim targetForm As New form_newCommands
+    targetForm.Show
 End Sub
 
 Public Sub btn_panelCharts_onAction(control As IRibbonControl)
@@ -174,11 +172,11 @@ Public Sub btn_sheetNamesOutput_onAction(control As IRibbonControl)
 End Sub
 
 Sub btn_sht_unhide_onAction(control As IRibbonControl)
-    Dim sht As Worksheet
+    Dim targetSheet As Worksheet
 
-    For Each sht In Sheets
-        sht.Visible = xlSheetVisible
-    Next sht
+    For Each targetSheet In Sheets
+        targetSheet.Visible = xlSheetVisible
+    Next targetSheet
 End Sub
 
 Public Sub btn_split_onAction(control As IRibbonControl)

@@ -7,46 +7,47 @@ Public Sub CategoricalColoring()
     ' Procedure : CategoricalColoring
     ' Author    : @byronwall
     ' Date      : 2015 07 24
-    ' Purpose   : Applies the formatting from one range to another if cell value's match
+    ' Purpose   : Applies the formatting from one range to another if targetCell value's match
     '---------------------------------------------------------------------------------------
     '
 
     '+Get User Input
-    Dim rngToColor As Range
+    Dim targetRange As Range
     On Error GoTo errHandler
-    Set rngToColor = GetInputOrSelection("Select Range to Color")
+    Set targetRange = GetInputOrSelection("Select Range to Color")
 
-    Dim rngColors As Range
-    Set rngColors = GetInputOrSelection("Select Range with Colors")
+    Dim coloredRange As Range
+    Set coloredRange = GetInputOrSelection("Select Range with Colors")
 
     '+Do Magic
     Application.ScreenUpdating = False
-    Dim c As Range
-    Dim varRow As Variant
+    Dim targetCell As Range
+    Dim foundRange As Variant
 
-    For Each c In rngToColor
-        varRow = Application.Match(c, rngColors, 0)
+    For Each targetCell In targetRange
+        foundRange = Application.Match(targetCell, coloredRange, 0)
         '+ Matches font style as well as interior color
-        If IsNumeric(varRow) Then
-            c.Font.FontStyle = rngColors.Cells(varRow).Font.FontStyle
-            c.Font.Color = rngColors.Cells(varRow).Font.Color
+        If IsNumeric(foundRange) Then
+            targetCell.Font.FontStyle = coloredRange.Cells(foundRange).Font.FontStyle
+            targetCell.Font.Color = coloredRange.Cells(foundRange).Font.Color
             '+Skip interior color if there is none
-            If Not rngColors.Cells(varRow).Interior.ColorIndex = xlNone Then
-                c.Interior.Color = rngColors.Cells(varRow).Interior.Color
+            If Not coloredRange.Cells(foundRange).Interior.ColorIndex = xlNone Then
+                targetCell.Interior.Color = coloredRange.Cells(foundRange).Interior.Color
             End If
         End If
-    Next c
+    Next targetCell
     '+ If no fill, restore gridlines
-    rngToColor.Borders.LineStyle = xlNone
+    targetRange.Borders.LineStyle = xlNone
     Application.ScreenUpdating = True
     Exit Sub
 errHandler:
-    MsgBox ("No Range Selected!")
+    MsgBox "No Range Selected!"
+    Application.ScreenUpdating = True
 End Sub
 
 
 
-Sub ColorForUnique()
+Public Sub ColorForUnique()
     '---------------------------------------------------------------------------------------
     ' Procedure : ColorForUnique
     ' Author    : @byronwall, @RaymondWise
@@ -58,51 +59,51 @@ Sub ColorForUnique()
     Dim dictKeysAndColors As New Scripting.Dictionary
     Dim dictColorsOnly As New Scripting.Dictionary
     
-    Dim rngToColor As Range
+    Dim targetRange As Range
 
     On Error GoTo ColorForUnique_Error
 
-    Set rngToColor = GetInputOrSelection("Select column to color")
-    Set rngToColor = Intersect(rngToColor, rngToColor.Parent.UsedRange)
+    Set targetRange = GetInputOrSelection("Select column to color")
+    Set targetRange = Intersect(targetRange, targetRange.Parent.UsedRange)
 
     'We can colorize the sorting column, or the entire row
-    Dim vShouldColorEntireRow As VbMsgBoxResult
-    vShouldColorEntireRow = MsgBox("Do you want to color the entire row?", vbYesNo)
+    Dim shouldColorEntireRow As VbMsgBoxResult
+    shouldColorEntireRow = MsgBox("Do you want to color the entire row?", vbYesNo)
 
     Application.ScreenUpdating = False
 
-    Dim rngRowToColor As Range
-    For Each rngRowToColor In rngToColor.Rows
+    Dim rowToColor As Range
+    For Each rowToColor In targetRange.Rows
 
         'allow for a multi column key if intial range is multi-column
         'TODO: consider making this another prompt... might (?) want to color multi range based on single column key
-        Dim id As String
-        If rngRowToColor.Columns.count > 1 Then
-            id = Join(Application.Transpose(Application.Transpose(rngRowToColor.Value)), "||")
+        Dim keyString As String
+        If rowToColor.Columns.count > 1 Then
+            keyString = Join(Application.Transpose(Application.Transpose(rowToColor.Value)), "||")
         Else
-            id = rngRowToColor.Value
+            keyString = rowToColor.Value
         End If
 
         'new value, need a color
-        If Not dictKeysAndColors.Exists(id) Then
-            Dim lRgbColor As Long
+        If Not dictKeysAndColors.Exists(keyString) Then
+            Dim randomColor As Long
 createNewColor:
-            lRgbColor = RGB(Application.RandBetween(50, 255), _
+            randomColor = RGB(Application.RandBetween(50, 255), _
                             Application.RandBetween(50, 255), Application.RandBetween(50, 255))
-            If dictColorsOnly.Exists(lRgbColor) Then
+            If dictColorsOnly.Exists(randomColor) Then
                 'ensure unique colors only
-                GoTo createNewColor
+                GoTo createNewColor 'This is a sub-optimal way of performing this error check and loop
             End If
                 
-            dictKeysAndColors.Add id, lRgbColor
+            dictKeysAndColors.Add keyString, randomColor
         End If
 
-        If vShouldColorEntireRow = vbYes Then
-            rngRowToColor.EntireRow.Interior.Color = dictKeysAndColors(id)
+        If shouldColorEntireRow = vbYes Then
+            rowToColor.EntireRow.Interior.Color = dictKeysAndColors(keyString)
         Else
-            rngRowToColor.Interior.Color = dictKeysAndColors(id)
+            rowToColor.Interior.Color = dictKeysAndColors(keyString)
         End If
-    Next rngRowToColor
+    Next rowToColor
 
     Application.ScreenUpdating = True
 
@@ -120,50 +121,49 @@ Public Sub Colorize()
     ' Procedure : Colorize
     ' Author    : @byronwall
     ' Date      : 2015 07 24
-    ' Purpose   : Creates an alternating color band based on cell values
+    ' Purpose   : Creates an alternating color band based on targetCell values
     '---------------------------------------------------------------------------------------
     '
-    Dim rngToColor As Range
+    Dim targetRange As Range
     On Error GoTo errHandler
-    Set rngToColor = GetInputOrSelection("Select range to color")
-    Dim lastrow As Long
-    lastrow = rngToColor.Rows.count
+    Set targetRange = GetInputOrSelection("Select range to color")
+    Dim lastRow As Long
+    lastRow = targetRange.Rows.count
+    Dim interiorColor As Long
+    interiorColor = RGB(200, 200, 200)
     
-    Dim likevalues As VbMsgBoxResult
-    likevalues = MsgBox("Do you want to keep duplicate values the same color?", vbYesNo)
+    Dim sameColorForLikeValues As VbMsgBoxResult
+    sameColorForLikeValues = MsgBox("Do you want to keep duplicate values the same color?", vbYesNo)
 
-    If likevalues = vbNo Then
+    If sameColorForLikeValues = vbNo Then
         
         Dim i As Long
-        For i = 1 To lastrow
+        For i = 1 To lastRow
             If i Mod 2 = 0 Then
-                rngToColor.Rows(i).Interior.Color = RGB(200, 200, 200)
-            Else: rngToColor.Rows(i).Interior.ColorIndex = xlNone
+                targetRange.Rows(i).Interior.Color = interiorColor
+            Else: targetRange.Rows(i).Interior.ColorIndex = xlNone
             End If
         Next
     End If
 
 
-    If likevalues = vbYes Then
-        Dim flip As Boolean
-        For i = 2 To lastrow
-            If rngToColor.Cells(i, 1) <> rngToColor.Cells(i - 1, 1) Then
-                flip = Not flip
-            End If
-
-            If flip Then
-                rngToColor.Rows(i).Interior.Color = RGB(200, 200, 200)
-            Else: rngToColor.Rows(i).Interior.ColorIndex = xlNone
+    If sameColorForLikeValues = vbYes Then
+        Dim flipFlag As Boolean
+        For i = 2 To lastRow
+            If targetRange.Cells(i, 1) <> targetRange.Cells(i - 1, 1) Then flipFlag = Not flipFlag
+            If flipFlag Then
+                targetRange.Rows(i).Interior.Color = interiorColor
+            Else: targetRange.Rows(i).Interior.ColorIndex = xlNone
             End If
         Next
     End If
     Exit Sub
 errHandler:
-    MsgBox ("No Range Selected!")
+    MsgBox "No Range Selected!"
 End Sub
 
 
-Sub CombineCells()
+Public Sub CombineCells()
     '---------------------------------------------------------------------------------------
     ' Procedure : CombineCells
     ' Author    : @byronwall, @RaymondWise
@@ -172,48 +172,50 @@ Sub CombineCells()
     '---------------------------------------------------------------------------------------
     '
     'collect all user data up front
-    Dim rngInput As Range
+    Dim inputRange As Range
     On Error GoTo errHandler
-    Set rngInput = GetInputOrSelection("Select the range of cells to combine")
+    Set inputRange = GetInputOrSelection("Select the range of cells to combine")
 
-    Dim strDelim As String
-    strDelim = Application.InputBox("Delimeter:")
-    If strDelim = "" Then GoTo errHandler
-    If strDelim = "False" Then GoTo errHandler
-    Dim rngOutput As Range
-    Set rngOutput = GetInputOrSelection("Select the output range")
+    Dim delimiter As String
+    delimiter = Application.InputBox("Delimeter:")
+    If delimiter = "" Or delimiter = "False" Then GoTo delimiterError
+
+    Dim outputRange As Range
+    Set outputRange = GetInputOrSelection("Select the output range")
     
     'Check the size of input and adjust output
-    Dim y As Long
-    y = rngInput.Columns.count
+    Dim numberOfColumns As Long
+    numberOfColumns = inputRange.Columns.count
     
-    Dim x As Long
-    x = rngInput.Rows.count
+    Dim numberOfRows As Long
+    numberOfRows = inputRange.Rows.count
     
-    rngOutput = rngOutput.Resize(x, 1)
+    outputRange = outputRange.Resize(numberOfRows, 1)
     
     'Read input rows into a single string
-    Dim strOutput As String
+    Dim outputString As String
     Dim i As Long
-    For i = 1 To x
-        strOutput = vbNullString
+    For i = 1 To numberOfRows
+        outputString = vbNullString
         Dim j As Long
-        For j = 1 To y
-            strOutput = strOutput & strDelim & rngInput(i, j)
+        For j = 1 To numberOfColumns
+            outputString = outputString & delimiter & inputRange(i, j)
         Next
-        'Get rid of the first character (strDelim)
-        strOutput = Right(strOutput, Len(strOutput) - 1)
+        'Get rid of the first character (delimiter)
+        outputString = Right(outputString, Len(outputString) - 1)
         'Print it!
-        rngOutput(i, 1) = strOutput
+        outputRange(i, 1) = outputString
     Next
     Exit Sub
+delimiterError:
+    MsgBox "No Delmiter Selected!"
+    Exit Sub
 errHandler:
-    MsgBox ("No Range or Delimiter Selected!")
+    MsgBox "No Range Selected!"
 End Sub
 
 
-
-Sub ConvertToNumber()
+Public Sub ConvertToNumber()
     '---------------------------------------------------------------------------------------
     ' Procedure : ConvertToNumber
     ' Author    : @byronwall
@@ -221,19 +223,17 @@ Sub ConvertToNumber()
     ' Purpose   : Forces all numbers stored as text to be converted to actual numbers
     '---------------------------------------------------------------------------------------
     '
-    Dim cell As Range
-    Dim sel As Range
+    Dim targetCell As Range
+    Dim targetSelection As Range
 
-    Set sel = Selection
+    Set targetSelection = Selection
 
     Application.ScreenUpdating = False
     Application.Calculation = xlCalculationManual
 
-    For Each cell In Intersect(sel, ActiveSheet.UsedRange)
-        If Not IsEmpty(cell.Value) And IsNumeric(cell.Value) Then
-            cell.Value = CDbl(cell.Value)
-        End If
-    Next cell
+    For Each targetCell In Intersect(targetSelection, ActiveSheet.UsedRange)
+        If Not IsEmpty(targetCell.Value) And IsNumeric(targetCell.Value) Then targetCell.Value = CDbl(targetCell.Value)
+    Next targetCell
 
     Application.ScreenUpdating = True
     Application.Calculation = xlCalculationAutomatic
@@ -241,7 +241,7 @@ Sub ConvertToNumber()
 End Sub
 
 
-Sub CopyTranspose()
+Public Sub CopyTranspose()
     '---------------------------------------------------------------------------------------
     ' Procedure : CopyTranspose
     ' Author    : @byronwall, @RaymondWise
@@ -252,56 +252,57 @@ Sub CopyTranspose()
     '
     'If user cancels a range input, we need to handle it when it occurs
     On Error GoTo errCancel
-    Dim rngSelect As Range
+    Dim selectedRange As Range
     
-    Set rngSelect = GetInputOrSelection("Select your range")
+    Set selectedRange = GetInputOrSelection("Select your range")
 
-    Dim rngOut As Range
-    Set rngOut = GetInputOrSelection("Select the output corner")
+    Dim outputRange As Range
+    'Need to handle the error of selecting more than one cell
+    Set outputRange = GetInputOrSelection("Select the output corner")
 
     Application.ScreenUpdating = False
     Application.EnableEvents = False
     Application.Calculation = xlCalculationManual
 
-    Dim rCorner As Range
-    Set rCorner = rngSelect.Cells(1, 1)
+    Dim startingCornerCell As Range
+    Set startingCornerCell = selectedRange.Cells(1, 1)
 
-    Dim iCRow As Long
-    iCRow = rCorner.Row
-    Dim iCCol As Long
-    iCCol = rCorner.Column
+    Dim startingCellRow As Long
+    startingCellRow = startingCornerCell.Row
+    Dim startingCellColumn As Long
+    startingCellColumn = startingCornerCell.Column
 
-    Dim iORow As Long
-    Dim iOCol As Long
-    iORow = rngOut.Row
-    iOCol = rngOut.Column
+    Dim outputRow As Long
+    Dim outputColumn As Long
+    outputRow = outputRange.Row
+    outputColumn = outputRange.Column
 
-    Dim c As Range
+    Dim targetCell As Range
     
     'We check for the intersection to ensure we don't overwrite any of the original data
-    For Each c In rngSelect
-        If Not Intersect(rngSelect, Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow)) Is Nothing Then
-            MsgBox ("Your destination intersects with your data")
+    'There's probably a better way to do this than For Each
+    For Each targetCell In selectedRange
+        If Not Intersect(selectedRange, Cells(outputRow + targetCell.Column - startingCellColumn, outputColumn + targetCell.Row - startingCellRow)) Is Nothing Then
+            MsgBox "Your destination intersects with your data"
             Exit Sub
         End If
-    Next c
+    Next targetCell
 
-    For Each c In rngSelect
-        ActiveSheet.Cells(iORow + c.Column - iCCol, iOCol + c.Row - iCRow).Formula = c.Formula
-    Next c
+    For Each targetCell In selectedRange
+        ActiveSheet.Cells(outputRow + targetCell.Column - startingCellColumn, outputColumn + targetCell.Row - startingCellRow).Formula = targetCell.Formula
+    Next targetCell
 
+errCancel:
     Application.ScreenUpdating = True
     Application.EnableEvents = True
     Application.Calculation = xlCalculationAutomatic
     Application.Calculate
-    
-errCancel:
 End Sub
 
 
 
 
-Sub CreateConditionalsForFormatting()
+Public Sub CreateConditionalsForFormatting()
     '---------------------------------------------------------------------------------------
     ' Procedure : CreateConditionalsForFormatting
     ' Author    : @byronwall
@@ -310,27 +311,28 @@ Sub CreateConditionalsForFormatting()
     '---------------------------------------------------------------------------------------
     '
     On Error GoTo errHandler
-    Dim rngInput As Range
-    Set rngInput = GetInputOrSelection("Select the range of cells to convert")
+    Dim inputRange As Range
+    Set inputRange = GetInputOrSelection("Select the range of cells to convert")
     'add these in as powers of 3, starting at 1 = 10^0
+    Const ARRAY_MARKERS As String = " ,k,M,B,T,Q"
     Dim arrMarkers As Variant
-    arrMarkers = Array(" ", "k", "M", "B", "T", "Q")
+    arrMarkers = Split(ARRAY_MARKERS, ",")
     
     Dim i As Long
     For i = UBound(arrMarkers) To 0 Step -1
 
-        With rngInput.FormatConditions.Add(xlCellValue, xlGreaterEqual, 10 ^ (3 * i))
+        With inputRange.FormatConditions.Add(xlCellValue, xlGreaterEqual, 10 ^ (3 * i))
             .NumberFormat = "0.0" & Application.WorksheetFunction.Rept(",", i) & " "" " & arrMarkers(i) & """"
         End With
 
     Next
     Exit Sub
 errHandler:
-    MsgBox ("No Range Selected!")
+    MsgBox "No Range Selected!"
 End Sub
 
 
-Sub ExtendArrayFormulaDown()
+Public Sub ExtendArrayFormulaDown()
     '---------------------------------------------------------------------------------------
     ' Procedure : ExtendArrayFormulaDown
     ' Author    : @byronwall
@@ -338,72 +340,72 @@ Sub ExtendArrayFormulaDown()
     ' Purpose   : Takes an array formula and extends it down as far as the range on its right goes
     '---------------------------------------------------------------------------------------
     '
-    Dim rngArrForm As Range
-    Dim RngArea As Range
+    Dim startingRange As Range
+    Dim targetArea As Range
 
 
     Application.ScreenUpdating = False
 
-    Set rngArrForm = Selection
+    Set startingRange = Selection
 
-    For Each RngArea In rngArrForm.Areas
+    For Each targetArea In startingRange.Areas
     
-        Dim c As Range
-        For Each c In RngArea.Cells
+        Dim targetCell As Range
+        For Each targetCell In targetArea.Cells
 
-            If c.HasArray Then
+            If targetCell.HasArray Then
 
-                Dim strFormula As String
-                strFormula = c.FormulaArray
+                Dim formulaString As String
+                formulaString = targetCell.FormulaArray
 
-                Dim arrStart As Range
-                Dim arrEnd As Range
+                Dim startOfArray As Range
+                Dim endOfArray As Range
 
-                Set arrStart = c.CurrentArray.Cells(1, 1)
-                Set arrEnd = arrStart.Offset(0, -1).End(xlDown).Offset(0, 1)
+                Set startOfArray = targetCell.CurrentArray.Cells(1, 1)
+                Set endOfArray = startOfArray.Offset(0, -1).End(xlDown).Offset(0, 1)
 
-                c.CurrentArray.Formula = ""
+                targetCell.CurrentArray.Formula = vbNullString
 
-                Range(arrStart, arrEnd).FormulaArray = strFormula
+                Range(startOfArray, endOfArray).FormulaArray = formulaString
 
             End If
 
-        Next c
-    Next RngArea
+        Next targetCell
+    Next targetArea
 
 
     'Find the range of the new array formula
     'Save current formula and clear it out
     'Apply the formula to the new range
-
+    Application.ScreenUpdating = True
 End Sub
 
 
-Sub MakeHyperlinks()
+Public Sub MakeHyperlinks()
     '---------------------------------------------------------------------------------------
     ' Procedure : MakeHyperlinks
     ' Author    : @byronwall
     ' Date      : 2015 07 24
-    ' Purpose   : Converts a set of cells to hyperlink to their cell value
+    ' Purpose   : Converts a set of cells to hyperlink to their targetCell value
     '---------------------------------------------------------------------------------------
     '
     '+Changed to inputbox
     On Error GoTo errHandler
-    Dim rngEval As Range
-    Set rngEval = GetInputOrSelection("Select the range of cells to convert to hyperlink")
+    Dim targetRange As Range
+    Set targetRange = GetInputOrSelection("Select the range of cells to convert to hyperlink")
     
     'TODO: choose a better variable name
-    Dim c As Range
-    For Each c In rngEval
-        ActiveSheet.Hyperlinks.Add Anchor:=c, Address:=c
-    Next c
+    Dim targetCell As Range
+    For Each targetCell In targetRange
+        ActiveSheet.Hyperlinks.Add Anchor:=targetCell, Address:=targetCell
+    Next targetCell
     Exit Sub
 errHandler:
-    MsgBox ("No Range Selected!")
+    MsgBox "No Range Selected!"
 End Sub
 
 
-Sub OutputColors()
+Public Sub OutputColors()
     '---------------------------------------------------------------------------------------
     ' Procedure : OutputColors
     ' Author    : @byronwall
@@ -412,105 +414,109 @@ Sub OutputColors()
     ' Flag      : not-used
     '---------------------------------------------------------------------------------------
     '
+    Const MINIMUM_INTEGER As Long = 1
+    Const MAXIMUM_INTEGER As Long = 10
     Dim i As Long
-    For i = 1 To 10
+    For i = MINIMUM_INTEGER To MAXIMUM_INTEGER
         ActiveCell.Offset(i).Interior.Color = Chart_GetColor(i)
     Next i
 
 End Sub
 
 
-Sub SelectedToValue()
+Public Sub SelectedToValue()
     '---------------------------------------------------------------------------------------
     ' Procedure : SelectedToValue
     ' Author    : @byronwall
     ' Date      : 2015 07 24
-    ' Purpose   : Forces a cell to take on its value.  Removes formulas.
+    ' Purpose   : Forces a targetCell to take on its value.  Removes formulas.
     '---------------------------------------------------------------------------------------
     '
-    Dim rng As Range
+    Dim targetRange As Range
     On Error GoTo errHandler
-    Set rng = GetInputOrSelection("Select the formulas you'd like to convert to static values")
+    Set targetRange = GetInputOrSelection("Select the formulas you'd like to convert to static values")
 
-    Dim c As Range
-    For Each c In rng
-        c.Value = c.Value
-    Next c
+    Dim targetCell As Range
+    Dim targetCellValue As String
+    For Each targetCell In targetRange
+        targetCellValue = targetCell.Value
+        targetCell.Clear
+        targetCell = targetCellValue
+    Next targetCell
     Exit Sub
 errHandler:
-    MsgBox ("No selection made!")
+    MsgBox "No selection made!"
 End Sub
 
 
-Sub Selection_ColorWithHex()
+Public Sub Selection_ColorWithHex()
     '---------------------------------------------------------------------------------------
     ' Procedure : Selection_ColorWithHex
     ' Author    : @byronwall
     ' Date      : 2015 07 24
-    ' Purpose   : Colors a cell based on the hex value stored in the cell
+    ' Purpose   : Colors a targetCell based on the hex value stored in the targetCell
     ' Flag      : new-feature
     '---------------------------------------------------------------------------------------
     '
-    Dim c As Range
-    Dim rngToColor As Range
+    Dim targetCell As Range
+    Dim targetRange As Range
     On Error GoTo errHandler
-    Set rngToColor = GetInputOrSelection("Select the range of cells to color")
-
-    For Each c In rngToColor
-
-        c.Interior.Color = RGB(WorksheetFunction.Hex2Dec(Mid(c.Value, 2, 2)), _
-                               WorksheetFunction.Hex2Dec(Mid(c.Value, 4, 2)), _
-                               WorksheetFunction.Hex2Dec(Mid(c.Value, 6, 2)))
-
-    Next c
+    Set targetRange = GetInputOrSelection("Select the range of cells to color")
+    For Each targetCell In targetRange
+        targetCell.Interior.Color = RGB( _
+                                    WorksheetFunction.Hex2Dec(Mid(targetCell.Value, 2, 2)), _
+                                    WorksheetFunction.Hex2Dec(Mid(targetCell.Value, 4, 2)), _
+                                    WorksheetFunction.Hex2Dec(Mid(targetCell.Value, 6, 2)))
+    Next targetCell
     Exit Sub
 errHandler:
-    MsgBox ("No selection made!")
+    MsgBox "No selection made!"
 End Sub
 
 
-Sub SplitAndKeep()
+Public Sub SplitAndKeep()
     '---------------------------------------------------------------------------------------
     ' Procedure : SplitAndKeep
     ' Author    : @byronwall
     ' Date      : 2015 08 12
-    ' Purpose   : Reduces a cell's value to one item returned from Split
+    ' Purpose   : Reduces a targetCell's value to one item returned from Split
     '---------------------------------------------------------------------------------------
     '
     On Error GoTo SplitAndKeep_Error
 
-    Dim rngToSplit As Range
-    Set rngToSplit = GetInputOrSelection("Select range to split")
+    Dim rangeToSplit As Range
+    Set rangeToSplit = GetInputOrSelection("Select range to split")
     
-    If rngToSplit Is Nothing Then
+    If rangeToSplit Is Nothing Then
         Exit Sub
     End If
 
-    Dim delim As Variant
-    delim = InputBox("What delimeter to split on?")
-    
-    If StrPtr(delim) = 0 Then
+    Dim delimiter As Variant
+    delimiter = InputBox("What delimeter to split on?")
+    'StrPtr is undocumented, perhaps add documentation or change function
+    If StrPtr(delimiter) = 0 Then
         Exit Sub
     End If
 
-    Dim vItemToKeep As Variant
-    vItemToKeep = InputBox("Which item to keep? (This is 0-indexed)")
+    Dim itemToKeep As Variant
+    'Perhaps inform user to input the sequence number of the item to keep
+    itemToKeep = InputBox("Which item to keep? (This is 0-indexed)")
     
-    If StrPtr(vItemToKeep) = 0 Then
+    If StrPtr(itemToKeep) = 0 Then
         Exit Sub
     End If
 
-    Dim rngCell As Range
-    For Each rngCell In Intersect(rngToSplit, rngToSplit.Parent.UsedRange)
+    Dim targetCell As Range
+    For Each targetCell In Intersect(rangeToSplit, rangeToSplit.Parent.UsedRange)
         
-        Dim vParts As Variant
-        vParts = Split(rngCell, delim)
+        Dim delimitedCellParts As Variant
+        delimitedCellParts = Split(targetCell, delimiter)
         
-        If UBound(vParts) >= vItemToKeep Then
-            rngCell.Value = vParts(vItemToKeep)
+        If UBound(delimitedCellParts) >= itemToKeep Then
+            targetCell.Value = delimitedCellParts(itemToKeep)
         End If
         
-    Next rngCell
+    Next targetCell
 
     On Error GoTo 0
     Exit Sub
@@ -520,88 +526,87 @@ SplitAndKeep_Error:
 End Sub
 
 
-Sub SplitIntoColumns()
+Public Sub SplitIntoColumns()
     '---------------------------------------------------------------------------------------
     ' Procedure : SplitIntoColumns
     ' Author    : @byronwall, @RaymondWise
     ' Date      : 2015 07 24
-    ' Purpose   : Splits a cell into columns next to it based on a delimeter
+    ' Purpose   : Splits a targetCell into columns next to it based on a delimeter
     '---------------------------------------------------------------------------------------
     '
-    Dim rngInput As Range
+    Dim inputRange As Range
 
-    Set rngInput = GetInputOrSelection("Select the range of cells to split")
+    Set inputRange = GetInputOrSelection("Select the range of cells to split")
 
-    Dim c As Range
+    Dim targetCell As Range
 
-    Dim strDelim As String
-    strDelim = Application.InputBox("What is the delimeter?", , ",", vbOKCancel)
-    If strDelim = "" Then GoTo errHandler
-    If strDelim = "False" Then GoTo errHandler
-    For Each c In rngInput
+    Dim delimiter As String
+    delimiter = Application.InputBox("What is the delimeter?", , ",", vbOKCancel)
+    If delimiter = "" Or delimiter = "False" Then GoTo errHandler
+    For Each targetCell In inputRange
 
-        Dim arrParts As Variant
-        arrParts = Split(c, strDelim)
+        Dim targetCellParts As Variant
+        targetCellParts = Split(targetCell, delimiter)
 
-        Dim varPart As Variant
-        For Each varPart In arrParts
+        Dim targetPart As Variant
+        For Each targetPart In targetCellParts
 
-            Set c = c.Offset(, 1)
-            c = varPart
+            Set targetCell = targetCell.Offset(, 1)
+            targetCell = targetPart
 
-        Next varPart
+        Next targetPart
 
-    Next c
+    Next targetCell
     Exit Sub
 errHandler:
-    MsgBox ("No Delimiter Defined!")
+    MsgBox "No Delimiter Defined!"
 End Sub
 
 
-Sub SplitIntoRows()
+Public Sub SplitIntoRows()
     '---------------------------------------------------------------------------------------
     ' Procedure : SplitIntoRows
     ' Author    : @byronwall
     ' Date      : 2015 07 24
-    ' Purpose   : Splits a cell with return characters into multiple rows with no returns
+    ' Purpose   : Splits a targetCell with return characters into multiple rows with no returns
     '---------------------------------------------------------------------------------------
     '
-    Dim rngOutput As Range
+    Dim outputRange As Range
 
-    Dim rngInput As Range
-    Set rngInput = Selection
+    Dim inputRange As Range
+    Set inputRange = Selection
 
-    Set rngOutput = GetInputOrSelection("Select the output corner")
+    Set outputRange = GetInputOrSelection("Select the output corner")
 
-    Dim varPart As Variant
-    Dim iRow As Long
-    iRow = 0
-    Dim c As Range
+    Dim targetPart As Variant
+    Dim offsetCounter As Long
+    offsetCounter = 0
+    Dim targetCell As Range
 
-    For Each c In rngInput.SpecialCells(xlCellTypeVisible)
-        Dim varParts As Variant
-        varParts = Split(c, vbLf)
+    For Each targetCell In inputRange.SpecialCells(xlCellTypeVisible)
+        Dim targetParts As Variant
+        targetParts = Split(targetCell, vbLf)
 
-        For Each varPart In varParts
-            rngOutput.Offset(iRow) = varPart
+        For Each targetPart In targetParts
+            outputRange.Offset(offsetCounter) = targetPart
 
-            iRow = iRow + 1
-        Next varPart
-    Next c
+            offsetCounter = offsetCounter + 1
+        Next targetPart
+    Next targetCell
 End Sub
 
 
-Sub TrimSelection()
+Public Sub TrimSelection()
     '---------------------------------------------------------------------------------------
     ' Procedure : TrimSelection
     ' Author    : @byronwall
     ' Date      : 2015 07 24
-    ' Purpose   : Trims whitespace from a cell's value
+    ' Purpose   : Trims whitespace from a targetCell's value
     '---------------------------------------------------------------------------------------
     '
-    Dim rngToTrim As Range
+    Dim rangeToTrim As Range
     On Error GoTo errHandler
-    Set rngToTrim = GetInputOrSelection("Select the formulas you'd like to convert to static values")
+    Set rangeToTrim = GetInputOrSelection("Select the formulas you'd like to convert to static values")
 
     'disable calcs to speed up
     Application.ScreenUpdating = False
@@ -609,23 +614,22 @@ Sub TrimSelection()
     Application.Calculation = xlCalculationManual
     
     'force to only consider used range
-    Set rngToTrim = Intersect(rngToTrim, rngToTrim.Parent.UsedRange)
+    Set rangeToTrim = Intersect(rangeToTrim, rangeToTrim.Parent.UsedRange)
 
-    Dim c As Range
-    For Each c In rngToTrim
+    Dim targetCell As Range
+    For Each targetCell In rangeToTrim
         
         'only change if needed
-        Dim var_trim As Variant
-        var_trim = Trim(c.Value)
+        Dim temporaryTrimHolder As Variant
+        temporaryTrimHolder = Trim(targetCell.Value)
         
         'added support for char 160
         'TODO add more characters to remove
-        var_trim = Replace(var_trim, Chr(160), "")
+        temporaryTrimHolder = Replace(temporaryTrimHolder, Chr(160), vbNullString)
         
-        If var_trim <> c.Value Then
-            c.Value = var_trim
-        End If
-    Next c
+        If temporaryTrimHolder <> targetCell.Value Then targetCell.Value = temporaryTrimHolder
+
+    Next targetCell
 
     Application.Calculation = xlCalculationAutomatic
     Application.EnableEvents = True
@@ -633,6 +637,9 @@ Sub TrimSelection()
 
     Exit Sub
 errHandler:
-    MsgBox ("No Delimiter Defined!")
+    MsgBox "No Delimiter Defined!"
+    Application.ScreenUpdating = False
+    Application.EnableEvents = False
+    Application.Calculation = xlCalculationManual
 End Sub
 

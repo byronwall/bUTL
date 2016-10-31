@@ -1,7 +1,7 @@
 Attribute VB_Name = "Chart_Series"
 Option Explicit
 
-Sub Chart_AddTrendlineToSeriesAndColor()
+Public Sub Chart_AddTrendlineToSeriesAndColor()
     '---------------------------------------------------------------------------------------
     ' Procedure : Chart_AddTrendlineToSeriesAndColor
     ' Author    : @byronwall
@@ -9,50 +9,50 @@ Sub Chart_AddTrendlineToSeriesAndColor()
     ' Purpose   : Adds a trendline to each series in all charts
     '---------------------------------------------------------------------------------------
     '
-    Dim chtObj As ChartObject
+    Dim targetObject As ChartObject
 
-    For Each chtObj In Chart_GetObjectsFromObject(Selection)
+    For Each targetObject In Chart_GetObjectsFromObject(Selection)
         Dim chartIndex As Long
         chartIndex = 1
         
-        Dim chtSeries As series
-        For Each chtSeries In chtObj.Chart.SeriesCollection
+        Dim targetSeries As series
+        For Each targetSeries In targetObject.Chart.SeriesCollection
 
             Dim butlSeries As New bUTLChartSeries
-            butlSeries.UpdateFromChartSeries chtSeries
+            butlSeries.UpdateFromChartSeries targetSeries
 
             'clear out old ones
             Dim j As Long
-            For j = 1 To chtSeries.Trendlines.count
-                chtSeries.Trendlines(j).Delete
+            For j = 1 To targetSeries.Trendlines.count
+                targetSeries.Trendlines(j).Delete
             Next j
 
-            chtSeries.MarkerBackgroundColor = Chart_GetColor(chartIndex)
+            targetSeries.MarkerBackgroundColor = Chart_GetColor(chartIndex)
 
-            Dim trend As Trendline
-            Set trend = chtSeries.Trendlines.Add()
-            trend.Type = xlLinear
-            trend.Border.Color = chtSeries.MarkerBackgroundColor
+            Dim newTrendline As Trendline
+            Set newTrendline = targetSeries.Trendlines.Add()
+            newTrendline.Type = xlLinear
+            newTrendline.Border.Color = targetSeries.MarkerBackgroundColor
             
             '2015 11 06 test to avoid error without name
             '2015 12 07 dealing with multi-cell Names
             'TODO: handle if the name is not a range also
             If Not butlSeries.name Is Nothing Then
-                trend.name = butlSeries.name.Cells(1, 1).Value
+                newTrendline.name = butlSeries.name.Cells(1, 1).Value
             End If
 
-            trend.DisplayEquation = True
-            trend.DisplayRSquared = True
-            trend.DataLabel.Format.TextFrame2.TextRange.Font.Fill.ForeColor.RGB = Chart_GetColor(chartIndex)
+            newTrendline.DisplayEquation = True
+            newTrendline.DisplayRSquared = True
+            newTrendline.DataLabel.Format.TextFrame2.TextRange.Font.Fill.ForeColor.RGB = Chart_GetColor(chartIndex)
 
             chartIndex = chartIndex + 1
-        Next chtSeries
+        Next targetSeries
 
-    Next chtObj
+    Next targetObject
 End Sub
 
 
-Sub Chart_ExtendSeriesToRanges()
+Public Sub Chart_ExtendSeriesToRanges()
     '---------------------------------------------------------------------------------------
     ' Procedure : Chart_ExtendSeriesToRanges
     ' Author    : @byronwall
@@ -60,30 +60,30 @@ Sub Chart_ExtendSeriesToRanges()
     ' Purpose   : Extends the underlying data for a series to go to the end of its current Range
     '---------------------------------------------------------------------------------------
     '
-    Dim chtObj As ChartObject
+    Dim targetObject As ChartObject
 
-    For Each chtObj In Chart_GetObjectsFromObject(Selection)
+    For Each targetObject In Chart_GetObjectsFromObject(Selection)
 
-        Dim chtSeries As series
+        Dim targetSeries As series
 
         'get each series
-        For Each chtSeries In chtObj.Chart.SeriesCollection
+        For Each targetSeries In targetObject.Chart.SeriesCollection
 
             'create the bUTL obj and manipulate series ranges
             Dim butlSeries As New bUTLChartSeries
-            butlSeries.UpdateFromChartSeries chtSeries
+            butlSeries.UpdateFromChartSeries targetSeries
 
             If Not butlSeries.XValues Is Nothing Then
-                chtSeries.XValues = RangeEnd(butlSeries.XValues.Cells(1), xlDown)
+                targetSeries.XValues = RangeEnd(butlSeries.XValues.Cells(1), xlDown)
             End If
-            chtSeries.Values = RangeEnd(butlSeries.Values.Cells(1), xlDown)
+            targetSeries.Values = RangeEnd(butlSeries.Values.Cells(1), xlDown)
 
-        Next chtSeries
-    Next chtObj
+        Next targetSeries
+    Next targetObject
 End Sub
 
 
-Sub Chart_GoToXRange()
+Public Sub Chart_GoToXRange()
     '---------------------------------------------------------------------------------------
     ' Procedure : Chart_GoToXRange
     ' Author    : @byronwall
@@ -105,7 +105,7 @@ Sub Chart_GoToXRange()
 End Sub
 
 
-Sub Chart_GoToYRange()
+Public Sub Chart_GoToYRange()
     '---------------------------------------------------------------------------------------
     ' Procedure : Chart_GoToYRange
     ' Author    : @byronwall
@@ -127,7 +127,7 @@ Sub Chart_GoToYRange()
 End Sub
 
 
-Sub Chart_RemoveTrendlines()
+Public Sub Chart_RemoveTrendlines()
     '---------------------------------------------------------------------------------------
     ' Procedure : Chart_RemoveTrendlines
     ' Author    : @byronwall
@@ -136,23 +136,23 @@ Sub Chart_RemoveTrendlines()
     ' Flag      : new-feature
     '---------------------------------------------------------------------------------------
     '
-    Dim chtObj As ChartObject
+    Dim targetObject As ChartObject
 
-    For Each chtObj In Chart_GetObjectsFromObject(Selection)
+    For Each targetObject In Chart_GetObjectsFromObject(Selection)
 
-        Dim chtSeries As series
-        For Each chtSeries In chtObj.Chart.SeriesCollection
+        Dim targetSeries As series
+        For Each targetSeries In targetObject.Chart.SeriesCollection
 
-            Dim trend As Trendline
-            For Each trend In chtSeries.Trendlines
-                trend.Delete
-            Next trend
-        Next chtSeries
-    Next chtObj
+            Dim newTrendline As Trendline
+            For Each newTrendline In targetSeries.Trendlines
+                newTrendline.Delete
+            Next newTrendline
+        Next targetSeries
+    Next targetObject
 End Sub
 
 
-Sub Chart_RerangeSeries()
+Public Sub Chart_RerangeSeries()
     '---------------------------------------------------------------------------------------
     ' Procedure : Chart_RerangeSeries
     ' Author    : @byronwall
@@ -161,13 +161,13 @@ Sub Chart_RerangeSeries()
     ' Flag      : new-feature
     '---------------------------------------------------------------------------------------
     '
-    Dim frm As New form_chtSeries
-    frm.Show
+    Dim targetForm As New form_chtSeries
+    targetForm.Show
 
 End Sub
 
 
-Sub Chart_TrendlinesToAverage()
+Public Sub Chart_TrendlinesToAverage()
     '---------------------------------------------------------------------------------------
     ' Procedure : Chart_TrendlinesToAverage
     ' Author    : @byronwall
@@ -176,20 +176,20 @@ Sub Chart_TrendlinesToAverage()
     ' Flag      : new-feature
     '---------------------------------------------------------------------------------------
     '
-    Dim chtObj As ChartObject
+    Dim targetObject As ChartObject
 
-    For Each chtObj In Chart_GetObjectsFromObject(Selection)
+    For Each targetObject In Chart_GetObjectsFromObject(Selection)
 
-        Dim chtSeries As series
+        Dim targetSeries As series
 
-        For Each chtSeries In chtObj.Chart.SeriesCollection
+        For Each targetSeries In targetObject.Chart.SeriesCollection
 
-            Dim trend As Trendline
+            Dim newTrendline As Trendline
 
-            For Each trend In chtSeries.Trendlines
-                trend.Type = xlMovingAvg
-                trend.Period = 15
-                trend.Format.Line.Weight = 2
+            For Each newTrendline In targetSeries.Trendlines
+                newTrendline.Type = xlMovingAvg
+                newTrendline.Period = 15
+                newTrendline.Format.Line.Weight = 2
             Next
         Next
     Next
@@ -197,7 +197,7 @@ Sub Chart_TrendlinesToAverage()
 End Sub
 
 
-Sub ChartFlipXYValues()
+Public Sub ChartFlipXYValues()
     '---------------------------------------------------------------------------------------
     ' Procedure : ChartFlipXYValues
     ' Author    : @byronwall
@@ -205,72 +205,72 @@ Sub ChartFlipXYValues()
     ' Purpose   : Flips the x/y ranges for each series
     '---------------------------------------------------------------------------------------
     '
-    Dim chtObj As ChartObject
-    Dim cht As Chart
-    For Each chtObj In Chart_GetObjectsFromObject(Selection)
-        Set cht = chtObj.Chart
+    Dim targetObject As ChartObject
+    Dim targetChart As Chart
+    For Each targetObject In Chart_GetObjectsFromObject(Selection)
+        Set targetChart = targetObject.Chart
 
         Dim butlSeriesies As New Collection
         Dim butlSeries As bUTLChartSeries
         
-        Dim chtSeries As series
-        For Each chtSeries In cht.SeriesCollection
+        Dim targetSeries As series
+        For Each targetSeries In targetChart.SeriesCollection
             Set butlSeries = New bUTLChartSeries
-            butlSeries.UpdateFromChartSeries chtSeries
+            butlSeries.UpdateFromChartSeries targetSeries
 
-            Dim rngDummy As Range
+            Dim dummyRange As Range
 
-            Set rngDummy = butlSeries.Values
+            Set dummyRange = butlSeries.Values
             Set butlSeries.Values = butlSeries.XValues
-            Set butlSeries.XValues = rngDummy
+            Set butlSeries.XValues = dummyRange
 
             'need to change the series name also
             'assume that title is same offset
             'code blocked for now
             If False And Not butlSeries.name Is Nothing Then
-                Dim int_offset_rows As Long, int_offset_cols As Long
-                int_offset_rows = butlSeries.name.Row - butlSeries.XValues.Cells(1, 1).Row
-                int_offset_cols = butlSeries.name.Column - butlSeries.XValues.Cells(1, 1).Column
+                Dim rowsOffset As Long, columnsOffset As Long
+                rowsOffset = butlSeries.name.Row - butlSeries.XValues.Cells(1, 1).Row
+                columnsOffset = butlSeries.name.Column - butlSeries.XValues.Cells(1, 1).Column
 
-                Set butlSeries.name = butlSeries.Values.Cells(1, 1).Offset(int_offset_rows, int_offset_cols)
+                Set butlSeries.name = butlSeries.Values.Cells(1, 1).Offset(rowsOffset, columnsOffset)
             End If
 
             butlSeries.UpdateSeriesWithNewValues
 
-        Next chtSeries
+        Next targetSeries
 
         ''need to flip axis labels if they exist
         ''three cases: X only, Y only, X and Y
 
-        If cht.Axes(xlCategory).HasTitle And Not cht.Axes(xlValue).HasTitle Then
+        If targetChart.Axes(xlCategory).HasTitle And Not targetChart.Axes(xlValue).HasTitle Then
 
-            cht.Axes(xlValue).HasTitle = True
-            cht.Axes(xlValue).AxisTitle.Text = cht.Axes(xlCategory).AxisTitle.Text
-            cht.Axes(xlCategory).HasTitle = False
+            targetChart.Axes(xlValue).HasTitle = True
+            targetChart.Axes(xlValue).AxisTitle.Text = targetChart.Axes(xlCategory).AxisTitle.Text
+            targetChart.Axes(xlCategory).HasTitle = False
 
-        ElseIf Not cht.Axes(xlCategory).HasTitle And cht.Axes(xlValue).HasTitle Then
-            cht.Axes(xlCategory).HasTitle = True
-            cht.Axes(xlCategory).AxisTitle.Text = cht.Axes(xlValue).AxisTitle.Text
-            cht.Axes(xlValue).HasTitle = False
+        ElseIf Not targetChart.Axes(xlCategory).HasTitle And targetChart.Axes(xlValue).HasTitle Then
+            targetChart.Axes(xlCategory).HasTitle = True
+            targetChart.Axes(xlCategory).AxisTitle.Text = targetChart.Axes(xlValue).AxisTitle.Text
+            targetChart.Axes(xlValue).HasTitle = False
             
-        ElseIf cht.Axes(xlCategory).HasTitle And cht.Axes(xlValue).HasTitle Then
+        ElseIf targetChart.Axes(xlCategory).HasTitle And targetChart.Axes(xlValue).HasTitle Then
             Dim swapText As String
 
-            swapText = cht.Axes(xlCategory).AxisTitle.Text
+            swapText = targetChart.Axes(xlCategory).AxisTitle.Text
 
-            cht.Axes(xlCategory).AxisTitle.Text = cht.Axes(xlValue).AxisTitle.Text
-            cht.Axes(xlValue).AxisTitle.Text = swapText
+            targetChart.Axes(xlCategory).AxisTitle.Text = targetChart.Axes(xlValue).AxisTitle.Text
+            targetChart.Axes(xlValue).AxisTitle.Text = swapText
 
         End If
 
         Set butlSeriesies = Nothing
 
-    Next chtObj
+    Next targetObject
 
 End Sub
 
 
-Sub ChartMergeSeries()
+Public Sub ChartMergeSeries()
     '---------------------------------------------------------------------------------------
     ' Procedure : ChartMergeSeries
     ' Author    : @byronwall
@@ -278,9 +278,8 @@ Sub ChartMergeSeries()
     ' Purpose   : Merges all selected charts into a single chart
     '---------------------------------------------------------------------------------------
     '
-    Dim chtObj As ChartObject
-    Dim cht As Chart
-    Dim sel As Variant
+    Dim targetObject As ChartObject
+    Dim targetChart As Chart
     Dim firstChart As Chart
 
     Dim isFirstChart As Boolean
@@ -288,40 +287,40 @@ Sub ChartMergeSeries()
     
     Application.ScreenUpdating = False
     
-    For Each chtObj In Chart_GetObjectsFromObject(Selection)
+    For Each targetObject In Chart_GetObjectsFromObject(Selection)
     
-        Set cht = chtObj.Chart
+        Set targetChart = targetObject.Chart
         If isFirstChart Then
-            Set firstChart = cht
+            Set firstChart = targetChart
             isFirstChart = False
         Else
-            Dim chtSeries As series
-            For Each chtSeries In cht.SeriesCollection
+            Dim targetSeries As series
+            For Each targetSeries In targetChart.SeriesCollection
 
-                Dim chtNewSeries As series
+                Dim newChartSeries As series
                 Dim butlSeries As New bUTLChartSeries
 
-                butlSeries.UpdateFromChartSeries chtSeries
-                Set chtNewSeries = butlSeries.AddSeriesToChart(firstChart)
+                butlSeries.UpdateFromChartSeries targetSeries
+                Set newChartSeries = butlSeries.AddSeriesToChart(firstChart)
 
-                chtNewSeries.MarkerSize = chtSeries.MarkerSize
-                chtNewSeries.MarkerStyle = chtSeries.MarkerStyle
+                newChartSeries.MarkerSize = targetSeries.MarkerSize
+                newChartSeries.MarkerStyle = targetSeries.MarkerStyle
 
-                chtSeries.Delete
+                targetSeries.Delete
 
-            Next chtSeries
+            Next targetSeries
 
-            chtObj.Delete
+            targetObject.Delete
 
         End If
-    Next chtObj
+    Next targetObject
     
     Application.ScreenUpdating = True
 
 End Sub
 
 
-Sub ChartSplitSeries()
+Public Sub ChartSplitSeries()
     '---------------------------------------------------------------------------------------
     ' Procedure : ChartSplitSeries
     ' Author    : @byronwall
@@ -329,33 +328,33 @@ Sub ChartSplitSeries()
     ' Purpose   : Take all series from selected charts and puts them in their own charts
     '---------------------------------------------------------------------------------------
     '
-    Dim chtObj As ChartObject
-    Dim cht As Chart
+    Dim targetObject As ChartObject
+    Dim targetChart As Chart
 
-    Dim chtSeries As series
-    For Each chtObj In Chart_GetObjectsFromObject(Selection)
+    Dim targetSeries As series
+    For Each targetObject In Chart_GetObjectsFromObject(Selection)
 
-        For Each chtSeries In chtObj.Chart.SeriesCollection
+        For Each targetSeries In targetObject.Chart.SeriesCollection
 
-            Dim chtObjNew As ChartObject
-            Set chtObjNew = ActiveSheet.ChartObjects.Add(0, 0, 300, 300)
+            Dim newChartObject As ChartObject
+            Set newChartObject = ActiveSheet.ChartObjects.Add(0, 0, 300, 300)
 
-            Dim chtSeriesNew As series
+            Dim newChartSeries As series
             Dim butlSeries As New bUTLChartSeries
 
-            butlSeries.UpdateFromChartSeries chtSeries
-            Set chtSeriesNew = butlSeries.AddSeriesToChart(chtObjNew.Chart)
+            butlSeries.UpdateFromChartSeries targetSeries
+            Set newChartSeries = butlSeries.AddSeriesToChart(newChartObject.Chart)
 
-            chtSeriesNew.MarkerSize = chtSeries.MarkerSize
-            chtSeriesNew.MarkerStyle = chtSeries.MarkerStyle
+            newChartSeries.MarkerSize = targetSeries.MarkerSize
+            newChartSeries.MarkerStyle = targetSeries.MarkerStyle
 
-            chtSeries.Delete
+            targetSeries.Delete
 
-        Next chtSeries
+        Next targetSeries
 
 
-        chtObj.Delete
+        targetObject.Delete
 
-    Next chtObj
+    Next targetObject
 End Sub
 

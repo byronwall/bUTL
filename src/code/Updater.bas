@@ -4,30 +4,28 @@ Option Explicit
 Public Sub CheckForUpdates()
     
     'get the path of the current file
-    Dim strReleaseUrl As String
-    strReleaseUrl = "https://api.github.com/repos/byronwall/butl/releases"
+    Const RELEASE_URL As String = "https://api.github.com/repos/byronwall/butl/releases"
     
-    Dim strGitHubData As String
-    strGitHubData = DownloadFileAsString(strReleaseUrl)
+    Dim githubData As String
+    githubData = DownloadFileAsString(RELEASE_URL)
     
     'this will grab the first file from the most recent release
     'this is a cheap way to "parse" the JSON without a library
-    Dim strUrl As String
-    strUrl = Split(Split(strGitHubData, "tag_name"":")(1), """")(1)
+    Dim splitURL As String
+    splitURL = Split(Split(githubData, "tag_name"":")(1), """")(1)
     
-    Dim strVersion As String
-    strVersion = "Current version on GitHub is " & vbCrLf & _
-                 vbTab & strUrl & vbCrLf & _
+    Dim currentVersion As String
+    currentVersion = "Current version on GitHub is " & vbCrLf & _
+                 vbTab & splitURL & vbCrLf & _
                  "Version of bUTL on computer is" & vbCrLf & _
                  vbTab & bUTL_GetVersion() & vbCrLf & _
                  "Do you want to update?"
     
     Dim shouldUpdate As VbMsgBoxResult
-    shouldUpdate = MsgBox(strVersion, vbYesNo, "Update?")
+    shouldUpdate = MsgBox(currentVersion, vbYesNo, "Update?")
     
-    If shouldUpdate = vbYes Then
-        UpdateSelf
-    End If
+    If shouldUpdate = vbYes Then UpdateSelf
+
 
 End Sub
 
@@ -46,33 +44,32 @@ Public Sub UpdateSelf()
                            "Continue?", _
                            vbYesNo, "Update bUTL?")
                            
-    If promptResults = vbNo Then
-        Exit Sub
-    End If
+    If promptResults = vbNo Then Exit Sub
+
     
     'get the path of the current file
-    Dim strReleaseUrl As String
-    strReleaseUrl = "https://api.github.com/repos/byronwall/butl/releases"
+    Const RELEASE_URL As String = "https://api.github.com/repos/byronwall/butl/releases"
     
-    Dim strGitHubData As String
-    strGitHubData = DownloadFileAsString(strReleaseUrl)
+    Dim githubData As String
+    githubData = DownloadFileAsString(RELEASE_URL)
     
     'this will grab the first file from the most recent release
     'this is a cheap way to "parse" the JSON without a library
-    Dim strUrl As String
-    strUrl = Split(Split(strGitHubData, "browser_download_url"":")(1), """")(1)
+    Dim splitURL As String
+    splitURL = Split(Split(githubData, "browser_download_url"":")(1), """")(1)
     
-    Debug.Print strUrl
+    Debug.Print splitURL
 
-    Dim str_download_path As String
-    str_download_path = ThisWorkbook.path & "\" & "butl-github.xlam"
+    Dim downloadPath As String
+    downloadPath = ThisWorkbook.path & "\" & "butl-github.xlam"
 
-    Download_File strUrl, str_download_path
+    Download_File splitURL, downloadPath
 
     Dim fso As FileSystemObject
-    Dim ts As TextStream
-    Dim Script As String, ScriptFile As String
+    Dim textStream As textStream
+    Dim scriptAddress As String, ScriptFile As String
     Dim A As AddIn
+    'objShell should have a type
     Dim objShell
 
 
@@ -84,7 +81,7 @@ Public Sub UpdateSelf()
     'open excel back up
     'delete script
 
-    Script = _
+    scriptAddress = _
            "'sleep so Excel closes" & vbCrLf & _
            "Wscript.Sleep 1000" & vbCrLf & _
            "Set fso = CreateObject(""Scripting.FileSystemObject"")" & vbCrLf & _
@@ -95,21 +92,21 @@ Public Sub UpdateSelf()
            "fso.DeleteFile Wscript.ScriptFullName" & vbCrLf & _
            "MsgBox ""bUTL is now updated to the current version"""
 
-    Script = Replace(Script, "[butl-current]", ThisWorkbook.path & "\" & ThisWorkbook.name)
-    Script = Replace(Script, "[butl-new]", str_download_path)
+    scriptAddress = Replace(scriptAddress, "[butl-current]", ThisWorkbook.path & "\" & ThisWorkbook.name)
+    scriptAddress = Replace(scriptAddress, "[butl-new]", downloadPath)
 
     
     Set fso = CreateObject("Scripting.FileSystemObject")
 
     ScriptFile = ThisWorkbook.path & "\" & "butl updater.vbs"
-    Set ts = fso.CreateTextFile(ScriptFile)
-    ts.Write Script
-    ts.Close
+    Set textStream = fso.CreateTextFile(ScriptFile)
+    textStream.Write scriptAddress
+    textStream.Close
 
-    Dim str_scriptPath As String
-    str_scriptPath = """" & ScriptFile & """"
+    Dim pathToScript As String
+    pathToScript = """" & ScriptFile & """"
 
-    CreateObject("Wscript.Shell").Run str_scriptPath
+    CreateObject("Wscript.Shell").Run pathToScript
 
     Application.DisplayAlerts = False
     Application.Quit
