@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://byronwall.github.io/blog</id>
+    <title>bUTL Blog</title>
+    <updated>2021-12-27T00:00:00.000Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://byronwall.github.io/blog"/>
+    <subtitle>bUTL Blog</subtitle>
+    <icon>https://byronwall.github.io/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[Welcome]]></title>
+        <id>welcome</id>
+        <link href="https://byronwall.github.io/blog/welcome"/>
+        <updated>2021-12-27T00:00:00.000Z</updated>
+        <summary type="html"><![CDATA[Blank holder - might want a blog?]]></summary>
+        <content type="html"><![CDATA[<p>Blank holder - might want a blog?</p>]]></content>
+        <author>
+            <name>Byron Wall</name>
+            <uri>https://github.com/byronwall</uri>
+        </author>
+    </entry>
+</feed>
